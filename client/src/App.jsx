@@ -3,7 +3,7 @@ import { Routes,Route } from 'react-router-dom'
 import LandingPage from './pages/LandingPage'
 import { Toaster } from "react-hot-toast";
 import Privacy from './pages/Privacy';
-import SignIn from './pages/SIgnIn';
+import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 
 
