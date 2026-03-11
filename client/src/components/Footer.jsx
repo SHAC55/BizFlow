@@ -66,15 +66,15 @@ const Footer = () => {
 
           {/* Social Icons with modern design */}
           <div className="flex items-center gap-4 order-1 md:order-2">
-            <a
-              href="#"
+            <NavLink
+              to="https://x.com/Bizezyapp"
               aria-label="Twitter"
               className="w-10 h-10 bg-gray-100 hover:bg-blue-600 rounded-xl flex items-center justify-center text-gray-600 hover:text-white transition-all duration-300 transform hover:scale-110 hover:rotate-3 shadow-sm hover:shadow-lg"
             >
               <FaXTwitter className="text-lg" />
-            </a>
+            </NavLink>
             <NavLink
-              to="https://www.instagram.com/accounts/login/?next=https%3A%2F%2Fwww.instagram.com%2Fbiz.ezy%3Figsh%3DZTQ5aGFraGc3cTh4%26utm_source%3Dqr&is_from_rle"
+              to="https://www.instagram.com/bizezyapp/"
               aria-label="Instagram"
               className="w-10 h-10 bg-gray-100 hover:bg-pink-600 rounded-xl flex items-center justify-center text-gray-600 hover:text-white transition-all duration-300 transform hover:scale-110 hover:-rotate-3 shadow-sm hover:shadow-lg"
             >
