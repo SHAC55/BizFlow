@@ -1,14 +1,162 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
   output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
 }
+//////////////////////
+// Enums
+//////////////////////
+
+enum VerificationCodeType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+//////////////////////
+// User
+//////////////////////
 
 model User {
-  id    String  @id @default(uuid())
-  email String  @unique
-  name  String?
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String?
+  verified  Boolean   @default(false)
+  mobile    String?   @unique
+  name      String?
+  provider  String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  sessions          Session[]
+  verificationCodes VerificationCode[]
+
+  business Business?
+}
+
+//////////////////////
+// Session
+//////////////////////
+
+model Session {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  userAgent String?
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+//////////////////////
+// Verification Code
+//////////////////////
+
+model VerificationCode {
+  id        String               @id @default(cuid())
+  userId    Int
+  type      VerificationCodeType
+  createdAt DateTime             @default(now())
+  expiresAt DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("verification_codes")
+}
+
+//////////////////////
+// Business
+//////////////////////
+
+model Business {
+  id        String   @id @default(uuid())
+  name      String
+  ownerId   Int      @unique
+  owner     User     @relation(fields: [ownerId], references: [id])
+
+  customers Customer[]
+  sales     Sale[]
+
+  createdAt DateTime @default(now())
+}
+
+//////////////////////
+// Customer
+//////////////////////
+
+model Customer {
+  id         String   @id @default(uuid())
+  name       String
+  mobile     String
+  address    String?
+  notes      String?
+  businessId String
+
+  business   Business @relation(fields: [businessId], references: [id])
+  sales      Sale[]
+
+  createdAt  DateTime @default(now())
+
+  @@index([businessId])
+}
+
+//////////////////////
+// Sale
+//////////////////////
+
+model Sale {
+  id          String   @id @default(uuid())
+  businessId  String
+  customerId  String
+  totalAmount Float
+  createdAt   DateTime @default(now())
+
+  business Business @relation(fields: [businessId], references: [id])
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  invoice  Invoice?
+  payments Payment[]
+
+  @@index([businessId])
+  @@index([customerId])
+}
+
+//////////////////////
+// Invoice
+//////////////////////
+
+model Invoice {
+  id        String   @id @default(uuid())
+  saleId    String   @unique
+  pdfUrl    String?
+  createdAt DateTime @default(now())
+
+  sale Sale @relation(fields: [saleId], references: [id])
+}
+
+//////////////////////
+// Payment
+//////////////////////
+
+model Payment {
+  id        String   @id @default(uuid())
+  saleId    String
+  amount    Float
+  createdAt DateTime @default(now())
+
+  sale Sale @relation(fields: [saleId], references: [id])
+
+  @@index([saleId])
 }
