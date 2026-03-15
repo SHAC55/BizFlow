@@ -1,15 +1,24 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FcGoogle } from "react-icons/fc";
-import { MdEmail, MdLock, MdVisibility, MdVisibilityOff, MdBusiness, MdPerson, MdPhone } from "react-icons/md";
+import {
+  MdLock,
+  MdVisibility,
+  MdVisibilityOff,
+  MdBusiness,
+  MdPerson,
+  MdPhone,
+} from "react-icons/md";
 import signupImg from "../assets/signup.jpg";
 import { NavLink } from "react-router-dom";
+import { useRegister } from "../hooks/useAuth";
+import { googleAuthURL } from "../api/auth.api";
 
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  
+  const { register: registerUser, isLoading, error } = useRegister();
+
   const {
     register,
     handleSubmit,
@@ -19,30 +28,24 @@ const SignUp = () => {
 
   const password = watch("password");
 
-  const onSubmit = async (data) => {
-    setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    console.log(data);
-    setIsLoading(false);
+  const onSubmit = (data) => {
+    registerUser({
+      businessName: data.businessName,
+      username: data.username,
+      phone: data.mobileNumber,
+      password: data.password,
+      confirmPassword: data.confirmPassword,
+    });
   };
 
   const handleGoogleSignUp = () => {
-    console.log("Google sign up");
-  };
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
-  const toggleConfirmPasswordVisibility = () => {
-    setShowConfirmPassword(!showConfirmPassword);
+    window.location.href = googleAuthURL();
   };
 
   return (
     <section className="h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4 overflow-hidden">
       <div className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-5xl w-full flex flex-col md:flex-row h-[90vh] max-h-[850px]">
-        
-        {/* FORM SECTION - Left side with scrollable content if needed */}
+        {/* FORM SECTION */}
         <div className="md:w-1/2 p-8 lg:p-10 overflow-y-auto">
           <div className="mb-6">
             <h1 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-2">
@@ -53,8 +56,15 @@ const SignUp = () => {
             </p>
           </div>
 
+          {/* API Error */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-600 text-sm">{error}</p>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
-            {/* Business Name Field */}
+            {/* Business Name */}
             <div>
               <label className="text-sm font-medium text-gray-700 block mb-1.5">
                 Business Name
@@ -63,12 +73,12 @@ const SignUp = () => {
                 <MdBusiness className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
                 <input
                   placeholder="Enter your business name"
-                  {...register("businessName", { 
+                  {...register("businessName", {
                     required: "Business name is required",
                     minLength: {
                       value: 2,
-                      message: "Business name must be at least 2 characters"
-                    }
+                      message: "Business name must be at least 2 characters",
+                    },
                   })}
                   className={`w-full pl-10 pr-4 py-3 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
                     errors.businessName ? "border-red-500" : "border-gray-300"
@@ -76,11 +86,13 @@ const SignUp = () => {
                 />
               </div>
               {errors.businessName && (
-                <p className="text-red-500 text-sm mt-1">{errors.businessName.message}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.businessName.message}
+                </p>
               )}
             </div>
 
-            {/* Username Field */}
+            {/* Username */}
             <div>
               <label className="text-sm font-medium text-gray-700 block mb-1.5">
                 Username
@@ -89,16 +101,17 @@ const SignUp = () => {
                 <MdPerson className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
                 <input
                   placeholder="Choose a username"
-                  {...register("username", { 
+                  {...register("username", {
                     required: "Username is required",
                     minLength: {
                       value: 3,
-                      message: "Username must be at least 3 characters"
+                      message: "Username must be at least 3 characters",
                     },
                     pattern: {
                       value: /^[a-zA-Z0-9_]+$/,
-                      message: "Username can only contain letters, numbers, and underscores"
-                    }
+                      message:
+                        "Username can only contain letters, numbers, and underscores",
+                    },
                   })}
                   className={`w-full pl-10 pr-4 py-3 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
                     errors.username ? "border-red-500" : "border-gray-300"
@@ -106,11 +119,13 @@ const SignUp = () => {
                 />
               </div>
               {errors.username && (
-                <p className="text-red-500 text-sm mt-1">{errors.username.message}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.username.message}
+                </p>
               )}
             </div>
 
-            {/* Mobile Number Field */}
+            {/* Mobile Number */}
             <div>
               <label className="text-sm font-medium text-gray-700 block mb-1.5">
                 Mobile Number
@@ -120,12 +135,12 @@ const SignUp = () => {
                 <input
                   type="tel"
                   placeholder="Enter your mobile number"
-                  {...register("mobileNumber", { 
+                  {...register("mobileNumber", {
                     required: "Mobile number is required",
-                    pattern: {
-                      value: /^[0-9]{10}$/,
-                      message: "Please enter a valid 10-digit mobile number"
-                    }
+                    minLength: {
+                      value: 7,
+                      message: "Please enter a valid mobile number",
+                    },
                   })}
                   className={`w-full pl-10 pr-4 py-3 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
                     errors.mobileNumber ? "border-red-500" : "border-gray-300"
@@ -133,11 +148,13 @@ const SignUp = () => {
                 />
               </div>
               {errors.mobileNumber && (
-                <p className="text-red-500 text-sm mt-1">{errors.mobileNumber.message}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.mobileNumber.message}
+                </p>
               )}
             </div>
 
-            {/* Password Field */}
+            {/* Password */}
             <div>
               <label className="text-sm font-medium text-gray-700 block mb-1.5">
                 Password
@@ -147,16 +164,12 @@ const SignUp = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="Create a password"
-                  {...register("password", { 
+                  {...register("password", {
                     required: "Password is required",
                     minLength: {
                       value: 6,
-                      message: "Password must be at least 6 characters"
+                      message: "Password must be at least 6 characters",
                     },
-                    pattern: {
-                      value: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/,
-                      message: "Password must contain at least one letter and one number"
-                    }
                   })}
                   className={`w-full pl-10 pr-12 py-3 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
                     errors.password ? "border-red-500" : "border-gray-300"
@@ -164,18 +177,24 @@ const SignUp = () => {
                 />
                 <button
                   type="button"
-                  onClick={togglePasswordVisibility}
+                  onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showPassword ? <MdVisibilityOff size={20} /> : <MdVisibility size={20} />}
+                  {showPassword ? (
+                    <MdVisibilityOff size={20} />
+                  ) : (
+                    <MdVisibility size={20} />
+                  )}
                 </button>
               </div>
               {errors.password && (
-                <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.password.message}
+                </p>
               )}
             </div>
 
-            {/* Confirm Password Field */}
+            {/* Confirm Password */}
             <div>
               <label className="text-sm font-medium text-gray-700 block mb-1.5">
                 Confirm Password
@@ -185,49 +204,57 @@ const SignUp = () => {
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Confirm your password"
-                  {...register("confirmPassword", { 
+                  {...register("confirmPassword", {
                     required: "Please confirm your password",
-                    validate: value => value === password || "Passwords do not match"
+                    validate: (value) =>
+                      value === password || "Passwords do not match",
                   })}
                   className={`w-full pl-10 pr-12 py-3 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
-                    errors.confirmPassword ? "border-red-500" : "border-gray-300"
+                    errors.confirmPassword
+                      ? "border-red-500"
+                      : "border-gray-300"
                   }`}
                 />
                 <button
                   type="button"
-                  onClick={toggleConfirmPasswordVisibility}
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showConfirmPassword ? <MdVisibilityOff size={20} /> : <MdVisibility size={20} />}
+                  {showConfirmPassword ? (
+                    <MdVisibilityOff size={20} />
+                  ) : (
+                    <MdVisibility size={20} />
+                  )}
                 </button>
               </div>
               {errors.confirmPassword && (
-                <p className="text-red-500 text-sm mt-1">{errors.confirmPassword.message}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.confirmPassword.message}
+                </p>
               )}
             </div>
 
-            {/* Terms and Conditions Checkbox */}
+            {/* Terms */}
             <div>
               <label className="flex items-center space-x-2 mt-5 cursor-pointer">
                 <input
                   type="checkbox"
-                  {...register("terms", { 
-                    required: "You must accept the terms and conditions" 
+                  {...register("terms", {
+                    required: "You must accept the terms and conditions",
                   })}
                   className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                 />
                 <span className="text-sm text-gray-700">
                   I accept the{" "}
-                  <button
-                    type="button"
-                    className="text-blue-600 hover:text-blue-800 font-semibold hover:underline"
-                  >
+                  <span className="text-blue-600 hover:text-blue-800 font-semibold hover:underline cursor-pointer">
                     Terms and Conditions
-                  </button>
+                  </span>
                 </span>
               </label>
               {errors.terms && (
-                <p className="text-red-500 text-sm mt-1">{errors.terms.message}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.terms.message}
+                </p>
               )}
             </div>
 
@@ -253,11 +280,13 @@ const SignUp = () => {
                 <div className="w-full border-t border-gray-300"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500">Or sign up with</span>
+                <span className="px-4 bg-white text-gray-500">
+                  Or sign up with
+                </span>
               </div>
             </div>
 
-            {/* Google Sign Up Button */}
+            {/* Google Sign Up */}
             <button
               type="button"
               onClick={handleGoogleSignUp}
@@ -270,14 +299,17 @@ const SignUp = () => {
             {/* Sign In Link */}
             <p className="text-center text-gray-600 text-sm mt-4">
               Already have an account?{" "}
-              <NavLink to="/signin" className="text-blue-600 hover:text-blue-800 font-semibold hover:underline">
+              <NavLink
+                to="/signin"
+                className="text-blue-600 hover:text-blue-800 font-semibold hover:underline"
+              >
                 Sign In
               </NavLink>
             </p>
           </form>
         </div>
 
-        {/* IMAGE SECTION - Right side */}
+        {/* IMAGE SECTION */}
         <div className="md:w-1/2 relative overflow-hidden hidden md:block">
           <div className="absolute inset-0 z-10"></div>
           <img
@@ -292,3 +324,4 @@ const SignUp = () => {
 };
 
 export default SignUp;
+
