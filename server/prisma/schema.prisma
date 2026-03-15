@@ -1,4 +1,4 @@
-// This is your Prisma schema file,
+//  This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
@@ -12,9 +12,6 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
-//////////////////////
-// Enums
-//////////////////////
 
 enum VerificationCodeType {
   EMAIL_VERIFICATION
@@ -24,29 +21,25 @@ enum VerificationCodeType {
 //////////////////////
 // User
 //////////////////////
-
 model User {
-  id        Int       @id @default(autoincrement())
-  email     String    @unique
+  id        Int      @id @default(autoincrement())
+  name      String?   @unique
   password  String?
-  verified  Boolean   @default(false)
+  verified  Boolean  @default(false)
   mobile    String?   @unique
-  name      String?
+  email     String?  @unique
   provider  String?
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   sessions          Session[]
   verificationCodes VerificationCode[]
-
-  business Business?
+  business          Business?
 }
 
 //////////////////////
 // Session
 //////////////////////
-
 model Session {
   id        Int      @id @default(autoincrement())
   userId    Int
@@ -62,7 +55,6 @@ model Session {
 //////////////////////
 // Verification Code
 //////////////////////
-
 model VerificationCode {
   id        String               @id @default(cuid())
   userId    Int
@@ -79,23 +71,20 @@ model VerificationCode {
 //////////////////////
 // Business
 //////////////////////
-
 model Business {
   id        String   @id @default(uuid())
   name      String
   ownerId   Int      @unique
-  owner     User     @relation(fields: [ownerId], references: [id])
+  createdAt DateTime @default(now())
 
+  owner     User       @relation(fields: [ownerId], references: [id])
   customers Customer[]
   sales     Sale[]
-
-  createdAt DateTime @default(now())
 }
 
 //////////////////////
 // Customer
 //////////////////////
-
 model Customer {
   id         String   @id @default(uuid())
   name       String
@@ -103,11 +92,10 @@ model Customer {
   address    String?
   notes      String?
   businessId String
-
-  business   Business @relation(fields: [businessId], references: [id])
-  sales      Sale[]
-
   createdAt  DateTime @default(now())
+
+  business Business @relation(fields: [businessId], references: [id])
+  sales    Sale[]
 
   @@index([businessId])
 }
@@ -115,7 +103,6 @@ model Customer {
 //////////////////////
 // Sale
 //////////////////////
-
 model Sale {
   id          String   @id @default(uuid())
   businessId  String
@@ -123,9 +110,8 @@ model Sale {
   totalAmount Float
   createdAt   DateTime @default(now())
 
-  business Business @relation(fields: [businessId], references: [id])
-  customer Customer @relation(fields: [customerId], references: [id])
-
+  business Business  @relation(fields: [businessId], references: [id])
+  customer Customer  @relation(fields: [customerId], references: [id])
   invoice  Invoice?
   payments Payment[]
 
@@ -136,7 +122,6 @@ model Sale {
 //////////////////////
 // Invoice
 //////////////////////
-
 model Invoice {
   id        String   @id @default(uuid())
   saleId    String   @unique
@@ -149,7 +134,6 @@ model Invoice {
 //////////////////////
 // Payment
 //////////////////////
-
 model Payment {
   id        String   @id @default(uuid())
   saleId    String

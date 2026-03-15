@@ -14,7 +14,8 @@ import type * as Prisma from "../internal/prismaNamespace.ts"
 
 /**
  * Model Business
- * 
+ * ///////////////////
+ * ///////////////////
  */
 export type BusinessModel = runtime.Types.Result.DefaultSelection<Prisma.$BusinessPayload>
 

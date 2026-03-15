@@ -31,45 +31,50 @@ import {
 } from "../utils/emailTemplates";
 
 export type createAccountParams = {
-  email: string;
+  businessName: string;
+  username: string;
+  email?: string;
+  phone: string;
   password: string;
   userAgent?: string;
 };
 
 export const createAccount = async (data: createAccountParams) => {
   const userExists = await prisma.user.findUnique({
-    where: { email: data.email },
+    where: { mobile: data.phone },
   });
-  //  if (userExists) {
-  //   throw new Error("user already exists");
-  //}
-  appAssert(!userExists, 409, "email already in use");
-  const hashedValue = await hashValue(data.password);
+  appAssert(!userExists, 409, "phone number already in use");
+
+  const hashedPassword = await hashValue(data.password);
+
   const user = await prisma.user.create({
     data: {
+      name: data.username,
+      mobile: data.phone,
       email: data.email,
-      password: hashedValue,
+      password: hashedPassword,
+      business: {
+        create: {
+          name: data.businessName,
+        },
+      },
     },
     select: {
       id: true,
-      email: true,
+      name: true,
+      mobile: true,
       verified: true,
       createdAt: true,
       updatedAt: true,
+      business: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
     },
   });
-  const verificationCode = await prisma.verificationCode.create({
-    data: {
-      userId: user.id,
-      type: VerificationCodeType.EMAIL_VERIFICATION,
-      expiresAt: oneYearFromNow(),
-    },
-  });
-  const url = `${APP_ORIGIN}/email/verify/${verificationCode.id}`;
-  await sendMail({
-    to: user.email,
-    ...getVerifyEmailTemplate(url),
-  });
+
   const session = await prisma.session.create({
     data: {
       userId: user.id,
@@ -77,6 +82,7 @@ export const createAccount = async (data: createAccountParams) => {
       expiresAt: thirtyDaysFromNow(),
     },
   });
+
   const refreshToken = signToken(
     { sessionId: session.id },
     refreshTokenSignOptions,
@@ -85,59 +91,130 @@ export const createAccount = async (data: createAccountParams) => {
     userId: user.id,
     sessionId: session.id,
   });
-  return {
-    user,
-    accessToken,
-    refreshToken,
-  };
+
+  return { user, accessToken, refreshToken };
 };
 
 export type LoginParams = {
-  email: string;
+  username: string;
   password: string;
   userAgent?: string;
 };
+
 export const loginUser = async (data: LoginParams) => {
-  const user = await prisma.user.findUnique({
-    where: { email: data.email },
+  const user = await prisma.user.findFirst({
+    where: { name: data.username },
   });
-  appAssert(user, UNAUTHORIZED, "invalid email");
+  appAssert(user, UNAUTHORIZED, "invalid username");
+
   const isValid = await comparePassword(user, data.password);
   appAssert(isValid, UNAUTHORIZED, "invalid password");
-  const userId = user.id;
 
   const session = await prisma.session.create({
     data: {
-      userId,
+      userId: user.id,
       userAgent: data.userAgent,
       expiresAt: thirtyDaysFromNow(),
     },
   });
-  const sessionInfo = {
-    sessionId: session.id,
-  };
 
-  const refreshToken = signToken(sessionInfo, refreshTokenSignOptions);
+  const refreshToken = signToken(
+    { sessionId: session.id },
+    refreshTokenSignOptions,
+  );
   const accessToken = signToken({
-    ...sessionInfo,
-    userId,
+    userId: user.id,
+    sessionId: session.id,
   });
+
   const safeUser = await prisma.user.findUnique({
-    where: { id: userId },
+    where: { id: user.id },
     select: {
       id: true,
-      email: true,
+      name: true,
+      mobile: true,
       verified: true,
       createdAt: true,
       updatedAt: true,
+      business: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
     },
   });
 
-  return {
-    safeUser,
-    accessToken,
-    refreshToken,
-  };
+  return { safeUser, accessToken, refreshToken };
+};
+
+export type GoogleAuthParams = {
+  email: string;
+  name: string;
+  provider: string;
+  userAgent?: string;
+};
+export const googleAuth = async (data: GoogleAuthParams) => {
+  let user = await prisma.user.findUnique({
+    where: { email: data.email },
+  });
+
+  if (!user) {
+    user = await prisma.user.create({
+      data: {
+        email: data.email ?? null,
+        name: null, // ?? leave null - user will fill in onboarding
+        mobile: null, // ?? leave null - user will fill in onboarding
+        provider: data.provider,
+        verified: true,
+      },
+    });
+  }
+
+  const session = await prisma.session.create({
+    data: {
+      userId: user.id,
+      userAgent: data.userAgent,
+      expiresAt: thirtyDaysFromNow(),
+    },
+  });
+
+  const refreshToken = signToken(
+    { sessionId: session.id },
+    refreshTokenSignOptions,
+  );
+  const accessToken = signToken({
+    userId: user.id,
+    sessionId: session.id,
+  });
+
+  // if mobile and name are missing, onboarding is needed
+  const isOnboardingComplete = !!(user.mobile && user.name);
+
+  return { accessToken, refreshToken, isOnboardingComplete };
+};
+export type OnboardingParams = {
+  userId: number;
+  phone: string;
+  username: string;
+  businessName: string;
+};
+
+export const completeOnboarding = async (data: OnboardingParams) => {
+  const user = await prisma.user.update({
+    where: { id: data.userId },
+    data: {
+      mobile: data.phone,
+      name: data.username,
+      business: {
+        create: {
+          name: data.businessName,
+        },
+      },
+    },
+  });
+  appAssert(user, INTERNAL_SERVER_ERROR, "failed to complete onboarding");
+  return user;
 };
 export const refreshUserAccessToken = async (refreshToken: string) => {
   const { payload } = verifyToken<RefreshTokenPayload>(refreshToken, {

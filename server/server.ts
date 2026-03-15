@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import passport from "./config/passport";
 import errorHandler from "./middleware/errorHandler";
 import authRoutes from "./routes/auth.route";
 import authenticate from "./middleware/authenticate";
@@ -16,6 +17,7 @@ app.use(
   }),
 );
 app.use(cookieParser());
+app.use(passport.initialize());
 app.get("/health", (_req, res) => {
   return res.status(200).json({
     status: "ok",

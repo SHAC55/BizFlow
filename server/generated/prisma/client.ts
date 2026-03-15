@@ -41,41 +41,49 @@ export { Prisma }
 
 /**
  * Model User
- * 
+ * ///////////////////
+ * ///////////////////
  */
 export type User = Prisma.UserModel
 /**
  * Model Session
- * 
+ * ///////////////////
+ * ///////////////////
  */
 export type Session = Prisma.SessionModel
 /**
  * Model VerificationCode
- * 
+ * ///////////////////
+ * ///////////////////
  */
 export type VerificationCode = Prisma.VerificationCodeModel
 /**
  * Model Business
- * 
+ * ///////////////////
+ * ///////////////////
  */
 export type Business = Prisma.BusinessModel
 /**
  * Model Customer
- * 
+ * ///////////////////
+ * ///////////////////
  */
 export type Customer = Prisma.CustomerModel
 /**
  * Model Sale
- * 
+ * ///////////////////
+ * ///////////////////
  */
 export type Sale = Prisma.SaleModel
 /**
  * Model Invoice
- * 
+ * ///////////////////
+ * ///////////////////
  */
 export type Invoice = Prisma.InvoiceModel
 /**
  * Model Payment
- * 
+ * ///////////////////
+ * ///////////////////
  */
 export type Payment = Prisma.PaymentModel

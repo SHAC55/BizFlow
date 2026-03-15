@@ -14,7 +14,8 @@ import type * as Prisma from "../internal/prismaNamespace.ts"
 
 /**
  * Model Session
- * 
+ * ///////////////////
+ * ///////////////////
  */
 export type SessionModel = runtime.Types.Result.DefaultSelection<Prisma.$SessionPayload>
 

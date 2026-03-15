@@ -14,7 +14,8 @@ import type * as Prisma from "../internal/prismaNamespace.ts"
 
 /**
  * Model VerificationCode
- * 
+ * ///////////////////
+ * ///////////////////
  */
 export type VerificationCodeModel = runtime.Types.Result.DefaultSelection<Prisma.$VerificationCodePayload>
 
@@ -401,6 +402,10 @@ export type VerificationCodeUncheckedUpdateManyWithoutUserNestedInput = {
   update?: Prisma.VerificationCodeUpdateWithWhereUniqueWithoutUserInput | Prisma.VerificationCodeUpdateWithWhereUniqueWithoutUserInput[]
   updateMany?: Prisma.VerificationCodeUpdateManyWithWhereWithoutUserInput | Prisma.VerificationCodeUpdateManyWithWhereWithoutUserInput[]
   deleteMany?: Prisma.VerificationCodeScalarWhereInput | Prisma.VerificationCodeScalarWhereInput[]
+}
+
+export type StringFieldUpdateOperationsInput = {
+  set?: string
 }
 
 export type EnumVerificationCodeTypeFieldUpdateOperationsInput = {
