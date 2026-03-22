@@ -5,25 +5,39 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true); // true on mount to check session
+  const [isLoading, setIsLoading] = useState(true);
 
-  // check if user is already logged in on app load
+  //  Check session on app load
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await API.get("/user");
-        setUser(response.data);
+        const res = await API.get("/user");
+        setUser(res.data);
       } catch {
         setUser(null);
       } finally {
         setIsLoading(false);
       }
     };
+
     fetchUser();
   }, []);
 
-  const login = (userData) => setUser(userData);
-  const logout = () => setUser(null);
+  //  Login
+  const login = (userData) => {
+    setUser(userData);
+  };
+
+  //  Logout 
+  const logout = async () => {
+    try {
+      await API.post("/logout"); // if your backend has it
+    } catch (err) {
+      console.log("Logout error", err);
+    } finally {
+      setUser(null);
+    }
+  };
 
   return (
     <AuthContext.Provider value={{ user, setUser, login, logout, isLoading }}>
@@ -39,5 +53,3 @@ export const useAuthContext = () => {
   }
   return context;
 };
-
-export default AuthContext;

@@ -35,7 +35,7 @@ const SignIn = () => {
   };
 
   return (
-    <section className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <section className="min-h-screen w-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-5xl w-full flex flex-col md:flex-row transform transition-all duration-500 hover:shadow-3xl">
         {/* IMAGE SECTION */}
         <div className="md:w-1/2 relative overflow-hidden hidden md:block">

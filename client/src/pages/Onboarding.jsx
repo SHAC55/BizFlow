@@ -30,7 +30,7 @@ const Onboarding = () => {
   // wait for session check
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen w-screen flex items-center justify-center bg-gray-50">
         <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -45,7 +45,7 @@ const Onboarding = () => {
   }
 
   return (
-    <section className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <section className="min-h-screen w-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 lg:p-10">
         {/* Header */}
         <div className="mb-8 text-center">

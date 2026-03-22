@@ -7,7 +7,7 @@ import Footer from '../components/Footer'
 
 const LandingPage = () => {
   return (
-    <div className='min-w-[375px]'>
+    <div className='min-w-[375px] w-screen'>
       <LandingHeader />
       <HeroSection/>
       <Features/>
