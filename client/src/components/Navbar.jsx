@@ -12,15 +12,14 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useAuthContext } from "../context/AuthContext";
+import { NavLink } from "react-router-dom";
 
 const navItems = [
-  { name: "Dashboard", icon: LayoutDashboard, href: "#" },
-  { name: "Sales", icon: TrendingUp, href: "#" },
-  { name: "Inventory", icon: Boxes, href: "#" },
-  { name: "Quality", icon: CheckCircle, href: "#" },
-  { name: "Payments", icon: CreditCard, href: "#" },
-  { name: "Customers", icon: Users, href: "#" },
-  { name: "Shipping", icon: Truck, href: "#" },
+  { name: "Dashboard", icon: LayoutDashboard, to: "/dashboard" },
+  { name: "Sales", icon: TrendingUp, to: "/sales" },
+  { name: "Inventory", icon: Boxes, to: "/inventory" },
+  { name: "Payments", icon: CreditCard, to: "/payments" },
+  { name: "Customers", icon: Users, to: "/customers" },
 ];
 
 const Navbar = () => {
@@ -45,7 +44,7 @@ const Navbar = () => {
             </h1>
           </div>
         </div>
-
+        
         {/* Navigation */}
         <nav className="flex-1 px-4 py-6 space-y-1.5">
           {navItems.map((item) => {
@@ -53,9 +52,9 @@ const Navbar = () => {
             const isActive = activeItem === item.name;
             
             return (
-              <a
+              <NavLink
                 key={item.name}
-                href={item.href}
+                to={item.to}
                 onClick={() => setActiveItem(item.name)}
                 className={`
                   relative group flex items-center justify-between px-4 py-3 rounded-2xl
@@ -96,7 +95,7 @@ const Navbar = () => {
                 {isActive && (
                   <div className="absolute left-0 w-1 h-8 bg-gradient-to-b from-blue-600 to-blue-400 rounded-r-full" />
                 )}
-              </a>
+              </NavLink>
             );
           })}
         </nav>
