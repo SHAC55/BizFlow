@@ -13,12 +13,16 @@ import Customers from "./pages/Customers";
 import Payments from "./pages/Payments";
 import Inventory from "./pages/Inventory";
 import AddItemForm from "./pages/AddItemForm";
+import Profile from "./pages/Profile";
+import AddInventory from "./pages/AddInventory";
+import AddCustomer from "./pages/AddCustomer";
+import AddTransaction from "./pages/AddTransaction";
 
 const App = () => {
   const location = useLocation();
 
   //  Pages where Navbar should NOT show
-  const hideNavbarRoutes = ["/","/signin", "/signup", "/onboarding","/add-item"];
+  const hideNavbarRoutes = ["/","/signin", "/signup", "/onboarding","/add-item","/profile","/add-inventory","/add-customer","/add-transaction"];
 
   const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
 
@@ -42,6 +46,10 @@ const App = () => {
         <Route path="/payments" element={<Payments />} />
         <Route path="/inventory" element={<Inventory />} />
         <Route path="/add-item" element={<AddItemForm />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/add-inventory" element={<AddInventory />} />
+        <Route path="/add-customer" element={<AddCustomer />} />
+        <Route path="/add-transaction" element={<AddTransaction />} />
       </Routes>
     </div>
   );
