@@ -8,14 +8,7 @@ const AddItemButton = () => {
   return (
     <button
       onClick={() => navigate("/add-item")}
-      className="flex items-center gap-2 px-4 py-2 rounded-xl
-                 h-20 w-38 m-3 
-                 text-white text-sm font-medium
-                 bg-blue-600
-                 hover:from-blue-600 hover:to-blue-500
-                 active:scale-95
-                 transition-all duration-200
-                 shadow-sm hover:shadow-md"
+      className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:bg-blue-700 active:scale-95"
     >
       <Plus size={18} />
       Add Item

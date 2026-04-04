@@ -1,8 +1,20 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { UploadCloud } from "lucide-react";
+import { ArrowLeft, UploadCloud } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useCreateProduct, useProduct, useUpdateProduct } from "../hooks/useProducts";
 
 const AddItemForm = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const productId = searchParams.get("productId");
+  const isEditMode = Boolean(productId);
+  const { product, isLoading: isProductLoading, error: productError } =
+    useProduct(productId);
+  const { createProduct, isLoading: isCreating, error: createError } =
+    useCreateProduct();
+  const { updateProduct, isLoading: isUpdating, error: updateError } =
+    useUpdateProduct();
   const {
     register,
     handleSubmit,
@@ -32,29 +44,86 @@ const AddItemForm = () => {
 
   // Auto-generate SKU when name changes
   React.useEffect(() => {
+    if (!productName) {
+      return;
+    }
+
+    if (isEditMode) {
+      return;
+    }
+
     if (productName) {
       setValue("sku", generateSKU(productName));
     }
-  }, [productName, setValue]);
+  }, [isEditMode, productName, setValue]);
+
+  React.useEffect(() => {
+    if (!product) {
+      return;
+    }
+
+    reset({
+      name: product.name,
+      category: product.category,
+      sku: product.sku || "",
+      price: product.price,
+      quantity: product.quantity,
+      minimumQuantity: product.minimumQuantity,
+    });
+  }, [product, reset]);
 
   // Submit
-  const onSubmit = (data) => {
-    const finalData = {
+  const onSubmit = async (data) => {
+    const payload = {
       ...data,
       sku: data.sku ? data.sku : generateSKU(data.name),
+      price: Number(data.price),
+      quantity: Number(data.quantity),
+      minimumQuantity: Number(data.minimumQuantity),
     };
 
-    console.log(finalData);
-    reset();
+    if (isEditMode) {
+      await updateProduct(productId, payload);
+    } else {
+      await createProduct(payload);
+      reset();
+    }
+
+    navigate("/inventory");
   };
+
+  const submitError = createError || updateError || productError;
+  const isSubmitting = isCreating || isUpdating;
+
+  if (isEditMode && isProductLoading) {
+    return (
+      <div className="min-h-screen w-screen flex items-center justify-center bg-blue-50 px-4">
+        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-screen flex items-center justify-center bg-blue-50 px-4">
       <div className="w-full max-w-lg bg-white/80 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-md border border-blue-100">
-        
+        <button
+          type="button"
+          onClick={() => navigate("/inventory")}
+          className="mb-5 inline-flex items-center gap-2 text-sm text-blue-700 hover:text-blue-800"
+        >
+          <ArrowLeft size={16} />
+          Back to inventory
+        </button>
+
         <h2 className="text-2xl font-semibold text-blue-900 mb-6">
-          Add New Product
+          {isEditMode ? "Update Product" : "Add New Product"}
         </h2>
+
+        {submitError && (
+          <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+            {submitError}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
 
@@ -74,6 +143,25 @@ const AddItemForm = () => {
             {errors.name && (
               <p className="text-red-500 text-xs mt-1">
                 {errors.name.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-gray-700">
+              Category
+            </label>
+            <input
+              {...register("category", {
+                required: "Category is required",
+              })}
+              className="w-full mt-1 px-4 py-2 border border-blue-100 rounded-xl 
+                         focus:ring-2 focus:ring-blue-500 outline-none"
+              placeholder="e.g. Grocery"
+            />
+            {errors.category && (
+              <p className="text-red-500 text-xs mt-1">
+                {errors.category.message}
               </p>
             )}
           </div>
@@ -105,19 +193,17 @@ const AddItemForm = () => {
             </div>
           </div>
 
-          {/* Product Image */}
           <div>
             <label className="text-sm font-medium text-gray-700">
               Product Image (optional)
             </label>
 
-            <label className="mt-2 flex flex-col items-center justify-center 
-                              border-2 border-dashed border-blue-200 
-                              rounded-xl p-4 cursor-pointer 
-                              hover:bg-blue-50 transition">
-              <UploadCloud className="text-blue-500 mb-2" size={24} />
+            <label
+              className="mt-2 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-blue-200 p-4 transition hover:bg-blue-50"
+            >
+              <UploadCloud className="mb-2 text-blue-500" size={24} />
               <span className="text-sm text-gray-500">
-                Click to upload image
+                Keep for later. Image upload is not connected yet.
               </span>
               <input type="file" {...register("image")} className="hidden" />
             </label>
@@ -131,9 +217,9 @@ const AddItemForm = () => {
               <label className="text-sm font-medium text-gray-700">
                 Price
               </label>
-              <input
-                type="number"
-                step="0.01"
+            <input
+              type="number"
+              step="0.01"
                 {...register("price", {
                   required: "Price is required",
                   min: {
@@ -157,15 +243,15 @@ const AddItemForm = () => {
               <label className="text-sm font-medium text-gray-700">
                 Quantity
               </label>
-              <input
-                type="number"
-                {...register("quantity", {
-                  required: "Quantity is required",
-                  min: {
-                    value: 1,
-                    message: "Quantity must be greater than 0",
-                  },
-                })}
+            <input
+              type="number"
+              {...register("quantity", {
+                required: "Quantity is required",
+                min: {
+                  value: 0,
+                  message: "Quantity cannot be negative",
+                },
+              })}
                 className="w-full mt-1 px-4 py-2 border border-blue-100 rounded-xl 
                            focus:ring-2 focus:ring-blue-500 outline-none appearance-none"
                 placeholder="0"
@@ -185,20 +271,20 @@ const AddItemForm = () => {
             </label>
             <input
               type="number"
-              {...register("minQuantity", {
+              {...register("minimumQuantity", {
                 required: "Minimum quantity is required",
                 min: {
-                  value: 1,
-                  message: "Minimum quantity must be greater than 0",
+                  value: 0,
+                  message: "Minimum quantity cannot be negative",
                 },
               })}
               className="w-full mt-1 px-4 py-2 border border-blue-100 rounded-xl 
                          focus:ring-2 focus:ring-blue-500 outline-none appearance-none"
               placeholder="Set alert threshold"
             />
-            {errors.minQuantity && (
+            {errors.minimumQuantity && (
               <p className="text-red-500 text-xs mt-1">
-                {errors.minQuantity.message}
+                {errors.minimumQuantity.message}
               </p>
             )}
           </div>
@@ -206,12 +292,19 @@ const AddItemForm = () => {
           {/* Submit */}
           <button
             type="submit"
+            disabled={isSubmitting}
             className="w-full py-2.5 rounded-xl text-white font-medium 
                        bg-gradient-to-r from-blue-600 to-blue-400 
                        hover:from-blue-700 hover:to-blue-500 
-                       transition-all duration-200 shadow-sm"
+                       transition-all duration-200 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            Add Product
+            {isSubmitting
+              ? isEditMode
+                ? "Updating..."
+                : "Adding..."
+              : isEditMode
+                ? "Update Product"
+                : "Add Product"}
           </button>
 
           <p className="text-xs text-gray-600 text-center">
