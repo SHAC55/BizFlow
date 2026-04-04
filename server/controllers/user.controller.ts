@@ -11,7 +11,6 @@ export const getUserHandler = catchErrors(async (req, res) => {
     },
   });
   appAssert(user, NOT_FOUND, "user not found");
-
   const safeUser = await prisma.user.findUnique({
     where: { id: user.id },
     select: safeUserSelect,
