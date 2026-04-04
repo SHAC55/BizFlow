@@ -79,6 +79,7 @@ model Business {
 
   owner     User       @relation(fields: [ownerId], references: [id])
   customers Customer[]
+  products  Product[]
   sales     Sale[]
 }
 
@@ -143,4 +144,23 @@ model Payment {
   sale Sale @relation(fields: [saleId], references: [id])
 
   @@index([saleId])
+}
+
+//////////////////////
+// Product
+//////////////////////
+model Product {
+  id              String   @id @default(uuid())
+  businessId      String
+  name            String
+  price           Float
+  quantity        Int
+  minimumQuantity Int
+  sku             String?  @unique
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id])
+
+  @@index([businessId])
 }

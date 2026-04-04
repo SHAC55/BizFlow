@@ -65,3 +65,9 @@ export type Invoice = Prisma.InvoiceModel
  * ///////////////////
  */
 export type Payment = Prisma.PaymentModel
+/**
+ * Model Product
+ * ///////////////////
+ * ///////////////////
+ */
+export type Product = Prisma.ProductModel
