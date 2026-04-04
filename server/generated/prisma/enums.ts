@@ -15,3 +15,13 @@ export const VerificationCodeType = {
 } as const
 
 export type VerificationCodeType = (typeof VerificationCodeType)[keyof typeof VerificationCodeType]
+
+
+export const InventoryMovementType = {
+  INITIAL: 'INITIAL',
+  INCREASE: 'INCREASE',
+  DECREASE: 'DECREASE',
+  SET: 'SET'
+} as const
+
+export type InventoryMovementType = (typeof InventoryMovementType)[keyof typeof InventoryMovementType]

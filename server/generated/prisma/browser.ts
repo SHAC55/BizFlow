@@ -71,3 +71,9 @@ export type Payment = Prisma.PaymentModel
  * ///////////////////
  */
 export type Product = Prisma.ProductModel
+/**
+ * Model InventoryMovement
+ * ///////////////////
+ * ///////////////////
+ */
+export type InventoryMovement = Prisma.InventoryMovementModel

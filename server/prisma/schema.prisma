@@ -18,6 +18,13 @@ enum VerificationCodeType {
   PASSWORD_RESET
 }
 
+enum InventoryMovementType {
+  INITIAL
+  INCREASE
+  DECREASE
+  SET
+}
+
 //////////////////////
 // User
 //////////////////////
@@ -153,14 +160,41 @@ model Product {
   id              String   @id @default(uuid())
   businessId      String
   name            String
+  category        String
   price           Float
   quantity        Int
   minimumQuantity Int
-  sku             String?  @unique
+  sku             String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  business Business @relation(fields: [businessId], references: [id])
+  business  Business             @relation(fields: [businessId], references: [id])
+  movements InventoryMovement[]
 
   @@index([businessId])
+  @@unique([businessId, sku])
+}
+
+//////////////////////
+// Inventory Movement
+//////////////////////
+model InventoryMovement {
+  id             String                @id @default(uuid())
+  productId      String
+  businessId     String
+  userId         Int
+  type           InventoryMovementType
+  quantityBefore Int
+  quantityAfter  Int
+  quantityChange Int
+  reason         String
+  notes          String?
+  createdAt      DateTime              @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([businessId])
+  @@index([userId])
+  @@index([createdAt])
 }
