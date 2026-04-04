@@ -8,13 +8,16 @@ import {
   MdVisibilityOff,
 } from "react-icons/md";
 import loginImg from "../assets/login.jpg";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { useLogin } from "../hooks/useAuth";
 import { googleAuthURL } from "../api/auth.api";
 
 const SignIn = () => {
+  const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const { login, isLoading, error } = useLogin();
+  const googleError = new URLSearchParams(location.search).get("error");
+  const resetSuccess = location.state?.resetSuccess;
 
   const {
     register,
@@ -59,6 +62,22 @@ const SignIn = () => {
           </div>
 
           {/* API Error */}
+          {resetSuccess && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-green-700 text-sm">
+                Password reset successful. Sign in with your new password.
+              </p>
+            </div>
+          )}
+
+          {googleError && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-600 text-sm">
+                Google sign-in failed. Please try again.
+              </p>
+            </div>
+          )}
+
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-red-600 text-sm">{error}</p>
@@ -206,4 +225,3 @@ const SignIn = () => {
 };
 
 export default SignIn;
-

@@ -13,14 +13,34 @@ import Customers from "./pages/Customers";
 import Payments from "./pages/Payments";
 import Inventory from "./pages/Inventory";
 import AddItemForm from "./pages/AddItemForm";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import VerifyEmail from "./pages/VerifyEmail";
+import {
+  OnboardingRoute,
+  ProtectedRoute,
+  PublicOnlyRoute,
+} from "./components/ProtectedRoute";
+import { Navigate } from "react-router-dom";
 
 const App = () => {
   const location = useLocation();
 
   //  Pages where Navbar should NOT show
-  const hideNavbarRoutes = ["/","/signin", "/signup", "/onboarding","/add-item"];
+  const hideNavbarRoutes = [
+    "/",
+    "/signin",
+    "/signup",
+    "/onboarding",
+    "/add-item",
+    "/login",
+    "/forgot-password",
+    "/password/reset",
+  ];
 
-  const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
+  const shouldHideNavbar =
+    hideNavbarRoutes.includes(location.pathname) ||
+    location.pathname.startsWith("/email/verify/");
 
   return (
     <div className="flex min-w-[350px]">
@@ -33,15 +53,99 @@ const App = () => {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/privacy" element={<Privacy />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="/sales" element={<Sales />} />
-        <Route path="/customers" element={<Customers />} />
-        <Route path="/payments" element={<Payments />} />
-        <Route path="/inventory" element={<Inventory />} />
-        <Route path="/add-item" element={<AddItemForm />} />
+        <Route
+          path="/signup"
+          element={
+            <PublicOnlyRoute>
+              <SignUp />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/signin"
+          element={
+            <PublicOnlyRoute>
+              <SignIn />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route path="/login" element={<Navigate to="/signin" replace />} />
+        <Route
+          path="/forgot-password"
+          element={
+            <PublicOnlyRoute>
+              <ForgotPassword />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/password/reset"
+          element={
+            <PublicOnlyRoute>
+              <ResetPassword />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/email/verify/:code"
+          element={<VerifyEmail />}
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/onboarding"
+          element={
+            <OnboardingRoute>
+              <Onboarding />
+            </OnboardingRoute>
+          }
+        />
+        <Route
+          path="/sales"
+          element={
+            <ProtectedRoute>
+              <Sales />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/customers"
+          element={
+            <ProtectedRoute>
+              <Customers />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/payments"
+          element={
+            <ProtectedRoute>
+              <Payments />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/inventory"
+          element={
+            <ProtectedRoute>
+              <Inventory />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/add-item"
+          element={
+            <ProtectedRoute>
+              <AddItemForm />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </div>
   );

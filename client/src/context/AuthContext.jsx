@@ -7,40 +7,46 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  //  Check session on app load
+  const refreshUser = async () => {
+    try {
+      const response = await API.get("/user");
+      setUser(response.data);
+      return response.data;
+    } catch {
+      setUser(null);
+      return null;
+    }
+  };
+
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await API.get("/user");
-        setUser(res.data);
-      } catch {
-        setUser(null);
-      } finally {
-        setIsLoading(false);
-      }
+    const initializeAuth = async () => {
+      setIsLoading(true);
+      await refreshUser();
+      setIsLoading(false);
     };
 
-    fetchUser();
+    initializeAuth();
   }, []);
 
-  //  Login
   const login = (userData) => {
     setUser(userData);
   };
 
-  //  Logout 
-  const logout = async () => {
-    try {
-      await API.post("/logout"); // if your backend has it
-    } catch (err) {
-      console.log("Logout error", err);
-    } finally {
-      setUser(null);
-    }
+  const logout = () => {
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser, login, logout, isLoading }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        setUser,
+        login,
+        logout,
+        refreshUser,
+        isLoading,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
