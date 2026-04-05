@@ -1,54 +1,120 @@
-# 🔌 API Documentation
+# API Documentation
+
+All protected routes require authentication.
 
 ## Product APIs
 
 ### Create Product
 
-POST /api/products
+`POST /products`
 
 Body:
-{
-name,
-price,
-quantity,
-minQuantity,
-sku
-}
 
----
+```json
+{
+  "name": "Wireless Mouse",
+  "category": "Electronics",
+  "price": 899,
+  "quantity": 25,
+  "minimumQuantity": 5,
+  "sku": "WM-001"
+}
+```
 
 ### Get Products
 
-GET /api/products
+`GET /products`
 
----
+Query params:
 
-## Transaction APIs
+```txt
+page
+limit
+category
+search
+lowStockOnly
+```
 
-### Create Order
+### Get Product By Id
 
-POST /api/orders
+`GET /products/:id`
 
-### Get Orders
+### Update Product
 
-GET /api/orders
+`PATCH /products/:id`
 
----
+### Adjust Product Stock
+
+`POST /products/:id/adjust-stock`
+
+### Get Product Movements
+
+`GET /products/:id/movements`
+
+### Delete Product
+
+`DELETE /products/:id`
 
 ## Customer APIs
 
 ### Add Customer
 
-POST /api/customers
+`POST /customers`
+
+Body:
+
+```json
+{
+  "name": "Rahul Sharma",
+  "mobile": "9876543210",
+  "email": "rahul@example.com",
+  "address": "Jaipur, Rajasthan",
+  "notes": "Prefers weekend delivery",
+  "openingBalance": 2000
+}
+```
 
 ### Get Customers
 
-GET /api/customers
+`GET /customers`
 
----
+Query params:
 
-## Expense APIs
+```txt
+page
+limit
+search
+dueStatus
+sortBy
+sortOrder
+recentOnly
+includeArchived
+```
 
-### Add Expense
+### Get Customer By Id
 
-POST /api/expenses
+`GET /customers/:id`
+
+Returns profile details with sales history and payment history.
+
+### Update Customer
+
+`PATCH /customers/:id`
+
+### Archive Customer
+
+`POST /customers/:id/archive`
+
+## Business APIs
+
+### Get Business
+
+`GET /business`
+
+### Create Business
+
+`POST /business`
+
+### Update Business
+
+`PATCH /business`
