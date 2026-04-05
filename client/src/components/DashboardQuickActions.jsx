@@ -1,5 +1,7 @@
+import { useQueryClient } from "@tanstack/react-query";
 import React from "react";
 import { Users, CreditCard, Boxes } from "lucide-react";
+import { prefetchRouteData } from "../lib/prefetchRoutes";
 import { useNavigate } from "react-router-dom";
 
 const actions = [
@@ -25,6 +27,7 @@ const actions = [
 
 const DashboardQuickActions = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   return (
     <div className="mt-4 px-4 md:px-6">
@@ -40,6 +43,8 @@ const DashboardQuickActions = () => {
             <button
               key={index}
               onClick={() => navigate(action.path)}
+              onMouseEnter={() => prefetchRouteData(queryClient, action.path)}
+              onFocus={() => prefetchRouteData(queryClient, action.path)}
               className="
                 flex items-center gap-2 sm:gap-3 
                 p-3 sm:p-4 

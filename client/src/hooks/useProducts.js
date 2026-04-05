@@ -1,4 +1,9 @@
-import { useEffect, useState } from "react";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useDeferredValue } from "react";
 import toast from "react-hot-toast";
 import {
   adjustProductStockAPI,
@@ -10,8 +15,10 @@ import {
   getProductsAPI,
   updateProductAPI,
 } from "../api/product.api";
+import { mapListItems, updateMatchingQueries } from "../lib/queryCacheUtils";
+import { productKeys, saleKeys } from "../lib/queryKeys";
 
-export const useProducts = (params) => {
+export const useProducts = (params = {}) => {
   const {
     page = 1,
     limit = 10,
@@ -19,342 +26,277 @@ export const useProducts = (params) => {
     search = "",
     lowStockOnly = false,
   } = params;
-  const [products, setProducts] = useState([]);
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 10,
-    total: 0,
-    totalPages: 0,
+  const deferredSearch = useDeferredValue(search);
+  const queryParams = {
+    page,
+    limit,
+    category,
+    search: deferredSearch,
+    lowStockOnly,
+  };
+
+  const query = useQuery({
+    queryKey: productKeys.list(queryParams),
+    queryFn: () => getProductsAPI(queryParams),
+    staleTime: 2 * 60 * 1000,
   });
-  const [summary, setSummary] = useState({
-    totalProducts: 0,
-    totalValue: 0,
-    lowStockCount: 0,
-    outOfStockCount: 0,
-  });
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [reloadKey, setReloadKey] = useState(0);
-
-  useEffect(() => {
-    let ignore = false;
-
-    const fetchProducts = async () => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const response = await getProductsAPI({
-          page,
-          limit,
-          category,
-          search,
-          lowStockOnly,
-        });
-
-        if (ignore) {
-          return;
-        }
-
-        setProducts(response.products);
-        setPagination(response.pagination);
-        setSummary(response.summary);
-      } catch (err) {
-        if (ignore) {
-          return;
-        }
-
-        const message =
-          err.response?.data?.message || "Failed to load inventory";
-        setError(message);
-      } finally {
-        if (!ignore) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchProducts();
-
-    return () => {
-      ignore = true;
-    };
-  }, [page, limit, category, search, lowStockOnly, reloadKey]);
 
   return {
-    products,
-    pagination,
-    summary,
-    isLoading,
-    error,
-    refetch: () => setReloadKey((current) => current + 1),
+    products: query.data?.products ?? [],
+    pagination: query.data?.pagination ?? {
+      page: 1,
+      limit,
+      total: 0,
+      totalPages: 0,
+    },
+    summary: query.data?.summary ?? {
+      totalProducts: 0,
+      totalValue: 0,
+      lowStockCount: 0,
+      outOfStockCount: 0,
+      categories: [],
+    },
+    isLoading: query.isLoading,
+    error: query.error?.response?.data?.message || query.error?.message || null,
+    refetch: query.refetch,
   };
 };
 
 export const useProduct = (productId) => {
-  const [product, setProduct] = useState(null);
-  const [isLoading, setIsLoading] = useState(Boolean(productId));
-  const [error, setError] = useState(null);
+  const query = useQuery({
+    queryKey: productKeys.detail(productId),
+    queryFn: () => getProductAPI(productId),
+    enabled: Boolean(productId),
+    staleTime: 5 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    if (!productId) {
-      setProduct(null);
-      setIsLoading(false);
-      setError(null);
-      return;
-    }
-
-    let ignore = false;
-
-    const fetchProduct = async () => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const response = await getProductAPI(productId);
-
-        if (!ignore) {
-          setProduct(response);
-        }
-      } catch (err) {
-        if (!ignore) {
-          setError(err.response?.data?.message || "Failed to load product");
-        }
-      } finally {
-        if (!ignore) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchProduct();
-
-    return () => {
-      ignore = true;
-    };
-  }, [productId]);
-
-  return { product, isLoading, error };
+  return {
+    product: query.data ?? null,
+    isLoading: query.isLoading,
+    error: query.error?.response?.data?.message || query.error?.message || null,
+  };
 };
 
-export const useLowStockProducts = (params) => {
+export const useLowStockProducts = (params = {}) => {
   const { page = 1, limit = 10, category = "", search = "" } = params;
-  const [products, setProducts] = useState([]);
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 10,
-    total: 0,
-    totalPages: 0,
+  const deferredSearch = useDeferredValue(search);
+  const queryParams = {
+    page,
+    limit,
+    category,
+    search: deferredSearch,
+  };
+
+  const query = useQuery({
+    queryKey: productKeys.lowStock(queryParams),
+    queryFn: () => getLowStockProductsAPI(queryParams),
+    staleTime: 45 * 1000,
   });
-  const [summary, setSummary] = useState({
-    totalProducts: 0,
-    totalValue: 0,
-    lowStockCount: 0,
-    outOfStockCount: 0,
-    categories: [],
-  });
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    let ignore = false;
-
-    const fetchProducts = async () => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const response = await getLowStockProductsAPI({
-          page,
-          limit,
-          category,
-          search,
-        });
-
-        if (ignore) {
-          return;
-        }
-
-        setProducts(response.products);
-        setPagination(response.pagination);
-        setSummary(response.summary);
-      } catch (err) {
-        if (!ignore) {
-          setError(
-            err.response?.data?.message || "Failed to load low-stock products",
-          );
-        }
-      } finally {
-        if (!ignore) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchProducts();
-
-    return () => {
-      ignore = true;
-    };
-  }, [page, limit, category, search]);
-
-  return { products, pagination, summary, isLoading, error };
+  return {
+    products: query.data?.products ?? [],
+    pagination: query.data?.pagination ?? {
+      page: 1,
+      limit,
+      total: 0,
+      totalPages: 0,
+    },
+    summary: query.data?.summary ?? {
+      totalProducts: 0,
+      totalValue: 0,
+      lowStockCount: 0,
+      outOfStockCount: 0,
+      categories: [],
+    },
+    isLoading: query.isLoading,
+    error: query.error?.response?.data?.message || query.error?.message || null,
+  };
 };
 
 export const useCreateProduct = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const queryClient = useQueryClient();
 
-  const createProduct = async (data) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await createProductAPI(data);
+  const mutation = useMutation({
+    mutationFn: createProductAPI,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: productKeys.all });
       toast.success("Product created");
-      return response;
-    } catch (err) {
-      const message =
-        err.response?.data?.message || "Failed to create product";
-      setError(message);
-      toast.error(message);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+  });
 
-  return { createProduct, isLoading, error };
+  return {
+    createProduct: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error:
+      mutation.error?.response?.data?.message || mutation.error?.message || null,
+  };
 };
 
 export const useUpdateProduct = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const queryClient = useQueryClient();
 
-  const updateProduct = async (productId, data) => {
-    setIsLoading(true);
-    setError(null);
+  const mutation = useMutation({
+    mutationFn: ({ productId, data }) => updateProductAPI(productId, data),
+    onMutate: async ({ productId, data }) => {
+      await queryClient.cancelQueries({ queryKey: productKeys.all });
 
-    try {
-      const response = await updateProductAPI(productId, data);
+      const previousProduct = queryClient.getQueryData(productKeys.detail(productId));
+      const previousLists = queryClient.getQueriesData({
+        queryKey: productKeys.lists(),
+      });
+
+      if (previousProduct) {
+        queryClient.setQueryData(productKeys.detail(productId), {
+          ...previousProduct,
+          ...data,
+        });
+      }
+
+      updateMatchingQueries(queryClient, productKeys.lists(), (currentData) =>
+        mapListItems(currentData, "products", (product) =>
+          product.id === productId ? { ...product, ...data } : product,
+        ),
+      );
+
+      return { previousProduct, previousLists };
+    },
+    onSuccess: (_response, variables) => {
+      queryClient.invalidateQueries({ queryKey: productKeys.all });
+      queryClient.invalidateQueries({
+        queryKey: productKeys.detail(variables.productId),
+      });
       toast.success("Product updated");
-      return response;
-    } catch (err) {
-      const message =
-        err.response?.data?.message || "Failed to update product";
-      setError(message);
-      toast.error(message);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    onError: (_error, variables, context) => {
+      if (context?.previousProduct) {
+        queryClient.setQueryData(
+          productKeys.detail(variables.productId),
+          context.previousProduct,
+        );
+      }
 
-  return { updateProduct, isLoading, error };
+      context?.previousLists?.forEach(([queryKey, data]) => {
+        queryClient.setQueryData(queryKey, data);
+      });
+    },
+  });
+
+  return {
+    updateProduct: (productId, data) =>
+      mutation.mutateAsync({ productId, data }),
+    isLoading: mutation.isPending,
+    error:
+      mutation.error?.response?.data?.message || mutation.error?.message || null,
+  };
 };
 
 export const useDeleteProduct = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const queryClient = useQueryClient();
 
-  const deleteProduct = async (productId) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await deleteProductAPI(productId);
+  const mutation = useMutation({
+    mutationFn: deleteProductAPI,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: productKeys.all });
+      queryClient.invalidateQueries({ queryKey: saleKeys.all });
       toast.success("Product deleted");
-      return response;
-    } catch (err) {
-      const message =
-        err.response?.data?.message || "Failed to delete product";
-      setError(message);
-      toast.error(message);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+  });
 
-  return { deleteProduct, isLoading, error };
+  return {
+    deleteProduct: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error:
+      mutation.error?.response?.data?.message || mutation.error?.message || null,
+  };
 };
 
 export const useAdjustProductStock = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const queryClient = useQueryClient();
 
-  const adjustProductStock = async (productId, data) => {
-    setIsLoading(true);
-    setError(null);
+  const mutation = useMutation({
+    mutationFn: ({ productId, data }) => adjustProductStockAPI(productId, data),
+    onMutate: async ({ productId, data }) => {
+      await queryClient.cancelQueries({ queryKey: productKeys.all });
 
-    try {
-      const response = await adjustProductStockAPI(productId, data);
+      const previousProduct = queryClient.getQueryData(productKeys.detail(productId));
+      const previousLists = queryClient.getQueriesData({
+        queryKey: productKeys.lists(),
+      });
+
+      const getNextQuantity = (currentQuantity) => {
+        if (data.type === "INCREASE") {
+          return currentQuantity + data.quantity;
+        }
+
+        if (data.type === "DECREASE") {
+          return currentQuantity - data.quantity;
+        }
+
+        return data.quantity;
+      };
+
+      if (previousProduct) {
+        queryClient.setQueryData(productKeys.detail(productId), {
+          ...previousProduct,
+          quantity: getNextQuantity(previousProduct.quantity),
+        });
+      }
+
+      updateMatchingQueries(queryClient, productKeys.lists(), (currentData) =>
+        mapListItems(currentData, "products", (product) =>
+          product.id === productId
+            ? { ...product, quantity: getNextQuantity(product.quantity) }
+            : product,
+        ),
+      );
+
+      return { previousProduct, previousLists };
+    },
+    onSuccess: (_response, variables) => {
+      queryClient.invalidateQueries({ queryKey: productKeys.all });
+      queryClient.invalidateQueries({
+        queryKey: productKeys.detail(variables.productId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: productKeys.movements(variables.productId),
+      });
       toast.success("Stock adjusted");
-      return response;
-    } catch (err) {
-      const message =
-        err.response?.data?.message || "Failed to adjust stock";
-      setError(message);
-      toast.error(message);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    onError: (_error, variables, context) => {
+      if (context?.previousProduct) {
+        queryClient.setQueryData(
+          productKeys.detail(variables.productId),
+          context.previousProduct,
+        );
+      }
 
-  return { adjustProductStock, isLoading, error };
+      context?.previousLists?.forEach(([queryKey, data]) => {
+        queryClient.setQueryData(queryKey, data);
+      });
+    },
+  });
+
+  return {
+    adjustProductStock: (productId, data) =>
+      mutation.mutateAsync({ productId, data }),
+    isLoading: mutation.isPending,
+    error:
+      mutation.error?.response?.data?.message || mutation.error?.message || null,
+  };
 };
 
 export const useProductMovements = (productId, isEnabled = true) => {
-  const [movements, setMovements] = useState([]);
-  const [isLoading, setIsLoading] = useState(Boolean(productId) && isEnabled);
-  const [error, setError] = useState(null);
-  const [reloadKey, setReloadKey] = useState(0);
-
-  useEffect(() => {
-    if (!productId || !isEnabled) {
-      setMovements([]);
-      setIsLoading(false);
-      setError(null);
-      return;
-    }
-
-    let ignore = false;
-
-    const fetchMovements = async () => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const response = await getProductMovementsAPI(productId);
-
-        if (!ignore) {
-          setMovements(response);
-        }
-      } catch (err) {
-        if (!ignore) {
-          setError(
-            err.response?.data?.message || "Failed to load inventory history",
-          );
-        }
-      } finally {
-        if (!ignore) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchMovements();
-
-    return () => {
-      ignore = true;
-    };
-  }, [productId, isEnabled, reloadKey]);
+  const query = useQuery({
+    queryKey: productKeys.movements(productId),
+    queryFn: () => getProductMovementsAPI(productId),
+    enabled: Boolean(productId) && isEnabled,
+    staleTime: 30 * 1000,
+  });
 
   return {
-    movements,
-    isLoading,
-    error,
-    refetch: () => setReloadKey((current) => current + 1),
+    movements: query.data ?? [],
+    isLoading: query.isLoading,
+    error: query.error?.response?.data?.message || query.error?.message || null,
+    refetch: query.refetch,
   };
 };

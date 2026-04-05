@@ -6,38 +6,65 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useCustomers } from "../hooks/useCustomers";
+import { useSales } from "../hooks/useSales";
+
+const formatCurrency = (value) =>
+  `₹${Number(value || 0).toLocaleString("en-IN", {
+    maximumFractionDigits: 2,
+  })}`;
 
 const DashboardStatCard = () => {
-  const { summary, isLoading, error } = useCustomers({
+  const {
+    summary: customerSummary,
+    isLoading: customersLoading,
+    error: customersError,
+  } = useCustomers({
+    page: 1,
+    limit: 1,
+  });
+  const {
+    summary: salesSummary,
+    isLoading: salesLoading,
+    error: salesError,
+  } = useSales({
     page: 1,
     limit: 1,
   });
 
+  const isLoading = customersLoading || salesLoading;
+  const error = customersError || salesError;
+
   const stats = [
     {
       title: "Today's Sales",
-      value: "₹12,430",
-      sub: "↑ 8% from yesterday",
+      value: isLoading ? "..." : formatCurrency(salesSummary.todaySalesAmount),
+      sub: error
+        ? "Unable to load today sales"
+        : `${salesSummary.todaySalesCount} sale${salesSummary.todaySalesCount === 1 ? "" : "s"} recorded`,
       icon: <IndianRupee size={20} />,
       bg: "bg-green-100",
       iconColor: "text-green-600",
-      subColor: "text-green-600",
+      subColor: error ? "text-red-500" : "text-gray-500",
     },
     {
       title: "Pending Payments",
-      value: "₹8,200",
-      sub: "5 invoices unpaid",
+      value: isLoading ? "..." : formatCurrency(salesSummary.totalOutstanding),
+      sub: error
+        ? "Unable to load pending payments"
+        : `${salesSummary.totalSales.toLocaleString("en-IN")} tracked sales`,
       icon: <CreditCard size={20} />,
       bg: "bg-yellow-100",
       iconColor: "text-yellow-600",
-      subColor: "text-gray-500",
+      subColor: error ? "text-red-500" : "text-gray-500",
     },
     {
       title: "Total Customers",
-      value: isLoading ? "..." : summary.totalCustomers.toLocaleString("en-IN"),
+      value: isLoading
+        ? "..."
+        : customerSummary.totalCustomers.toLocaleString("en-IN"),
       sub: error
         ? "Unable to load customer count"
-        : `${summary.pendingCustomers} pending balances`,
+        : `${customerSummary.pendingCustomers} pending balances`,
       icon: <Users size={20} />,
       bg: "bg-blue-100",
       iconColor: "text-blue-600",
@@ -45,12 +72,14 @@ const DashboardStatCard = () => {
     },
     {
       title: "Monthly Revenue",
-      value: "₹2.4L",
-      sub: "↑ 18% from last month",
+      value: isLoading ? "..." : formatCurrency(salesSummary.monthlyRevenue),
+      sub: error
+        ? "Unable to load monthly revenue"
+        : `${formatCurrency(salesSummary.monthlySalesAmount)} sold this month`,
       icon: <TrendingUp size={20} />,
       bg: "bg-purple-100",
       iconColor: "text-purple-600",
-      subColor: "text-green-600",
+      subColor: error ? "text-red-500" : "text-gray-500",
     },
   ];
 

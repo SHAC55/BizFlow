@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import React, { useState, useEffect } from "react";
 import {
   LayoutDashboard,
@@ -11,6 +12,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useAuthContext } from "../context/AuthContext";
+import { prefetchRouteData } from "../lib/prefetchRoutes";
 import { NavLink, useNavigate } from "react-router-dom";
 
 const navItems = [
@@ -26,13 +28,15 @@ const getInitials = (name = "") =>
   name.slice(0, 2).toUpperCase() || "U";
 
 /* ── Single nav link ── */
-const NavItem = ({ item, onClick }) => {
+const NavItem = ({ item, onClick, onPrefetch }) => {
   const Icon = item.icon;
   return (
     <NavLink
       to={item.to}
       end={item.to === "/dashboard"}
       onClick={onClick}
+      onMouseEnter={() => onPrefetch?.(item.to)}
+      onFocus={() => onPrefetch?.(item.to)}
       className={({ isActive }) =>
         `group flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 ${
           isActive
@@ -61,6 +65,7 @@ const NavItem = ({ item, onClick }) => {
 const Navbar = () => {
   const { user, logout } = useAuthContext();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   /* Lock scroll + blur main content when drawer open */
@@ -94,6 +99,7 @@ const Navbar = () => {
   };
 
   const closeMobile = () => setIsMobileMenuOpen(false);
+  const handlePrefetch = (path) => prefetchRouteData(queryClient, path);
 
   /* ── Shared sidebar content ── */
   const SidebarContent = ({ onClose }) => (
@@ -127,7 +133,12 @@ const Navbar = () => {
       {/* Nav links */}
       <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
         {navItems.map((item) => (
-          <NavItem key={item.name} item={item} onClick={onClose} />
+          <NavItem
+            key={item.name}
+            item={item}
+            onClick={onClose}
+            onPrefetch={handlePrefetch}
+          />
         ))}
       </nav>
 

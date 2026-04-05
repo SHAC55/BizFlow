@@ -1,4 +1,9 @@
-import { useDeferredValue, useEffect, useState } from "react";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useDeferredValue } from "react";
 import toast from "react-hot-toast";
 import {
   archiveCustomerAPI,
@@ -7,8 +12,10 @@ import {
   getCustomersAPI,
   updateCustomerAPI,
 } from "../api/customer.api";
+import { mapListItems, updateMatchingQueries } from "../lib/queryCacheUtils";
+import { customerKeys, saleKeys } from "../lib/queryKeys";
 
-export const useCustomers = (params) => {
+export const useCustomers = (params = {}) => {
   const {
     page = 1,
     limit = 12,
@@ -20,216 +27,189 @@ export const useCustomers = (params) => {
     includeArchived = false,
   } = params;
   const deferredSearch = useDeferredValue(search);
-  const [customers, setCustomers] = useState([]);
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit,
-    total: 0,
-    totalPages: 0,
-  });
-  const [summary, setSummary] = useState({
-    totalCustomers: 0,
-    clearedCustomers: 0,
-    pendingCustomers: 0,
-    totalDue: 0,
-    totalRevenue: 0,
-  });
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [reloadKey, setReloadKey] = useState(0);
-
-  useEffect(() => {
-    let ignore = false;
-
-    const fetchCustomers = async () => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const response = await getCustomersAPI({
-          page,
-          limit,
-          search: deferredSearch,
-          dueStatus,
-          sortBy,
-          sortOrder,
-          recentOnly,
-          includeArchived,
-        });
-
-        if (ignore) {
-          return;
-        }
-
-        setCustomers(response.customers);
-        setPagination(response.pagination);
-        setSummary(response.summary);
-      } catch (err) {
-        if (ignore) {
-          return;
-        }
-
-        const message =
-          err.response?.data?.message || "Failed to load customers";
-        setError(message);
-      } finally {
-        if (!ignore) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchCustomers();
-
-    return () => {
-      ignore = true;
-    };
-  }, [
-    deferredSearch,
-    dueStatus,
-    includeArchived,
-    limit,
+  const queryParams = {
     page,
-    recentOnly,
-    reloadKey,
+    limit,
+    search: deferredSearch,
+    dueStatus,
     sortBy,
     sortOrder,
-  ]);
+    recentOnly,
+    includeArchived,
+  };
+
+  const query = useQuery({
+    queryKey: customerKeys.list(queryParams),
+    queryFn: () => getCustomersAPI(queryParams),
+    staleTime: 2 * 60 * 1000,
+  });
 
   return {
-    customers,
-    pagination,
-    summary,
-    isLoading,
-    error,
-    refetch: () => setReloadKey((current) => current + 1),
+    customers: query.data?.customers ?? [],
+    pagination: query.data?.pagination ?? {
+      page: 1,
+      limit,
+      total: 0,
+      totalPages: 0,
+    },
+    summary: query.data?.summary ?? {
+      totalCustomers: 0,
+      clearedCustomers: 0,
+      pendingCustomers: 0,
+      totalDue: 0,
+      totalRevenue: 0,
+    },
+    isLoading: query.isLoading,
+    error: query.error?.response?.data?.message || query.error?.message || null,
+    refetch: query.refetch,
   };
 };
 
 export const useCustomer = (customerId) => {
-  const [customer, setCustomer] = useState(null);
-  const [isLoading, setIsLoading] = useState(Boolean(customerId));
-  const [error, setError] = useState(null);
+  const query = useQuery({
+    queryKey: customerKeys.detail(customerId),
+    queryFn: () => getCustomerAPI(customerId),
+    enabled: Boolean(customerId),
+    staleTime: 2 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    if (!customerId) {
-      setCustomer(null);
-      setIsLoading(false);
-      setError(null);
-      return;
-    }
-
-    let ignore = false;
-
-    const fetchCustomer = async () => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const response = await getCustomerAPI(customerId);
-
-        if (!ignore) {
-          setCustomer(response);
-        }
-      } catch (err) {
-        if (!ignore) {
-          setError(err.response?.data?.message || "Failed to load customer");
-        }
-      } finally {
-        if (!ignore) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchCustomer();
-
-    return () => {
-      ignore = true;
-    };
-  }, [customerId]);
-
-  return { customer, isLoading, error };
+  return {
+    customer: query.data ?? null,
+    isLoading: query.isLoading,
+    error: query.error?.response?.data?.message || query.error?.message || null,
+  };
 };
 
 export const useCreateCustomer = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const queryClient = useQueryClient();
 
-  const createCustomer = async (data) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await createCustomerAPI(data);
+  const mutation = useMutation({
+    mutationFn: createCustomerAPI,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: customerKeys.all });
       toast.success("Customer created");
-      return response;
-    } catch (err) {
-      const message =
-        err.response?.data?.message || "Failed to create customer";
-      setError(message);
-      toast.error(message);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+  });
 
   return {
-    createCustomer,
-    isLoading,
-    error,
+    createCustomer: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error:
+      mutation.error?.response?.data?.message || mutation.error?.message || null,
   };
 };
 
 export const useUpdateCustomer = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const queryClient = useQueryClient();
 
-  const updateCustomer = async (customerId, data) => {
-    setIsLoading(true);
-    setError(null);
+  const mutation = useMutation({
+    mutationFn: ({ customerId, data }) => updateCustomerAPI(customerId, data),
+    onMutate: async ({ customerId, data }) => {
+      await queryClient.cancelQueries({ queryKey: customerKeys.all });
 
-    try {
-      const response = await updateCustomerAPI(customerId, data);
+      const previousCustomer = queryClient.getQueryData(customerKeys.detail(customerId));
+      const previousLists = queryClient.getQueriesData({
+        queryKey: customerKeys.lists(),
+      });
+
+      if (previousCustomer) {
+        queryClient.setQueryData(customerKeys.detail(customerId), {
+          ...previousCustomer,
+          ...data,
+        });
+      }
+
+      updateMatchingQueries(queryClient, customerKeys.lists(), (currentData) =>
+        mapListItems(currentData, "customers", (customer) =>
+          customer.id === customerId ? { ...customer, ...data } : customer,
+        ),
+      );
+
+      return { previousCustomer, previousLists };
+    },
+    onSuccess: (_response, variables) => {
+      queryClient.invalidateQueries({ queryKey: customerKeys.all });
+      queryClient.invalidateQueries({
+        queryKey: customerKeys.detail(variables.customerId),
+      });
+      queryClient.invalidateQueries({ queryKey: saleKeys.all });
       toast.success("Customer updated");
-      return response;
-    } catch (err) {
-      const message =
-        err.response?.data?.message || "Failed to update customer";
-      setError(message);
-      toast.error(message);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    onError: (_error, variables, context) => {
+      if (context?.previousCustomer) {
+        queryClient.setQueryData(
+          customerKeys.detail(variables.customerId),
+          context.previousCustomer,
+        );
+      }
 
-  return { updateCustomer, isLoading, error };
+      context?.previousLists?.forEach(([queryKey, data]) => {
+        queryClient.setQueryData(queryKey, data);
+      });
+    },
+  });
+
+  return {
+    updateCustomer: (customerId, data) =>
+      mutation.mutateAsync({ customerId, data }),
+    isLoading: mutation.isPending,
+    error:
+      mutation.error?.response?.data?.message || mutation.error?.message || null,
+  };
 };
 
 export const useArchiveCustomer = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const queryClient = useQueryClient();
 
-  const archiveCustomer = async (customerId) => {
-    setIsLoading(true);
-    setError(null);
+  const mutation = useMutation({
+    mutationFn: archiveCustomerAPI,
+    onMutate: async (customerId) => {
+      await queryClient.cancelQueries({ queryKey: customerKeys.all });
 
-    try {
-      const response = await archiveCustomerAPI(customerId);
+      const previousCustomer = queryClient.getQueryData(customerKeys.detail(customerId));
+      const previousLists = queryClient.getQueriesData({
+        queryKey: customerKeys.lists(),
+      });
+      const archivedAt = new Date().toISOString();
+
+      if (previousCustomer) {
+        queryClient.setQueryData(customerKeys.detail(customerId), {
+          ...previousCustomer,
+          archivedAt,
+        });
+      }
+
+      updateMatchingQueries(queryClient, customerKeys.lists(), (currentData) =>
+        mapListItems(currentData, "customers", (customer) =>
+          customer.id === customerId ? { ...customer, archivedAt } : customer,
+        ),
+      );
+
+      return { previousCustomer, previousLists };
+    },
+    onSuccess: (_response, customerId) => {
+      queryClient.invalidateQueries({ queryKey: customerKeys.all });
+      queryClient.invalidateQueries({ queryKey: customerKeys.detail(customerId) });
       toast.success("Customer archived");
-      return response;
-    } catch (err) {
-      const message =
-        err.response?.data?.message || "Failed to archive customer";
-      setError(message);
-      toast.error(message);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    onError: (_error, customerId, context) => {
+      if (context?.previousCustomer) {
+        queryClient.setQueryData(
+          customerKeys.detail(customerId),
+          context.previousCustomer,
+        );
+      }
 
-  return { archiveCustomer, isLoading, error };
+      context?.previousLists?.forEach(([queryKey, data]) => {
+        queryClient.setQueryData(queryKey, data);
+      });
+    },
+  });
+
+  return {
+    archiveCustomer: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error:
+      mutation.error?.response?.data?.message || mutation.error?.message || null,
+  };
 };
