@@ -344,7 +344,7 @@ const InventoryProducts = () => {
                             </button>
                             <button
                               onClick={() =>
-                                navigate(`/add-item?productId=${product.id}`)
+                                navigate(`/add-inventory?productId=${product.id}`)
                               }
                               className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                             >

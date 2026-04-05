@@ -23,6 +23,7 @@ import {
 } from "./components/ProtectedRoute";
 import { Navigate } from "react-router-dom";
 import AddCustomer from "./pages/AddCustomer";
+import CustomerDetails from "./pages/CustomerDetails";
 
 const App = () => {
   const location = useLocation();
@@ -33,6 +34,7 @@ const App = () => {
     "/signin",
     "/signup",
     "/onboarding",
+    "/add-item",
     "/add-inventory",
     "/login",
     "/forgot-password",
@@ -125,6 +127,14 @@ const App = () => {
           }
         />
         <Route
+          path="/customers/:customerId"
+          element={
+            <ProtectedRoute>
+              <CustomerDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/payments"
           element={
             <ProtectedRoute>
@@ -147,6 +157,10 @@ const App = () => {
               <AddItemForm />
             </ProtectedRoute>
           }
+        />
+        <Route
+          path="/add-item"
+          element={<Navigate to="/add-inventory" replace />}
         />
         <Route
           path="/add-customer"
