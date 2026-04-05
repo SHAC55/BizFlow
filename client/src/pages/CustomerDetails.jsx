@@ -11,10 +11,7 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  useArchiveCustomer,
-  useCustomer,
-} from "../hooks/useCustomers";
+import { useArchiveCustomer, useCustomer } from "../hooks/useCustomers";
 
 const formatCurrency = (value) =>
   `₹${Number(value || 0).toLocaleString("en-IN")}`;
@@ -44,15 +41,13 @@ const CustomerDetails = () => {
     await archiveCustomer(customerId);
     navigate("/customers");
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-slate-600" />
-      </div>
-    );
-  }
-
+if (isLoading) {
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 z-50">
+      <div className="h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-slate-600" />
+    </div>
+  );
+}
   if (error || !customer) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 md:ml-72 md:p-8">
@@ -64,7 +59,7 @@ const CustomerDetails = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 md:ml-72 md:p-8">
+    <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 md:ml-72 md:p-8">
       <div className="mb-6 flex items-center justify-between gap-4">
         <button
           onClick={() => navigate("/customers")}

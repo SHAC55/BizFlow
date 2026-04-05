@@ -24,6 +24,8 @@ import {
 import { Navigate } from "react-router-dom";
 import AddCustomer from "./pages/AddCustomer";
 import CustomerDetails from "./pages/CustomerDetails";
+import AddTransaction from "./pages/AddTransaction";
+import SaleDetail from "./pages/SaleDetail";
 
 const App = () => {
   const location = useLocation();
@@ -39,7 +41,8 @@ const App = () => {
     "/login",
     "/forgot-password",
     "/password/reset",
-    "/add-customer"
+    "/add-customer",
+    "/add-transaction",
   ];
 
   const shouldHideNavbar =
@@ -48,10 +51,7 @@ const App = () => {
 
   return (
     <div className="flex min-w-[350px]">
-      
-      <div className="fixed">
-      {!shouldHideNavbar && <Navbar />}
-      </div>
+      <div className="fixed">{!shouldHideNavbar && <Navbar />}</div>
       <Toaster position="top-right" />
 
       <Routes>
@@ -90,10 +90,7 @@ const App = () => {
             </PublicOnlyRoute>
           }
         />
-        <Route
-          path="/email/verify/:code"
-          element={<VerifyEmail />}
-        />
+        <Route path="/email/verify/:code" element={<VerifyEmail />} />
         <Route
           path="/dashboard"
           element={
@@ -167,6 +164,22 @@ const App = () => {
           element={
             <ProtectedRoute>
               <AddCustomer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/add-transaction"
+          element={
+            <ProtectedRoute>
+              <AddTransaction />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/sales/:id"
+          element={
+            <ProtectedRoute>
+              <SaleDetail />
             </ProtectedRoute>
           }
         />
