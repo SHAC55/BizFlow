@@ -467,14 +467,6 @@ export type SaleUncheckedUpdateManyWithoutCustomerNestedInput = {
   deleteMany?: Prisma.SaleScalarWhereInput | Prisma.SaleScalarWhereInput[]
 }
 
-export type FloatFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type SaleCreateNestedOneWithoutInvoiceInput = {
   create?: Prisma.XOR<Prisma.SaleCreateWithoutInvoiceInput, Prisma.SaleUncheckedCreateWithoutInvoiceInput>
   connectOrCreate?: Prisma.SaleCreateOrConnectWithoutInvoiceInput

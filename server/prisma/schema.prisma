@@ -94,13 +94,16 @@ model Business {
 // Customer
 //////////////////////
 model Customer {
-  id         String   @id @default(uuid())
-  name       String
-  mobile     String
-  address    String?
-  notes      String?
-  businessId String
-  createdAt  DateTime @default(now())
+  id             String   @id @default(uuid())
+  name           String
+  mobile         String
+  email          String?
+  address        String?
+  notes          String?
+  openingBalance Float    @default(0)
+  archivedAt     DateTime?
+  businessId     String
+  createdAt      DateTime @default(now())
 
   business Business @relation(fields: [businessId], references: [id])
   sales    Sale[]

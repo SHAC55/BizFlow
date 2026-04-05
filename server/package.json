@@ -3,6 +3,8 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
+    "prisma:generate": "prisma generate --schema prisma/schema.prisma",
+    "postinstall": "npm run prisma:generate",
     "start": "bun run server.ts",
     "dev": "bun --watch server.ts"
   },
