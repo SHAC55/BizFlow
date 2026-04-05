@@ -16,7 +16,7 @@ const actions = [
     path: "/add-customer",
   },
   {
-    name: "Add Salex",
+    name: "Add Sale Transaction",
     icon: CreditCard,
     color: "bg-purple-100 text-purple-600",
     path: "/add-transaction",

@@ -6,6 +6,22 @@ import {
   GOOGLE_CALLBACK_URL,
 } from "../constants/env";
 
+type GoogleProfile = {
+  displayName: string;
+  emails?: Array<{
+    value?: string;
+  }>;
+};
+
+type VerifyDone = (
+  error: Error | null,
+  user?: {
+    email: string;
+    name: string;
+    provider: string;
+  },
+) => void;
+
 passport.use(
   new GoogleStrategy(
     {
@@ -13,10 +29,16 @@ passport.use(
       clientSecret: GOOGLE_CLIENT_SECRET,
       callbackURL: GOOGLE_CALLBACK_URL,
     },
-    async (_accessToken, _refreshToken, profile, done) => {
+    async (
+      _accessToken: string,
+      _refreshToken: string,
+      profile: unknown,
+      done: VerifyDone,
+    ) => {
       try {
-        const email = profile.emails?.[0]?.value;
-        const name = profile.displayName;
+        const googleProfile = profile as GoogleProfile;
+        const email = googleProfile.emails?.[0]?.value;
+        const name = googleProfile.displayName;
 
         if (!email) {
           return done(new Error("No email returned from Google"), undefined);
@@ -24,7 +46,7 @@ passport.use(
 
         return done(null, { email, name, provider: "google" });
       } catch (err) {
-        return done(err, undefined);
+        return done(err instanceof Error ? err : new Error("Google auth failed"));
       }
     },
   ),

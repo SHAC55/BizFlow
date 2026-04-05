@@ -58,7 +58,9 @@ export const ModelName = {
   Customer: 'Customer',
   Sale: 'Sale',
   Invoice: 'Invoice',
-  Payment: 'Payment'
+  Payment: 'Payment',
+  Product: 'Product',
+  InventoryMovement: 'InventoryMovement'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -166,6 +168,39 @@ export const PaymentScalarFieldEnum = {
 } as const
 
 export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
+
+
+export const ProductScalarFieldEnum = {
+  id: 'id',
+  businessId: 'businessId',
+  name: 'name',
+  category: 'category',
+  price: 'price',
+  quantity: 'quantity',
+  minimumQuantity: 'minimumQuantity',
+  sku: 'sku',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
+
+
+export const InventoryMovementScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  businessId: 'businessId',
+  userId: 'userId',
+  type: 'type',
+  quantityBefore: 'quantityBefore',
+  quantityAfter: 'quantityAfter',
+  quantityChange: 'quantityChange',
+  reason: 'reason',
+  notes: 'notes',
+  createdAt: 'createdAt'
+} as const
+
+export type InventoryMovementScalarFieldEnum = (typeof InventoryMovementScalarFieldEnum)[keyof typeof InventoryMovementScalarFieldEnum]
 
 
 export const SortOrder = {

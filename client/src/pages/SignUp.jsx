@@ -8,6 +8,7 @@ import {
   MdBusiness,
   MdPerson,
   MdPhone,
+  MdEmail,
 } from "react-icons/md";
 import signupImg from "../assets/signup.jpg";
 import { NavLink } from "react-router-dom";
@@ -32,6 +33,7 @@ const SignUp = () => {
     registerUser({
       businessName: data.businessName,
       username: data.username,
+      email: data.email || undefined,
       phone: data.mobileNumber,
       password: data.password,
       confirmPassword: data.confirmPassword,
@@ -150,6 +152,33 @@ const SignUp = () => {
               {errors.mobileNumber && (
                 <p className="text-red-500 text-sm mt-1">
                   {errors.mobileNumber.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700 block mb-1.5">
+                Email
+              </label>
+              <div className="relative">
+                <MdEmail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
+                <input
+                  type="email"
+                  placeholder="Enter your email (optional)"
+                  {...register("email", {
+                    pattern: {
+                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                      message: "Enter a valid email address",
+                    },
+                  })}
+                  className={`w-full pl-10 pr-4 py-3 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
+                    errors.email ? "border-red-500" : "border-gray-300"
+                  }`}
+                />
+              </div>
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.email.message}
                 </p>
               )}
             </div>
@@ -324,4 +353,3 @@ const SignUp = () => {
 };
 
 export default SignUp;
-
