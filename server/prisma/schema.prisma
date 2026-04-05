@@ -124,10 +124,30 @@ model Sale {
   business Business  @relation(fields: [businessId], references: [id])
   customer Customer  @relation(fields: [customerId], references: [id])
   invoice  Invoice?
+  items    SaleItem[]
   payments Payment[]
 
   @@index([businessId])
   @@index([customerId])
+}
+
+//////////////////////
+// Sale Item
+//////////////////////
+model SaleItem {
+  id          String   @id @default(uuid())
+  saleId      String
+  productId   String
+  quantity    Int
+  unitPrice   Float
+  totalAmount Float
+  createdAt   DateTime @default(now())
+
+  sale    Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([saleId])
+  @@index([productId])
 }
 
 //////////////////////
@@ -173,6 +193,7 @@ model Product {
 
   business  Business             @relation(fields: [businessId], references: [id])
   movements InventoryMovement[]
+  saleItems SaleItem[]
 
   @@index([businessId])
   @@unique([businessId, sku])

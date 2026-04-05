@@ -376,6 +376,15 @@ export const getLowStockProducts = async (
 
 export const deleteProduct = async (userId: number, productId: string) => {
   const product = await getOwnedProduct(userId, productId);
+  const saleItem = await prisma.saleItem.findFirst({
+    where: {
+      productId: product.id,
+    },
+    select: {
+      id: true,
+    },
+  });
+  appAssert(!saleItem, CONFLICT, "product cannot be deleted after sales exist");
 
   const deleted = await prisma.product.deleteMany({
     where: {
