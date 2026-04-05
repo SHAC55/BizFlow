@@ -45,7 +45,7 @@ const Navbar = () => {
         onClick={() => setIsMobileMenuOpen(false)}
         className={({ isActive }) =>
           `
-          flex items-center gap-3 px-4 py-3 rounded-xl transition-all
+          flex items-center gap-3 px-4 py-3 rounded-xl transition-all 
           ${
             isActive
               ? "bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-600"
@@ -65,7 +65,7 @@ const Navbar = () => {
       {/* Desktop Sidebar */}
       <div className="hidden md:flex flex-col w-72 h-screen bg-white border-r fixed z-30">
         <div className="p-6 border-b">
-          <h1 className="text-2xl font-bold text-blue-600">Bizezy</h1>
+          <h1 className="text-3xl font-bold text-blue-600">Bizezy</h1>
         </div>
 
         <nav className="flex-1 p-4 space-y-2">
