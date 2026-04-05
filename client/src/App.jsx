@@ -22,6 +22,7 @@ import {
   PublicOnlyRoute,
 } from "./components/ProtectedRoute";
 import { Navigate } from "react-router-dom";
+import AddCustomer from "./pages/AddCustomer";
 
 const App = () => {
   const location = useLocation();
@@ -36,6 +37,7 @@ const App = () => {
     "/login",
     "/forgot-password",
     "/password/reset",
+    "/add-customer"
   ];
 
   const shouldHideNavbar =
@@ -143,6 +145,14 @@ const App = () => {
           element={
             <ProtectedRoute>
               <AddItemForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/add-customer"
+          element={
+            <ProtectedRoute>
+              <AddCustomer />
             </ProtectedRoute>
           }
         />

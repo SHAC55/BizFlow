@@ -1,20 +1,44 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { ArrowLeft, UploadCloud } from "lucide-react";
+import {
+  ArrowLeft,
+  UploadCloud,
+  Package,
+  Tag,
+  Hash,
+  Layers,
+  AlertTriangle,
+  ArrowRight,
+  DollarSign,
+  Box,
+} from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useCreateProduct, useProduct, useUpdateProduct } from "../hooks/useProducts";
+import {
+  useCreateProduct,
+  useProduct,
+  useUpdateProduct,
+} from "../hooks/useProducts";
 
 const AddItemForm = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const productId = searchParams.get("productId");
   const isEditMode = Boolean(productId);
-  const { product, isLoading: isProductLoading, error: productError } =
-    useProduct(productId);
-  const { createProduct, isLoading: isCreating, error: createError } =
-    useCreateProduct();
-  const { updateProduct, isLoading: isUpdating, error: updateError } =
-    useUpdateProduct();
+  const {
+    product,
+    isLoading: isProductLoading,
+    error: productError,
+  } = useProduct(productId);
+  const {
+    createProduct,
+    isLoading: isCreating,
+    error: createError,
+  } = useCreateProduct();
+  const {
+    updateProduct,
+    isLoading: isUpdating,
+    error: updateError,
+  } = useUpdateProduct();
   const {
     register,
     handleSubmit,
@@ -88,7 +112,7 @@ const AddItemForm = () => {
       await createProduct(payload);
       reset();
     }
-
+    
     navigate("/inventory");
   };
 
@@ -97,221 +121,293 @@ const AddItemForm = () => {
 
   if (isEditMode && isProductLoading) {
     return (
-      <div className="min-h-screen w-screen flex items-center justify-center bg-blue-50 px-4">
-        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100/50 flex items-center justify-center">
+        <div className="w-10 h-10 border-2 border-slate-200 border-t-slate-600 rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen w-screen flex items-center justify-center bg-blue-50 px-4">
-      <div className="w-full max-w-lg bg-white/80 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-md border border-blue-100">
+      <div className="w-full max-w-2xl">
+        {/* Header */}
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-white rounded-2xl shadow-sm mb-3">
+            <Package className="w-7 h-7 text-slate-700" />
+          </div>
+          <h1 className="text-2xl md:text-3xl font-semibold text-slate-800 tracking-tight">
+            {isEditMode ? "Update Product" : "Add New Product"}
+          </h1>
+          <p className="text-sm text-slate-400 mt-1">
+            {isEditMode
+              ? "Edit product details and update inventory"
+              : "Enter product details to add to inventory"}
+          </p>
+        </div>
+
+        {/* Back Button */}
         <button
           type="button"
           onClick={() => navigate("/inventory")}
-          className="mb-5 inline-flex items-center gap-2 text-sm text-blue-700 hover:text-blue-800"
+          className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 transition-colors mb-4"
         >
           <ArrowLeft size={16} />
           Back to inventory
         </button>
 
-        <h2 className="text-2xl font-semibold text-blue-900 mb-6">
-          {isEditMode ? "Update Product" : "Add New Product"}
-        </h2>
+        {/* Form Card */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+          {submitError && (
+            <div className="m-6 mb-0 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
+              {submitError}
+            </div>
+          )}
 
-        {submitError && (
-          <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-            {submitError}
-          </div>
-        )}
+          <form onSubmit={handleSubmit(onSubmit)} className="p-6 md:p-8">
+            <div className="space-y-5">
+              {/* Product Name */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Product Name <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Package className="h-4 w-4 text-slate-400" />
+                  </div>
+                  <input
+                    {...register("name", {
+                      required: "Product name is required",
+                    })}
+                    className={`w-full pl-9 pr-3 py-2.5 bg-slate-50 border rounded-lg text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all ${
+                      errors.name
+                        ? "border-rose-300 focus:ring-rose-500/20 focus:border-rose-500"
+                        : "border-slate-200 focus:ring-slate-200 focus:border-slate-300"
+                    }`}
+                    placeholder="e.g. Wireless Mouse"
+                  />
+                </div>
+                {errors.name && (
+                  <p className="text-rose-500 text-xs mt-1.5 flex items-center gap-1">
+                    <span className="inline-block w-1 h-1 rounded-full bg-rose-500" />
+                    {errors.name.message}
+                  </p>
+                )}
+              </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+              {/* Category */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Category <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Tag className="h-4 w-4 text-slate-400" />
+                  </div>
+                  <input
+                    {...register("category", {
+                      required: "Category is required",
+                    })}
+                    className={`w-full pl-9 pr-3 py-2.5 bg-slate-50 border rounded-lg text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all ${
+                      errors.category
+                        ? "border-rose-300 focus:ring-rose-500/20 focus:border-rose-500"
+                        : "border-slate-200 focus:ring-slate-200 focus:border-slate-300"
+                    }`}
+                    placeholder="e.g. Electronics, Grocery, Clothing"
+                  />
+                </div>
+                {errors.category && (
+                  <p className="text-rose-500 text-xs mt-1.5 flex items-center gap-1">
+                    <span className="inline-block w-1 h-1 rounded-full bg-rose-500" />
+                    {errors.category.message}
+                  </p>
+                )}
+              </div>
 
-          {/* Product Name */}
-          <div>
-            <label className="text-sm font-medium text-gray-700">
-              Product Name
-            </label>
-            <input
-              {...register("name", {
-                required: "Product name is required",
-              })}
-              className="w-full mt-1 px-4 py-2 border border-blue-100 rounded-xl 
-                         focus:ring-2 focus:ring-blue-500 outline-none"
-              placeholder="e.g. Wireless Mouse"
-            />
-            {errors.name && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.name.message}
-              </p>
-            )}
-          </div>
+              {/* SKU with Regenerate */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  SKU
+                </label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Hash className="h-4 w-4 text-slate-400" />
+                    </div>
+                    <input
+                      {...register("sku")}
+                      className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 focus:border-slate-300 transition-all"
+                      placeholder="Auto-generated or enter manually"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setValue("sku", generateSKU(productName))}
+                    className="px-3 py-2.5 text-sm font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
+                  >
+                    ↻ Generate
+                  </button>
+                </div>
+                <p className="text-xs text-slate-400 mt-1.5">
+                  Unique identifier for this product
+                </p>
+              </div>
 
-          <div>
-            <label className="text-sm font-medium text-gray-700">
-              Category
-            </label>
-            <input
-              {...register("category", {
-                required: "Category is required",
-              })}
-              className="w-full mt-1 px-4 py-2 border border-blue-100 rounded-xl 
-                         focus:ring-2 focus:ring-blue-500 outline-none"
-              placeholder="e.g. Grocery"
-            />
-            {errors.category && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.category.message}
-              </p>
-            )}
-          </div>
+              {/* Product Image Upload */}
+              {/* <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Product Image
+                </label>
+                <label
+                  className="mt-1 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 p-5 transition-all hover:border-slate-300 hover:bg-slate-50"
+                >
+                  <UploadCloud className="mb-2 text-slate-400" size={24} />
+                  <span className="text-sm text-slate-500">
+                    Click to upload image
+                  </span>
+                  <span className="text-xs text-slate-400 mt-1">
+                    PNG, JPG or WEBP (max. 2MB)
+                  </span>
+                  <input type="file" {...register("image")} className="hidden" />
+                </label>
+                <p className="text-xs text-slate-400 mt-1.5">
+                  Image upload is not connected yet
+                </p>
+              </div> */}
 
-          {/* SKU */}
-          <div>
-            <label className="text-sm font-medium text-gray-700">
-              SKU (optional)
-            </label>
+              {/* Price + Quantity Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Price */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Price <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <DollarSign className="h-4 w-4 text-slate-400" />
+                    </div>
+                    <input
+                      type="number"
+                      step="0.01"
+                      {...register("price", {
+                        required: "Price is required",
+                        min: {
+                          value: 1,
+                          message: "Price must be greater than 0",
+                        },
+                      })}
+                      className={`w-full pl-9 pr-3 py-2.5 bg-slate-50 border rounded-lg text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all appearance-none ${
+                        errors.price
+                          ? "border-rose-300 focus:ring-rose-500/20 focus:border-rose-500"
+                          : "border-slate-200 focus:ring-slate-200 focus:border-slate-300"
+                      }`}
+                      placeholder="0.00"
+                    />
+                  </div>
+                  {errors.price && (
+                    <p className="text-rose-500 text-xs mt-1.5 flex items-center gap-1">
+                      <span className="inline-block w-1 h-1 rounded-full bg-rose-500" />
+                      {errors.price.message}
+                    </p>
+                  )}
+                </div>
 
-            <div className="flex gap-2">
-              <input
-                {...register("sku")}
-                className="w-full mt-1 px-4 py-2 border border-blue-100 rounded-xl 
-                           focus:ring-2 focus:ring-blue-500 outline-none"
-                placeholder="Auto-generated or enter manually"
-              />
+                {/* Quantity */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Quantity <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Box className="h-4 w-4 text-slate-400" />
+                    </div>
+                    <input
+                      type="number"
+                      {...register("quantity", {
+                        required: "Quantity is required",
+                        min: {
+                          value: 0,
+                          message: "Quantity cannot be negative",
+                        },
+                      })}
+                      className={`w-full pl-9 pr-3 py-2.5 bg-slate-50 border rounded-lg text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all appearance-none ${
+                        errors.quantity
+                          ? "border-rose-300 focus:ring-rose-500/20 focus:border-rose-500"
+                          : "border-slate-200 focus:ring-slate-200 focus:border-slate-300"
+                      }`}
+                      placeholder="0"
+                    />
+                  </div>
+                  {errors.quantity && (
+                    <p className="text-rose-500 text-xs mt-1.5 flex items-center gap-1">
+                      <span className="inline-block w-1 h-1 rounded-full bg-rose-500" />
+                      {errors.quantity.message}
+                    </p>
+                  )}
+                </div>
+              </div>
 
-              {/* Regenerate Button */}
+              {/* Minimum Quantity Alert */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Minimum Quantity Alert{" "}
+                  <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <AlertTriangle className="h-4 w-4 text-slate-400" />
+                  </div>
+                  <input
+                    type="number"
+                    {...register("minimumQuantity", {
+                      required: "Minimum quantity is required",
+                      min: {
+                        value: 0,
+                        message: "Minimum quantity cannot be negative",
+                      },
+                    })}
+                    className={`w-full pl-9 pr-3 py-2.5 bg-slate-50 border rounded-lg text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all appearance-none ${
+                      errors.minimumQuantity
+                        ? "border-rose-300 focus:ring-rose-500/20 focus:border-rose-500"
+                        : "border-slate-200 focus:ring-slate-200 focus:border-slate-300"
+                    }`}
+                    placeholder="Set alert threshold"
+                  />
+                </div>
+                {errors.minimumQuantity && (
+                  <p className="text-rose-500 text-xs mt-1.5 flex items-center gap-1">
+                    <span className="inline-block w-1 h-1 rounded-full bg-rose-500" />
+                    {errors.minimumQuantity.message}
+                  </p>
+                )}
+                <p className="text-xs text-slate-400 mt-1.5">
+                  You'll receive an alert when quantity drops below the minimum
+                  threshold
+                </p>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <div className="mt-8 pt-5 border-t border-slate-100">
               <button
-                type="button"
-                onClick={() =>
-                  setValue("sku", generateSKU(productName))
-                }
-                className="mt-1 px-3 py-2 text-sm bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200"
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full px-4 py-2.5 text-sm font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                ↻
+                {isSubmitting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    {isEditMode ? "Updating..." : "Adding..."}
+                  </>
+                ) : (
+                  <>
+                    {isEditMode ? "Update Product" : "Add Product"}
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
               </button>
             </div>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-gray-700">
-              Product Image (optional)
-            </label>
-
-            <label
-              className="mt-2 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-blue-200 p-4 transition hover:bg-blue-50"
-            >
-              <UploadCloud className="mb-2 text-blue-500" size={24} />
-              <span className="text-sm text-gray-500">
-                Keep for later. Image upload is not connected yet.
-              </span>
-              <input type="file" {...register("image")} className="hidden" />
-            </label>
-          </div>
-
-          {/* Price + Quantity */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            
-            {/* Price */}
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Price
-              </label>
-            <input
-              type="number"
-              step="0.01"
-                {...register("price", {
-                  required: "Price is required",
-                  min: {
-                    value: 1,
-                    message: "Price must be greater than 0",
-                  },
-                })}
-                className="w-full mt-1 px-4 py-2 border border-blue-100 rounded-xl 
-                           focus:ring-2 focus:ring-blue-500 outline-none appearance-none"
-                placeholder="₹0.00"
-              />
-              {errors.price && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.price.message}
-                </p>
-              )}
-            </div>
-
-            {/* Quantity */}
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Quantity
-              </label>
-            <input
-              type="number"
-              {...register("quantity", {
-                required: "Quantity is required",
-                min: {
-                  value: 0,
-                  message: "Quantity cannot be negative",
-                },
-              })}
-                className="w-full mt-1 px-4 py-2 border border-blue-100 rounded-xl 
-                           focus:ring-2 focus:ring-blue-500 outline-none appearance-none"
-                placeholder="0"
-              />
-              {errors.quantity && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.quantity.message}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Minimum Quantity Alert */}
-          <div>
-            <label className="text-sm font-medium text-gray-700">
-              Minimum Quantity Alert
-            </label>
-            <input
-              type="number"
-              {...register("minimumQuantity", {
-                required: "Minimum quantity is required",
-                min: {
-                  value: 0,
-                  message: "Minimum quantity cannot be negative",
-                },
-              })}
-              className="w-full mt-1 px-4 py-2 border border-blue-100 rounded-xl 
-                         focus:ring-2 focus:ring-blue-500 outline-none appearance-none"
-              placeholder="Set alert threshold"
-            />
-            {errors.minimumQuantity && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.minimumQuantity.message}
-              </p>
-            )}
-          </div>
-
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full py-2.5 rounded-xl text-white font-medium 
-                       bg-gradient-to-r from-blue-600 to-blue-400 
-                       hover:from-blue-700 hover:to-blue-500 
-                       transition-all duration-200 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
-          >
-            {isSubmitting
-              ? isEditMode
-                ? "Updating..."
-                : "Adding..."
-              : isEditMode
-                ? "Update Product"
-                : "Add Product"}
-          </button>
-
-          <p className="text-xs text-gray-600 text-center">
-            You'll receive an alert when quantity drops below the minimum threshold.
-          </p>
-
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );
