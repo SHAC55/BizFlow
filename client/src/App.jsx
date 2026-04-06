@@ -8,6 +8,7 @@ import {
   ProtectedRoute,
   PublicOnlyRoute,
 } from "./components/ProtectedRoute";
+import Profile from "./pages/Profile";
 
 const LandingPage = lazy(() => import("./pages/LandingPage"));
 const Privacy = lazy(() => import("./pages/Privacy"));
@@ -37,6 +38,7 @@ const App = () => {
     "/signin",
     "/signup",
     "/onboarding",
+    "/profile",
     "/add-item",
     "/add-inventory",
     "/login",
@@ -98,6 +100,14 @@ const App = () => {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/Profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             }
           />

@@ -30,7 +30,7 @@ const DashboardQuickActions = () => {
   const queryClient = useQueryClient();
 
   return (
-    <div className="mt-4 px-4 md:px-6">
+    <div className="mt-4 px-4 md:px-6 max-w-7xl mx-auto">
       <h2 className="text-base sm:text-lg font-semibold mb-3 text-gray-700">
         Quick Actions
       </h2>

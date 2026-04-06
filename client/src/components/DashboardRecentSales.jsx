@@ -29,7 +29,7 @@ const DashboardRecentSales = ({ sales, isLoading, error }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="mt-6 px-4 md:px-6">
+    <div className="mt-6 px-4 md:px-6 max-w-7xl mx-auto">
       <div className="rounded-3xl bg-white p-5 shadow-sm">
         <div className="mb-4 flex items-center justify-between gap-4">
           <div>

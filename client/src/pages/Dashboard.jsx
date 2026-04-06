@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import DashboardHeader from "../components/DashboardHeader";
 import DashboardRecentSales from "../components/DashboardRecentSales";
 import DashboardStatCard from "../components/DashboardStatCard";
 import DashboardQuickActions from "../components/DashboardQuickActions";
 import { useSales } from "../hooks/useSales";
+import PageHeader from "../components/PageHeader";
+import { LayoutDashboard } from "lucide-react";
 
 const Dashboard = () => {
   const { sales, isLoading, error } = useSales({
@@ -19,8 +20,8 @@ const Dashboard = () => {
   }, [isLoading, sales]);
 
   return (
-    <div className="p-6  bg-gradient-to-br from-blue-50 to-indigo-100 w-screen md:ml-72 md:mt-0 mt-12 min-w-[350px] min-h-screen">
-      <DashboardHeader lastUpdated={lastUpdated} isRefreshing={isLoading} />
+    <div className="min-h-screen w-full bg-gradient-to-br from-blue-100 to-indigo-50 p-4 md:ml-72 md:p-6 md:mt-0 mt-12">
+      <PageHeader lastUpdated={lastUpdated} title="Dashboard" icon={LayoutDashboard} isRefreshing={isLoading} />
       <DashboardStatCard />
       <DashboardQuickActions />
       <DashboardRecentSales sales={sales} isLoading={isLoading} error={error} />

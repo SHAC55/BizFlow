@@ -15,9 +15,8 @@ import AdjustStockModal from "./AdjustStockModal";
 import ProductMovementsPanel from "./ProductMovementsPanel";
 
 const InventoryProducts = () => {
-
   const navigate = useNavigate();
-  
+
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
@@ -88,7 +87,7 @@ const InventoryProducts = () => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-indigo-100 h-full max-w-7xl mx-auto ">
+    <div className=" h-full max-w-7xl mx-auto ">
       <AdjustStockModal
         product={adjustingProduct}
         isOpen={Boolean(adjustingProduct)}
@@ -101,13 +100,6 @@ const InventoryProducts = () => {
         onClose={() => setHistoryProduct(null)}
       />
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-800">Inventory</h1>
-            <p className="text-sm text-gray-500 mt-0.5">Manage your products</p>
-          </div>
-        </div>
-
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
           <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between">
@@ -346,7 +338,9 @@ const InventoryProducts = () => {
                             </button>
                             <button
                               onClick={() =>
-                                navigate(`/add-inventory?productId=${product.id}`)
+                                navigate(
+                                  `/add-inventory?productId=${product.id}`,
+                                )
                               }
                               className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                             >

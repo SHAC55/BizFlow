@@ -1,7 +1,14 @@
 import React, { useState } from "react";
-import { ArrowUpDown, Clock3, Funnel, UserRoundSearch } from "lucide-react";
+import {
+  ArrowUpDown,
+  Clock3,
+  Funnel,
+  User,
+  UserRoundSearch,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCustomers } from "../hooks/useCustomers";
+import PageHeader from "./PageHeader";
 
 const avatarPalettes = [
   { bg: "linear-gradient(135deg,#4f46e5,#6366f1)" },
@@ -133,7 +140,9 @@ const CustomerCard = ({ customer }) => {
             <p className="mb-1 text-[10px] font-medium uppercase tracking-widest text-indigo-400">
               Orders
             </p>
-            <p className="text-sm font-bold text-indigo-700">{customer.orders}</p>
+            <p className="text-sm font-bold text-indigo-700">
+              {customer.orders}
+            </p>
           </div>
         </div>
 
@@ -175,18 +184,14 @@ const AllCustomer = () => {
   });
 
   return (
-    <div className="ml-0 mt-12 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 md:ml-72 md:mt-0 md:p-8">
+    <div className=" min-h-screen bg-gradient-to-br from-blue-100 to-indigo-50 p-4 md:ml-72 md:mt-0 md:p-8 mt-12">
+      <PageHeader
+        title="Customers"
+        icon={User}
+        subtitle="Manage your customers and their transactions"
+      />
       <div className="mb-6 flex flex-col gap-4 md:mb-8 xl:flex-row xl:items-start xl:justify-between">
-        <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-gray-800 md:text-3xl">
-            Customers
-          </h1>
-          <p className="mt-1 text-sm text-gray-400">
-            Manage, review, and prioritize your customer relationships
-          </p>
-        </div>
-
-        <div className="flex flex-wrap gap-3">
+        {/* <div className="flex flex-wrap gap-3">
           {[
             {
               label: "Total",
@@ -217,10 +222,10 @@ const AllCustomer = () => {
               <p className={`mt-0.5 text-xl font-extrabold ${color}`}>{value}</p>
             </div>
           ))}
-        </div>
+        </div> */}
       </div>
 
-      <div className="mb-6 rounded-2xl border border-blue-100 bg-white p-4 shadow-sm md:mb-8">
+      <div className="mb-6 rounded-2xl border border-blue-100 bg-white p-4 shadow-sm md:mb-8 max-w-7xl  mx-auto">
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1.2fr)_repeat(4,minmax(0,0.8fr))]">
           <div className="relative">
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
@@ -319,7 +324,7 @@ const AllCustomer = () => {
       )}
 
       {isLoading ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 max-w-7xl mx-auto">
           {Array.from({ length: 4 }).map((_, index) => (
             <div
               key={index}
@@ -328,7 +333,7 @@ const AllCustomer = () => {
           ))}
         </div>
       ) : customers.length > 0 ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 max-w-7xl mx-auto">
           {customers.map((customer) => (
             <CustomerCard key={customer.id} customer={customer} />
           ))}
@@ -361,7 +366,7 @@ const AllCustomer = () => {
       )}
 
       {pagination.totalPages > 0 && (
-        <div className="mt-6 flex items-center justify-between rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm shadow-sm">
+        <div className="mt-6 flex items-center justify-between rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm shadow-sm max-w-7xl mx-auto">
           <p className="text-gray-500">
             Page {pagination.page} of {pagination.totalPages}
           </p>

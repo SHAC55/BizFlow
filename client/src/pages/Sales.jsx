@@ -17,6 +17,7 @@ import {
   Users,
 } from "lucide-react";
 import { useSales } from "../hooks/useSales";
+import PageHeader from "../components/PageHeader";
 
 const formatCurrency = (value) =>
   `₹${Number(value || 0).toLocaleString("en-IN", {
@@ -60,13 +61,7 @@ const Sales = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const {
-    sales,
-    pagination,
-    summary,
-    isLoading,
-    error,
-  } = useSales({
+  const { sales, pagination, summary, isLoading, error } = useSales({
     page: currentPage,
     limit: 10,
     search: searchTerm,
@@ -98,28 +93,23 @@ const Sales = () => {
   );
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/20 p-4 md:ml-72 md:p-6">
+    <div className="min-h-screen w-full bg-gradient-to-br from-blue-100 to-indigo-50 p-4 md:ml-72 md:p-6 md:mt-0 mt-12">
+      {/* Header */}
+      <PageHeader
+        title="Sales"
+        subtitle="Manage your sales and transactions"
+        icon={TrendingUp}
+        isRefreshing={isLoading}
+      />
       <div className="mx-auto max-w-7xl">
         <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-blue-600" />
-              <h1 className="text-2xl font-bold text-slate-800">
-                Sales Overview
-              </h1>
-            </div>
-            <p className="mt-2 text-sm text-slate-500">
-              Track recorded sales, payments, and pending dues across customers.
-            </p>
-          </div>
-
-          <button
+          {/* <button
             onClick={() => navigate("/add-transaction")}
-            className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+            className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-800"
           >
             <Plus className="h-4 w-4" />
             Record sale
-          </button>
+          </button> */}
         </div>
 
         <div className="mb-6 grid gap-4 md:grid-cols-3">
@@ -246,7 +236,9 @@ const Sales = () => {
                             </p>
                             <p className="mt-1 text-xs text-slate-500">
                               {sale.customer.mobile}
-                              {sale.customer.email ? ` · ${sale.customer.email}` : ""}
+                              {sale.customer.email
+                                ? ` · ${sale.customer.email}`
+                                : ""}
                             </p>
                           </td>
                           <td className="px-5 py-4">
@@ -315,7 +307,9 @@ const Sales = () => {
 
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setCurrentPage((page) => Math.max(page - 1, 1))}
+                    onClick={() =>
+                      setCurrentPage((page) => Math.max(page - 1, 1))
+                    }
                     disabled={pagination.page <= 1}
                     className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-600 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                   >

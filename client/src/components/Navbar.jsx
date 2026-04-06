@@ -17,15 +17,14 @@ import { NavLink, useNavigate } from "react-router-dom";
 
 const navItems = [
   { name: "Dashboard", icon: LayoutDashboard, to: "/dashboard" },
-  { name: "Sales",     icon: TrendingUp,      to: "/sales"     },
-  { name: "Inventory", icon: Boxes,           to: "/inventory" },
-  { name: "Payments",  icon: CreditCard,      to: "/payments"  },
-  { name: "Customers", icon: Users,           to: "/customers" },
+  { name: "Sales", icon: TrendingUp, to: "/sales" },
+  { name: "Inventory", icon: Boxes, to: "/inventory" },
+  { name: "Payments", icon: CreditCard, to: "/payments" },
+  { name: "Customers", icon: Users, to: "/customers" },
 ];
 
 /* ── Avatar initials helper ── */
-const getInitials = (name = "") =>
-  name.slice(0, 2).toUpperCase() || "U";
+const getInitials = (name = "") => name.slice(0, 2).toUpperCase() || "U";
 
 /* ── Single nav link ── */
 const NavItem = ({ item, onClick, onPrefetch }) => {
@@ -47,15 +46,15 @@ const NavItem = ({ item, onClick, onPrefetch }) => {
     >
       {({ isActive }) => (
         <>
-          <span className={`flex-shrink-0 transition-transform duration-200 ${!isActive ? "group-hover:scale-110" : ""}`}>
+          <span
+            className={`flex-shrink-0 transition-transform duration-200 ${!isActive ? "group-hover:scale-110" : ""}`}
+          >
             <Icon size={18} strokeWidth={isActive ? 2.2 : 1.8} />
           </span>
           <span className="text-[13.5px] font-semibold flex-1 tracking-tight">
             {item.name}
           </span>
-          {isActive && (
-            <ChevronRight size={14} className="opacity-60" />
-          )}
+          {isActive && <ChevronRight size={14} className="opacity-60" />}
         </>
       )}
     </NavLink>
@@ -89,7 +88,10 @@ const Navbar = () => {
     }
     return () => {
       document.body.style.overflow = "unset";
-      if (main) { main.style.filter = ""; main.style.pointerEvents = ""; }
+      if (main) {
+        main.style.filter = "";
+        main.style.pointerEvents = "";
+      }
     };
   }, [isMobileMenuOpen]);
 
@@ -104,12 +106,13 @@ const Navbar = () => {
   /* ── Shared sidebar content ── */
   const SidebarContent = ({ onClose }) => (
     <div className="flex flex-col h-full">
-
       {/* Logo */}
       <div className="px-6 pt-7 pb-6 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center shadow-md">
-            <span className="text-white text-xs font-black tracking-tight">Bz</span>
+            <span className="text-white text-xs font-black tracking-tight">
+              Bz
+            </span>
           </div>
           <span className="text-[22px] font-extrabold tracking-tight text-gray-900">
             Bize<span className="text-blue-600">zy</span>
@@ -146,18 +149,24 @@ const Navbar = () => {
       <div className="mx-5 my-3 h-px bg-gray-100" />
 
       {/* User card */}
-      <div className="px-3 pb-5">
+      <button onClick={() => navigate("/profile")} className=" w-full px-3 pb-5">
         <div className="flex items-center gap-3 bg-[#f5f7ff] border border-[#e8edf7] rounded-xl px-3.5 py-3">
           {/* Avatar */}
-          <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center
-                          text-sm font-bold shadow-sm flex-shrink-0">
-            {getInitials(user?.username)}
+          <div
+            className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center
+                          text-sm font-bold shadow-sm flex-shrink-0"
+          >
+            {getInitials(user?.name)}
           </div>
 
           {/* Info */}
           <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-bold text-gray-800 truncate">{user?.username || "User"}</p>
-            <p className="text-[11px] text-gray-400 truncate">{user?.email || ""}</p>
+            <p className="text-[13px] font-bold text-gray-800 truncate">
+              {user?.name || "-"}
+            </p>
+            <p className="text-[11px] text-gray-400 truncate">
+              {user?.email || ""}
+            </p>
           </div>
 
           {/* Logout */}
@@ -169,7 +178,7 @@ const Navbar = () => {
             <LogOut size={16} />
           </button>
         </div>
-      </div>
+      </button>
     </div>
   );
 
@@ -181,9 +190,11 @@ const Navbar = () => {
       </aside>
 
       {/* ══ Mobile Top Bar ══ */}
-      <header className="md:hidden fixed top-0 left-0 right-0 bg-white border-b border-[#e8edf7] z-50
+      <header
+        className="md:hidden fixed top-0 left-0 right-0 bg-white border-b border-[#e8edf7] z-50
                           px-4 h-14 flex items-center justify-between
-                          shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                          shadow-[0_1px_3px_rgba(0,0,0,0.06)]"
+      >
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center shadow">
             <span className="text-white text-[10px] font-black">Bz</span>

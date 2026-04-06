@@ -40,9 +40,7 @@ const Profile = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-800">User Profile</h1>
-              <p className="text-gray-500 mt-1">
-             {user.usernname || "User"}!
-              </p>
+              <p className="text-gray-500 mt-1">{user.usernname || "User"}!</p>
             </div>
             <button
               onClick={logout}
@@ -56,7 +54,6 @@ const Profile = () => {
               )}
               <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
             </button>
-            
           </div>
 
           {/* User Info Card */}

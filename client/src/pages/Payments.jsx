@@ -297,7 +297,7 @@ const Payments = () => {
   ];
 
   return (
-    <div className="min-h-screen w-full bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.18),_transparent_28%),linear-gradient(135deg,_#f8fbff_0%,_#eef5ff_48%,_#f9fafb_100%)] p-4 md:ml-72 md:p-6">
+    <div className="min-h-screen w-full bg-gradient-to-br from-blue-100 to-indigo-50 p-4 md:ml-72 md:p-6">
       <div className="mx-auto max-w-7xl">
         <div className="mb-6 rounded-[32px] border border-sky-100 bg-white/90 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.06)] backdrop-blur">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">

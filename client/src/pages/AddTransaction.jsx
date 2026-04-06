@@ -10,6 +10,8 @@ import {
   ShoppingCart,
   Trash2,
   User,
+  Search,
+  X,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCustomers } from "../hooks/useCustomers";
@@ -25,7 +27,8 @@ const AddTransaction = () => {
   const navigate = useNavigate();
   const [customerSearch, setCustomerSearch] = useState("");
   const [isTotalEdited, setIsTotalEdited] = useState(false);
-  const [finalAmountInput, setFinalAmountInput] = useState("0");
+  const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
+
   const { createSale, isLoading: isCreatingSale } = useCreateSale();
   const { products = [], isLoading: productsLoading } = useProducts({
     page: 1,
@@ -65,22 +68,12 @@ const AddTransaction = () => {
     name: "items",
   });
 
-  const totalAmountField = register("totalAmount", {
-    required: "Final amount is required",
-    valueAsNumber: true,
-    min: {
-      value: 0.01,
-      message: "Final amount must be greater than 0",
-    },
-    validate: (value) =>
-      value <= subtotalAmount || "Final amount cannot exceed subtotal",
-  });
-
   const watchedItems = watch("items");
   const totalAmount = Number(watch("totalAmount") || 0);
   const paidAmount = Number(watch("paidAmount") || 0);
   const selectedCustomerId = watch("customerId");
 
+  // Auto-calculate subtotal based on items
   const subtotalAmount = useMemo(
     () =>
       watchedItems.reduce((sum, item) => {
@@ -91,9 +84,9 @@ const AddTransaction = () => {
     [watchedItems],
   );
 
+  // Auto-update total amount when subtotal changes (if not manually edited)
   useEffect(() => {
     if (!isTotalEdited) {
-      setFinalAmountInput(subtotalAmount ? String(subtotalAmount) : "0");
       setValue("totalAmount", subtotalAmount, {
         shouldDirty: false,
         shouldValidate: true,
@@ -114,6 +107,31 @@ const AddTransaction = () => {
     setValue(`items.${index}.unitPrice`, product?.price ?? 0, {
       shouldValidate: true,
     });
+    // Reset manual edit flag when product changes (total amount will auto-update)
+    setIsTotalEdited(false);
+  };
+
+  const handleQuantityChange = (index, value) => {
+    setValue(`items.${index}.quantity`, value, { shouldValidate: true });
+    // Reset manual edit flag when quantity changes
+    setIsTotalEdited(false);
+  };
+
+  const handleUnitPriceChange = (index, value) => {
+    setValue(`items.${index}.unitPrice`, value, { shouldValidate: true });
+    // Reset manual edit flag when price changes
+    setIsTotalEdited(false);
+  };
+
+  const handleCustomerSelect = (customerId) => {
+    setValue("customerId", customerId, { shouldValidate: true });
+    setCustomerSearch("");
+    setShowCustomerDropdown(false);
+  };
+
+  const clearCustomerSearch = () => {
+    setCustomerSearch("");
+    setShowCustomerDropdown(false);
   };
 
   const onSubmit = async (formData) => {
@@ -144,9 +162,20 @@ const AddTransaction = () => {
     });
     setCustomerSearch("");
     setIsTotalEdited(false);
-    setFinalAmountInput("0");
+    setShowCustomerDropdown(false);
     navigate(`/sales/${response.sale.id}`);
   };
+
+  // Filter customers based on search input
+  const filteredCustomers = useMemo(() => {
+    if (!customerSearch.trim()) return customers;
+    const searchTerm = customerSearch.toLowerCase().trim();
+    return customers.filter(
+      (customer) =>
+        customer.name?.toLowerCase().includes(searchTerm) ||
+        customer.mobile?.includes(searchTerm),
+    );
+  }, [customers, customerSearch]);
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/20 px-4 py-8">
@@ -177,7 +206,6 @@ const AddTransaction = () => {
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-              <input type="hidden" {...totalAmountField} />
               <section className="space-y-4">
                 <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
                   <User className="h-4 w-4 text-blue-600" />
@@ -185,41 +213,94 @@ const AddTransaction = () => {
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-                  <div>
+                  {/* Search Customer Field with Autocomplete */}
+                  <div className="relative">
                     <label className="mb-2 block text-xs font-semibold uppercase tracking-widest text-slate-400">
                       Search Customer
                     </label>
-                    <input
-                      type="text"
-                      value={customerSearch}
-                      onChange={(event) => setCustomerSearch(event.target.value)}
-                      placeholder="Search by name or mobile"
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition-colors focus:border-blue-400 focus:bg-white"
-                    />
+                    <div className="relative">
+                      <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="text"
+                        value={customerSearch}
+                        onChange={(event) => {
+                          setCustomerSearch(event.target.value);
+                          setShowCustomerDropdown(true);
+                        }}
+                        onFocus={() => setShowCustomerDropdown(true)}
+                        placeholder="Search by name or mobile..."
+                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 pl-10 pr-10 py-3 text-sm text-slate-700 outline-none transition-colors focus:border-blue-400 focus:bg-white"
+                      />
+                      {customerSearch && (
+                        <button
+                          type="button"
+                          onClick={clearCustomerSearch}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Customer Dropdown */}
+                    {showCustomerDropdown && customerSearch && (
+                      <div className="absolute z-10 mt-1 w-full rounded-xl border border-slate-200 bg-white shadow-lg max-h-64 overflow-y-auto">
+                        {customersLoading ? (
+                          <div className="flex items-center justify-center p-4">
+                            <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+                          </div>
+                        ) : filteredCustomers.length > 0 ? (
+                          filteredCustomers.map((customer) => (
+                            <button
+                              key={customer.id}
+                              type="button"
+                              onClick={() => handleCustomerSelect(customer.id)}
+                              className="w-full px-4 py-3 text-left hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0"
+                            >
+                              <p className="font-medium text-slate-700">
+                                {customer.name}
+                              </p>
+                              <p className="text-xs text-slate-500">
+                                {customer.mobile}
+                              </p>
+                            </button>
+                          ))
+                        ) : (
+                          <div className="p-4 text-center text-sm text-slate-500">
+                            No customers found
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
+                  {/* Selected Customer Display */}
                   <div>
                     <label className="mb-2 block text-xs font-semibold uppercase tracking-widest text-slate-400">
-                      Select Customer
+                      Selected Customer
                     </label>
-                    <select
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 min-h-[50px]">
+                      {selectedCustomer ? (
+                        <div>
+                          <p className="text-sm font-semibold text-slate-700">
+                            {selectedCustomer.name}
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            {selectedCustomer.mobile}
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-slate-400">
+                          No customer selected
+                        </p>
+                      )}
+                    </div>
+                    <input
+                      type="hidden"
                       {...register("customerId", {
                         required: "Please select a customer",
                       })}
-                      disabled={customersLoading}
-                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition-colors focus:border-blue-400 disabled:cursor-not-allowed disabled:bg-slate-100"
-                    >
-                      <option value="">
-                        {customersLoading
-                          ? "Loading customers..."
-                          : "Choose a customer"}
-                      </option>
-                      {customers.map((customer) => (
-                        <option key={customer.id} value={customer.id}>
-                          {customer.name} · {customer.mobile}
-                        </option>
-                      ))}
-                    </select>
+                    />
                     {errors.customerId && (
                       <p className="mt-2 text-xs text-rose-500">
                         {errors.customerId.message}
@@ -254,9 +335,11 @@ const AddTransaction = () => {
                 <div className="space-y-4">
                   {fields.map((field, index) => {
                     const selectedProduct = products.find(
-                      (product) => product.id === watchedItems[index]?.productId,
+                      (product) =>
+                        product.id === watchedItems[index]?.productId,
                     );
                     const availableQuantity = selectedProduct?.quantity ?? 0;
+                    const currentQuantity = watchedItems[index]?.quantity || 1;
 
                     return (
                       <div
@@ -301,7 +384,8 @@ const AddTransaction = () => {
                               </option>
                               {products.map((product) => (
                                 <option key={product.id} value={product.id}>
-                                  {product.name} · {formatCurrency(product.price)}
+                                  {product.name} ·{" "}
+                                  {formatCurrency(product.price)}
                                 </option>
                               ))}
                             </select>
@@ -324,18 +408,13 @@ const AddTransaction = () => {
                             <input
                               type="number"
                               min="1"
-                              {...register(`items.${index}.quantity`, {
-                                required: "Quantity is required",
-                                valueAsNumber: true,
-                                min: {
-                                  value: 1,
-                                  message: "Quantity must be at least 1",
-                                },
-                                validate: (value) =>
-                                  !selectedProduct ||
-                                  value <= selectedProduct.quantity ||
-                                  "Quantity exceeds available stock",
-                              })}
+                              value={currentQuantity}
+                              onChange={(event) =>
+                                handleQuantityChange(
+                                  index,
+                                  Number(event.target.value),
+                                )
+                              }
                               className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition-colors focus:border-blue-400"
                             />
                             {errors.items?.[index]?.quantity && (
@@ -353,14 +432,13 @@ const AddTransaction = () => {
                               type="number"
                               min="0.01"
                               step="0.01"
-                              {...register(`items.${index}.unitPrice`, {
-                                required: "Unit price is required",
-                                valueAsNumber: true,
-                                min: {
-                                  value: 0.01,
-                                  message: "Unit price must be greater than 0",
-                                },
-                              })}
+                              value={watchedItems[index]?.unitPrice || 0}
+                              onChange={(event) =>
+                                handleUnitPriceChange(
+                                  index,
+                                  Number(event.target.value),
+                                )
+                              }
                               className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition-colors focus:border-blue-400"
                             />
                             {errors.items?.[index]?.unitPrice && (
@@ -368,6 +446,21 @@ const AddTransaction = () => {
                                 {errors.items[index].unitPrice.message}
                               </p>
                             )}
+                          </div>
+                        </div>
+
+                        {/* Auto-calculated line total */}
+                        <div className="mt-3 pt-3 border-t border-slate-200">
+                          <div className="flex justify-end">
+                            <p className="text-sm text-slate-600">
+                              Line total:{" "}
+                              <span className="font-semibold text-slate-800">
+                                {formatCurrency(
+                                  currentQuantity *
+                                    (watchedItems[index]?.unitPrice || 0),
+                                )}
+                              </span>
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -387,11 +480,10 @@ const AddTransaction = () => {
                       type="number"
                       min="0.01"
                       step="0.01"
-                      value={finalAmountInput}
+                      value={totalAmount}
                       onChange={(event) => {
                         const nextValue = event.target.value;
                         setIsTotalEdited(true);
-                        setFinalAmountInput(nextValue);
                         setValue(
                           "totalAmount",
                           nextValue === "" ? 0 : Number(nextValue),
@@ -417,7 +509,6 @@ const AddTransaction = () => {
                       type="button"
                       onClick={() => {
                         setIsTotalEdited(false);
-                        setFinalAmountInput(String(subtotalAmount));
                         setValue("totalAmount", subtotalAmount, {
                           shouldDirty: true,
                           shouldValidate: true,
@@ -440,16 +531,18 @@ const AddTransaction = () => {
                       type="number"
                       min="0"
                       step="0.01"
-                      {...register("paidAmount", {
-                        valueAsNumber: true,
-                        min: {
-                          value: 0,
-                          message: "Paid amount cannot be negative",
-                        },
-                        validate: (value) =>
-                          value <= totalAmount ||
-                          "Paid amount cannot exceed final amount",
-                      })}
+                      value={paidAmount}
+                      onChange={(event) =>
+                        setValue(
+                          "paidAmount",
+                          event.target.value === ""
+                            ? 0
+                            : Number(event.target.value),
+                          {
+                            shouldValidate: true,
+                          },
+                        )
+                      }
                       className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm text-slate-700 outline-none transition-colors focus:border-blue-400"
                     />
                   </div>
@@ -464,7 +557,7 @@ const AddTransaction = () => {
               <button
                 type="submit"
                 disabled={isSubmitting || isCreatingSale}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {(isSubmitting || isCreatingSale) && (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -518,7 +611,9 @@ const AddTransaction = () => {
                       Discount
                     </p>
                     <p className="mt-2 text-xl font-bold">
-                      {formatCurrency(Math.max(subtotalAmount - totalAmount, 0))}
+                      {formatCurrency(
+                        Math.max(subtotalAmount - totalAmount, 0),
+                      )}
                     </p>
                   </div>
                 </div>
