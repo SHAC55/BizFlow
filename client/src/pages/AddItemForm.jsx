@@ -90,6 +90,7 @@ const AddItemForm = () => {
       name: product.name,
       category: product.category,
       sku: product.sku || "",
+      costPrice: product.costPrice,
       price: product.price,
       quantity: product.quantity,
       minimumQuantity: product.minimumQuantity,
@@ -101,6 +102,7 @@ const AddItemForm = () => {
     const payload = {
       ...data,
       sku: data.sku ? data.sku : generateSKU(data.name),
+      costPrice: Number(data.costPrice),
       price: Number(data.price),
       quantity: Number(data.quantity),
       minimumQuantity: Number(data.minimumQuantity),
@@ -274,12 +276,44 @@ const AddItemForm = () => {
                 </p>
               </div> */}
 
-              {/* Price + Quantity Row */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Price */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Price <span className="text-rose-500">*</span>
+                    Cost Price <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <DollarSign className="h-4 w-4 text-slate-400" />
+                    </div>
+                    <input
+                      type="number"
+                      step="0.01"
+                      {...register("costPrice", {
+                        required: "Cost price is required",
+                        min: {
+                          value: 0,
+                          message: "Cost price cannot be negative",
+                        },
+                      })}
+                      className={`w-full pl-9 pr-3 py-2.5 bg-slate-50 border rounded-lg text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all appearance-none ${
+                        errors.costPrice
+                          ? "border-rose-300 focus:ring-rose-500/20 focus:border-rose-500"
+                          : "border-slate-200 focus:ring-slate-200 focus:border-slate-300"
+                      }`}
+                      placeholder="0.00"
+                    />
+                  </div>
+                  {errors.costPrice && (
+                    <p className="text-rose-500 text-xs mt-1.5 flex items-center gap-1">
+                      <span className="inline-block w-1 h-1 rounded-full bg-rose-500" />
+                      {errors.costPrice.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Selling Price <span className="text-rose-500">*</span>
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

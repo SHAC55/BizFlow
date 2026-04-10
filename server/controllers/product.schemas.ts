@@ -17,6 +17,7 @@ const booleanQuerySchema = z.preprocess((value) => {
 export const createProductSchema = z.object({
   name: z.string().trim().min(1).max(255),
   category: z.string().trim().min(1).max(100),
+  costPrice: z.number().nonnegative(),
   price: z.number().nonnegative(),
   quantity: z.number().int().nonnegative(),
   minimumQuantity: z.number().int().nonnegative(),
@@ -33,6 +34,7 @@ export const updateProductSchema = z
   .object({
     name: z.string().trim().min(1).max(255).optional(),
     category: z.string().trim().min(1).max(100).optional(),
+    costPrice: z.number().nonnegative().optional(),
     price: z.number().nonnegative().optional(),
     quantity: z.number().int().nonnegative().optional(),
     minimumQuantity: z.number().int().nonnegative().optional(),

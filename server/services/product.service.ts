@@ -9,6 +9,7 @@ export type CreateProductParams = {
   userId: number;
   name: string;
   category: string;
+  costPrice: number;
   price: number;
   quantity: number;
   minimumQuantity: number;
@@ -20,6 +21,7 @@ export type UpdateProductParams = {
   productId: string;
   name?: string;
   category?: string;
+  costPrice?: number;
   price?: number;
   quantity?: number;
   minimumQuantity?: number;
@@ -157,6 +159,7 @@ export const createProduct = async (data: CreateProductParams) => {
         businessId: business.id,
         name: data.name,
         category: data.category,
+        costPrice: data.costPrice,
         price: data.price,
         quantity: data.quantity,
         minimumQuantity: data.minimumQuantity,
@@ -242,6 +245,7 @@ export const getProducts = async (data: GetProductsParams) => {
     },
     select: {
       price: true,
+      costPrice: true,
       quantity: true,
       minimumQuantity: true,
     },
@@ -250,6 +254,9 @@ export const getProducts = async (data: GetProductsParams) => {
   const summary = inventoryItems.reduce(
     (accumulator, item) => {
       accumulator.totalValue += item.price * item.quantity;
+      accumulator.totalCostValue += item.costPrice * item.quantity;
+      accumulator.projectedProfit +=
+        (item.price - item.costPrice) * item.quantity;
 
       if (item.quantity === 0) {
         accumulator.outOfStockCount += 1;
@@ -261,6 +268,8 @@ export const getProducts = async (data: GetProductsParams) => {
     },
     {
       totalValue: 0,
+      totalCostValue: 0,
+      projectedProfit: 0,
       lowStockCount: 0,
       outOfStockCount: 0,
     },
@@ -287,9 +296,11 @@ export const getProducts = async (data: GetProductsParams) => {
       total,
       totalPages: Math.ceil(total / limit),
     },
-    summary: {
+      summary: {
       totalProducts: inventoryItems.length,
       totalValue: summary.totalValue,
+      totalCostValue: summary.totalCostValue,
+      projectedProfit: summary.projectedProfit,
       lowStockCount: summary.lowStockCount,
       outOfStockCount: summary.outOfStockCount,
       categories: categoryCounts.map((item) => ({
@@ -338,6 +349,7 @@ export const updateProduct = async (data: UpdateProductParams) => {
       data: {
         ...(data.name !== undefined && { name: data.name }),
         ...(data.category !== undefined && { category: data.category }),
+        ...(data.costPrice !== undefined && { costPrice: data.costPrice }),
         ...(data.price !== undefined && { price: data.price }),
         ...(data.quantity !== undefined && { quantity: data.quantity }),
         ...(data.minimumQuantity !== undefined && {

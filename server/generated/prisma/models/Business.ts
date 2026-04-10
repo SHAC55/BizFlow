@@ -38,6 +38,8 @@ export type BusinessSumAggregateOutputType = {
 export type BusinessMinAggregateOutputType = {
   id: string | null
   name: string | null
+  gstNumber: string | null
+  address: string | null
   ownerId: number | null
   createdAt: Date | null
 }
@@ -45,6 +47,8 @@ export type BusinessMinAggregateOutputType = {
 export type BusinessMaxAggregateOutputType = {
   id: string | null
   name: string | null
+  gstNumber: string | null
+  address: string | null
   ownerId: number | null
   createdAt: Date | null
 }
@@ -52,6 +56,8 @@ export type BusinessMaxAggregateOutputType = {
 export type BusinessCountAggregateOutputType = {
   id: number
   name: number
+  gstNumber: number
+  address: number
   ownerId: number
   createdAt: number
   _all: number
@@ -69,6 +75,8 @@ export type BusinessSumAggregateInputType = {
 export type BusinessMinAggregateInputType = {
   id?: true
   name?: true
+  gstNumber?: true
+  address?: true
   ownerId?: true
   createdAt?: true
 }
@@ -76,6 +84,8 @@ export type BusinessMinAggregateInputType = {
 export type BusinessMaxAggregateInputType = {
   id?: true
   name?: true
+  gstNumber?: true
+  address?: true
   ownerId?: true
   createdAt?: true
 }
@@ -83,6 +93,8 @@ export type BusinessMaxAggregateInputType = {
 export type BusinessCountAggregateInputType = {
   id?: true
   name?: true
+  gstNumber?: true
+  address?: true
   ownerId?: true
   createdAt?: true
   _all?: true
@@ -177,6 +189,8 @@ export type BusinessGroupByArgs<ExtArgs extends runtime.Types.Extensions.Interna
 export type BusinessGroupByOutputType = {
   id: string
   name: string
+  gstNumber: string | null
+  address: string | null
   ownerId: number
   createdAt: Date
   _count: BusinessCountAggregateOutputType | null
@@ -207,6 +221,8 @@ export type BusinessWhereInput = {
   NOT?: Prisma.BusinessWhereInput | Prisma.BusinessWhereInput[]
   id?: Prisma.StringFilter<"Business"> | string
   name?: Prisma.StringFilter<"Business"> | string
+  gstNumber?: Prisma.StringNullableFilter<"Business"> | string | null
+  address?: Prisma.StringNullableFilter<"Business"> | string | null
   ownerId?: Prisma.IntFilter<"Business"> | number
   createdAt?: Prisma.DateTimeFilter<"Business"> | Date | string
   owner?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -218,6 +234,8 @@ export type BusinessWhereInput = {
 export type BusinessOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  gstNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  address?: Prisma.SortOrderInput | Prisma.SortOrder
   ownerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   owner?: Prisma.UserOrderByWithRelationInput
@@ -233,6 +251,8 @@ export type BusinessWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.BusinessWhereInput[]
   NOT?: Prisma.BusinessWhereInput | Prisma.BusinessWhereInput[]
   name?: Prisma.StringFilter<"Business"> | string
+  gstNumber?: Prisma.StringNullableFilter<"Business"> | string | null
+  address?: Prisma.StringNullableFilter<"Business"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Business"> | Date | string
   owner?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   customers?: Prisma.CustomerListRelationFilter
@@ -243,6 +263,8 @@ export type BusinessWhereUniqueInput = Prisma.AtLeast<{
 export type BusinessOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  gstNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  address?: Prisma.SortOrderInput | Prisma.SortOrder
   ownerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.BusinessCountOrderByAggregateInput
@@ -258,6 +280,8 @@ export type BusinessScalarWhereWithAggregatesInput = {
   NOT?: Prisma.BusinessScalarWhereWithAggregatesInput | Prisma.BusinessScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Business"> | string
   name?: Prisma.StringWithAggregatesFilter<"Business"> | string
+  gstNumber?: Prisma.StringNullableWithAggregatesFilter<"Business"> | string | null
+  address?: Prisma.StringNullableWithAggregatesFilter<"Business"> | string | null
   ownerId?: Prisma.IntWithAggregatesFilter<"Business"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Business"> | Date | string
 }
@@ -265,6 +289,8 @@ export type BusinessScalarWhereWithAggregatesInput = {
 export type BusinessCreateInput = {
   id?: string
   name: string
+  gstNumber?: string | null
+  address?: string | null
   createdAt?: Date | string
   owner: Prisma.UserCreateNestedOneWithoutBusinessInput
   customers?: Prisma.CustomerCreateNestedManyWithoutBusinessInput
@@ -275,6 +301,8 @@ export type BusinessCreateInput = {
 export type BusinessUncheckedCreateInput = {
   id?: string
   name: string
+  gstNumber?: string | null
+  address?: string | null
   ownerId: number
   createdAt?: Date | string
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBusinessInput
@@ -285,6 +313,8 @@ export type BusinessUncheckedCreateInput = {
 export type BusinessUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  gstNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   owner?: Prisma.UserUpdateOneRequiredWithoutBusinessNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutBusinessNestedInput
@@ -295,6 +325,8 @@ export type BusinessUpdateInput = {
 export type BusinessUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  gstNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBusinessNestedInput
@@ -305,6 +337,8 @@ export type BusinessUncheckedUpdateInput = {
 export type BusinessCreateManyInput = {
   id?: string
   name: string
+  gstNumber?: string | null
+  address?: string | null
   ownerId: number
   createdAt?: Date | string
 }
@@ -312,12 +346,16 @@ export type BusinessCreateManyInput = {
 export type BusinessUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  gstNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type BusinessUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  gstNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -330,6 +368,8 @@ export type BusinessNullableScalarRelationFilter = {
 export type BusinessCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  gstNumber?: Prisma.SortOrder
+  address?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -341,6 +381,8 @@ export type BusinessAvgOrderByAggregateInput = {
 export type BusinessMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  gstNumber?: Prisma.SortOrder
+  address?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -348,6 +390,8 @@ export type BusinessMaxOrderByAggregateInput = {
 export type BusinessMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  gstNumber?: Prisma.SortOrder
+  address?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -438,6 +482,8 @@ export type BusinessUpdateOneRequiredWithoutProductsNestedInput = {
 export type BusinessCreateWithoutOwnerInput = {
   id?: string
   name: string
+  gstNumber?: string | null
+  address?: string | null
   createdAt?: Date | string
   customers?: Prisma.CustomerCreateNestedManyWithoutBusinessInput
   products?: Prisma.ProductCreateNestedManyWithoutBusinessInput
@@ -447,6 +493,8 @@ export type BusinessCreateWithoutOwnerInput = {
 export type BusinessUncheckedCreateWithoutOwnerInput = {
   id?: string
   name: string
+  gstNumber?: string | null
+  address?: string | null
   createdAt?: Date | string
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBusinessInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutBusinessInput
@@ -472,6 +520,8 @@ export type BusinessUpdateToOneWithWhereWithoutOwnerInput = {
 export type BusinessUpdateWithoutOwnerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  gstNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   customers?: Prisma.CustomerUpdateManyWithoutBusinessNestedInput
   products?: Prisma.ProductUpdateManyWithoutBusinessNestedInput
@@ -481,6 +531,8 @@ export type BusinessUpdateWithoutOwnerInput = {
 export type BusinessUncheckedUpdateWithoutOwnerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  gstNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBusinessNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutBusinessNestedInput
@@ -490,6 +542,8 @@ export type BusinessUncheckedUpdateWithoutOwnerInput = {
 export type BusinessCreateWithoutCustomersInput = {
   id?: string
   name: string
+  gstNumber?: string | null
+  address?: string | null
   createdAt?: Date | string
   owner: Prisma.UserCreateNestedOneWithoutBusinessInput
   products?: Prisma.ProductCreateNestedManyWithoutBusinessInput
@@ -499,6 +553,8 @@ export type BusinessCreateWithoutCustomersInput = {
 export type BusinessUncheckedCreateWithoutCustomersInput = {
   id?: string
   name: string
+  gstNumber?: string | null
+  address?: string | null
   ownerId: number
   createdAt?: Date | string
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutBusinessInput
@@ -524,6 +580,8 @@ export type BusinessUpdateToOneWithWhereWithoutCustomersInput = {
 export type BusinessUpdateWithoutCustomersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  gstNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   owner?: Prisma.UserUpdateOneRequiredWithoutBusinessNestedInput
   products?: Prisma.ProductUpdateManyWithoutBusinessNestedInput
@@ -533,6 +591,8 @@ export type BusinessUpdateWithoutCustomersInput = {
 export type BusinessUncheckedUpdateWithoutCustomersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  gstNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   products?: Prisma.ProductUncheckedUpdateManyWithoutBusinessNestedInput
@@ -542,6 +602,8 @@ export type BusinessUncheckedUpdateWithoutCustomersInput = {
 export type BusinessCreateWithoutSalesInput = {
   id?: string
   name: string
+  gstNumber?: string | null
+  address?: string | null
   createdAt?: Date | string
   owner: Prisma.UserCreateNestedOneWithoutBusinessInput
   customers?: Prisma.CustomerCreateNestedManyWithoutBusinessInput
@@ -551,6 +613,8 @@ export type BusinessCreateWithoutSalesInput = {
 export type BusinessUncheckedCreateWithoutSalesInput = {
   id?: string
   name: string
+  gstNumber?: string | null
+  address?: string | null
   ownerId: number
   createdAt?: Date | string
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBusinessInput
@@ -576,6 +640,8 @@ export type BusinessUpdateToOneWithWhereWithoutSalesInput = {
 export type BusinessUpdateWithoutSalesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  gstNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   owner?: Prisma.UserUpdateOneRequiredWithoutBusinessNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutBusinessNestedInput
@@ -585,6 +651,8 @@ export type BusinessUpdateWithoutSalesInput = {
 export type BusinessUncheckedUpdateWithoutSalesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  gstNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBusinessNestedInput
@@ -594,6 +662,8 @@ export type BusinessUncheckedUpdateWithoutSalesInput = {
 export type BusinessCreateWithoutProductsInput = {
   id?: string
   name: string
+  gstNumber?: string | null
+  address?: string | null
   createdAt?: Date | string
   owner: Prisma.UserCreateNestedOneWithoutBusinessInput
   customers?: Prisma.CustomerCreateNestedManyWithoutBusinessInput
@@ -603,6 +673,8 @@ export type BusinessCreateWithoutProductsInput = {
 export type BusinessUncheckedCreateWithoutProductsInput = {
   id?: string
   name: string
+  gstNumber?: string | null
+  address?: string | null
   ownerId: number
   createdAt?: Date | string
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBusinessInput
@@ -628,6 +700,8 @@ export type BusinessUpdateToOneWithWhereWithoutProductsInput = {
 export type BusinessUpdateWithoutProductsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  gstNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   owner?: Prisma.UserUpdateOneRequiredWithoutBusinessNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutBusinessNestedInput
@@ -637,6 +711,8 @@ export type BusinessUpdateWithoutProductsInput = {
 export type BusinessUncheckedUpdateWithoutProductsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  gstNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBusinessNestedInput
@@ -695,6 +771,8 @@ export type BusinessCountOutputTypeCountSalesArgs<ExtArgs extends runtime.Types.
 export type BusinessSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  gstNumber?: boolean
+  address?: boolean
   ownerId?: boolean
   createdAt?: boolean
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -707,6 +785,8 @@ export type BusinessSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
 export type BusinessSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  gstNumber?: boolean
+  address?: boolean
   ownerId?: boolean
   createdAt?: boolean
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -715,6 +795,8 @@ export type BusinessSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
 export type BusinessSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  gstNumber?: boolean
+  address?: boolean
   ownerId?: boolean
   createdAt?: boolean
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -723,11 +805,13 @@ export type BusinessSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
 export type BusinessSelectScalar = {
   id?: boolean
   name?: boolean
+  gstNumber?: boolean
+  address?: boolean
   ownerId?: boolean
   createdAt?: boolean
 }
 
-export type BusinessOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "ownerId" | "createdAt", ExtArgs["result"]["business"]>
+export type BusinessOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "gstNumber" | "address" | "ownerId" | "createdAt", ExtArgs["result"]["business"]>
 export type BusinessInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   customers?: boolean | Prisma.Business$customersArgs<ExtArgs>
@@ -753,6 +837,8 @@ export type $BusinessPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     name: string
+    gstNumber: string | null
+    address: string | null
     ownerId: number
     createdAt: Date
   }, ExtArgs["result"]["business"]>
@@ -1184,6 +1270,8 @@ export interface Prisma__BusinessClient<T, Null = never, ExtArgs extends runtime
 export interface BusinessFieldRefs {
   readonly id: Prisma.FieldRef<"Business", 'String'>
   readonly name: Prisma.FieldRef<"Business", 'String'>
+  readonly gstNumber: Prisma.FieldRef<"Business", 'String'>
+  readonly address: Prisma.FieldRef<"Business", 'String'>
   readonly ownerId: Prisma.FieldRef<"Business", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Business", 'DateTime'>
 }

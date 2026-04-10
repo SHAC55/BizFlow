@@ -19,3 +19,8 @@ export const createSalePaymentAPI = async (saleId, data) => {
   const response = await API.post(`/sales/${saleId}/payments`, data);
   return response.data;
 };
+
+export const getSaleReminderAPI = async (saleId) => {
+  const response = await API.get(`/sales/${saleId}/reminder`);
+  return response.data;
+};

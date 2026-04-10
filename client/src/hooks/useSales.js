@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import {
   createSaleAPI,
   createSalePaymentAPI,
+  getSaleReminderAPI,
   getSaleAPI,
   getSalesAPI,
 } from "../api/sale.api";
@@ -91,6 +92,19 @@ export const useCreateSale = () => {
 
   return {
     createSale: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error:
+      mutation.error?.response?.data?.message || mutation.error?.message || null,
+  };
+};
+
+export const useSaleReminder = () => {
+  const mutation = useMutation({
+    mutationFn: getSaleReminderAPI,
+  });
+
+  return {
+    getReminder: mutation.mutateAsync,
     isLoading: mutation.isPending,
     error:
       mutation.error?.response?.data?.message || mutation.error?.message || null,

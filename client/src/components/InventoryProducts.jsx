@@ -36,6 +36,8 @@ const InventoryProducts = () => {
 
   const totalProducts = summary.totalProducts;
   const totalValue = summary.totalValue;
+  const totalCostValue = summary.totalCostValue;
+  const projectedProfit = summary.projectedProfit;
   const lowStockCount = summary.lowStockCount;
   const outOfStockCount = summary.outOfStockCount;
   const categories = summary.categories || [];
@@ -100,7 +102,7 @@ const InventoryProducts = () => {
         onClose={() => setHistoryProduct(null)}
       />
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <div className="grid grid-cols-2 gap-3 mb-6 xl:grid-cols-5">
           <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
@@ -125,6 +127,38 @@ const InventoryProducts = () => {
               </div>
               <div className="bg-green-50 rounded-lg p-2">
                 <TrendingUp className="w-4 h-4 text-green-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-gray-500">Cost Value</p>
+                <p className="text-xl font-bold text-gray-800">
+                  ₹{totalCostValue.toLocaleString()}
+                </p>
+              </div>
+              <div className="bg-slate-100 rounded-lg p-2">
+                <ShieldPlus className="w-4 h-4 text-slate-700" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-gray-500">Projected P/L</p>
+                <p
+                  className={`text-xl font-bold ${
+                    projectedProfit >= 0 ? "text-emerald-600" : "text-rose-600"
+                  }`}
+                >
+                  ₹{projectedProfit.toLocaleString()}
+                </p>
+              </div>
+              <div className="bg-emerald-50 rounded-lg p-2">
+                <TrendingUp className="w-4 h-4 text-emerald-600" />
               </div>
             </div>
           </div>
@@ -225,7 +259,13 @@ const InventoryProducts = () => {
                     Category
                   </th>
                   <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Price
+                    Cost
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Selling
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Margin
                   </th>
                   <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Quantity
@@ -242,7 +282,7 @@ const InventoryProducts = () => {
                 {isLoading ? (
                   <tr>
                     <td
-                      colSpan="7"
+                      colSpan="9"
                       className="px-4 py-10 text-center text-sm text-gray-500"
                     >
                       Loading inventory...
@@ -254,6 +294,7 @@ const InventoryProducts = () => {
                       product.quantity,
                       product.minimumQuantity,
                     );
+                    const margin = product.price - product.costPrice;
 
                     return (
                       <tr
@@ -287,7 +328,23 @@ const InventoryProducts = () => {
 
                         <td className="px-4 py-3 whitespace-nowrap text-right">
                           <p className="text-sm font-semibold text-gray-800">
+                            ₹{product.costPrice}
+                          </p>
+                        </td>
+
+                        <td className="px-4 py-3 whitespace-nowrap text-right">
+                          <p className="text-sm font-semibold text-gray-800">
                             ₹{product.price}
+                          </p>
+                        </td>
+
+                        <td className="px-4 py-3 whitespace-nowrap text-right">
+                          <p
+                            className={`text-sm font-semibold ${
+                              margin >= 0 ? "text-emerald-600" : "text-rose-600"
+                            }`}
+                          >
+                            ₹{margin}
                           </p>
                         </td>
 

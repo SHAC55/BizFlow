@@ -28,6 +28,7 @@ const AddTransaction = () => {
   const [customerSearch, setCustomerSearch] = useState("");
   const [isTotalEdited, setIsTotalEdited] = useState(false);
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
+  const [reminderEnabled, setReminderEnabled] = useState(true);
 
   const { createSale, isLoading: isCreatingSale } = useCreateSale();
   const { products = [], isLoading: productsLoading } = useProducts({
@@ -60,6 +61,7 @@ const AddTransaction = () => {
       ],
       totalAmount: 0,
       paidAmount: 0,
+      reminderDate: "",
     },
   });
 
@@ -71,6 +73,7 @@ const AddTransaction = () => {
   const watchedItems = watch("items");
   const totalAmount = Number(watch("totalAmount") || 0);
   const paidAmount = Number(watch("paidAmount") || 0);
+  const reminderDate = watch("reminderDate");
   const selectedCustomerId = watch("customerId");
 
   // Auto-calculate subtotal based on items
@@ -100,6 +103,32 @@ const AddTransaction = () => {
   const dueAmount = Math.max(totalAmount - paidAmount, 0);
   const saleStatus =
     dueAmount <= 0 ? "paid" : paidAmount > 0 ? "partial" : "pending";
+  const estimatedCostAmount = useMemo(
+    () =>
+      watchedItems.reduce((sum, item) => {
+        const quantity = Number(item.quantity) || 0;
+        const product = products.find((entry) => entry.id === item.productId);
+        return sum + quantity * Number(product?.costPrice || 0);
+      }, 0),
+    [products, watchedItems],
+  );
+  const estimatedProfit = totalAmount - estimatedCostAmount;
+
+  useEffect(() => {
+    if (dueAmount <= 0) {
+      setReminderEnabled(false);
+      setValue("reminderDate", "", { shouldDirty: true });
+      return;
+    }
+
+    if (!reminderDate) {
+      const nextReminderDate = new Date();
+      nextReminderDate.setDate(nextReminderDate.getDate() + 7);
+      setValue("reminderDate", nextReminderDate.toISOString().slice(0, 10), {
+        shouldDirty: false,
+      });
+    }
+  }, [dueAmount, reminderDate, setValue]);
 
   const handleProductChange = (index, productId) => {
     const product = products.find((item) => item.id === productId);
@@ -144,6 +173,10 @@ const AddTransaction = () => {
       })),
       totalAmount: Number(formData.totalAmount),
       paidAmount: Number(formData.paidAmount || 0),
+      reminderDate:
+        dueAmount > 0 && reminderEnabled && formData.reminderDate
+          ? formData.reminderDate
+          : undefined,
     };
 
     const response = await createSale(payload);
@@ -159,10 +192,12 @@ const AddTransaction = () => {
       ],
       totalAmount: 0,
       paidAmount: 0,
+      reminderDate: "",
     });
     setCustomerSearch("");
     setIsTotalEdited(false);
     setShowCustomerDropdown(false);
+    setReminderEnabled(true);
     navigate(`/sales/${response.sale.id}`);
   };
 
@@ -554,6 +589,56 @@ const AddTransaction = () => {
                 </div>
               </section>
 
+              <section className="rounded-3xl border border-slate-100 bg-slate-50 p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-700">
+                      Due reminder
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      Schedule a WhatsApp-ready reminder when some amount is still due.
+                    </p>
+                  </div>
+                  <label className="inline-flex items-center gap-2 text-sm font-medium text-slate-700">
+                    <input
+                      type="checkbox"
+                      checked={dueAmount > 0 && reminderEnabled}
+                      onChange={(event) => setReminderEnabled(event.target.checked)}
+                      disabled={dueAmount <= 0}
+                      className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    Schedule
+                  </label>
+                </div>
+
+                <div className="mt-4 grid gap-4 md:grid-cols-2">
+                  <div>
+                    <label className="mb-2 block text-xs font-semibold uppercase tracking-widest text-slate-400">
+                      Reminder Date
+                    </label>
+                    <input
+                      type="date"
+                      {...register("reminderDate")}
+                      disabled={!reminderEnabled || dueAmount <= 0}
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition-colors focus:border-blue-400 disabled:cursor-not-allowed disabled:bg-slate-100"
+                    />
+                  </div>
+
+                  <div className="rounded-2xl bg-white p-4">
+                    <p className="text-xs uppercase tracking-widest text-slate-400">
+                      Reminder Status
+                    </p>
+                    <p className="mt-2 text-sm font-semibold text-slate-700">
+                      {dueAmount <= 0
+                        ? "No reminder needed for fully paid sale"
+                        : reminderEnabled
+                          ? "WhatsApp reminder will be available after saving"
+                          : "Reminder will not be scheduled for this due"}
+                    </p>
+                  </div>
+                </div>
+              </section>
+
               <button
                 type="submit"
                 disabled={isSubmitting || isCreatingSale}
@@ -634,6 +719,32 @@ const AddTransaction = () => {
                     </p>
                     <p className="mt-2 text-xl font-bold">
                       {formatCurrency(dueAmount)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                  <div className="rounded-2xl bg-slate-100 p-4 text-slate-700">
+                    <p className="text-xs uppercase tracking-widest opacity-70">
+                      Est. Cost
+                    </p>
+                    <p className="mt-2 text-xl font-bold">
+                      {formatCurrency(estimatedCostAmount)}
+                    </p>
+                  </div>
+
+                  <div
+                    className={`rounded-2xl p-4 ${
+                      estimatedProfit >= 0
+                        ? "bg-emerald-50 text-emerald-700"
+                        : "bg-rose-50 text-rose-700"
+                    }`}
+                  >
+                    <p className="text-xs uppercase tracking-widest opacity-70">
+                      Est. Profit / Loss
+                    </p>
+                    <p className="mt-2 text-xl font-bold">
+                      {formatCurrency(estimatedProfit)}
                     </p>
                   </div>
                 </div>

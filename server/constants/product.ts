@@ -3,6 +3,7 @@ export const productSelect = {
   businessId: true,
   name: true,
   category: true,
+  costPrice: true,
   price: true,
   quantity: true,
   minimumQuantity: true,

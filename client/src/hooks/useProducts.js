@@ -52,6 +52,8 @@ export const useProducts = (params = {}) => {
     summary: query.data?.summary ?? {
       totalProducts: 0,
       totalValue: 0,
+      totalCostValue: 0,
+      projectedProfit: 0,
       lowStockCount: 0,
       outOfStockCount: 0,
       categories: [],
@@ -104,6 +106,8 @@ export const useLowStockProducts = (params = {}) => {
     summary: query.data?.summary ?? {
       totalProducts: 0,
       totalValue: 0,
+      totalCostValue: 0,
+      projectedProfit: 0,
       lowStockCount: 0,
       outOfStockCount: 0,
       categories: [],

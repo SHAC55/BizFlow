@@ -81,6 +81,8 @@ model VerificationCode {
 model Business {
   id        String   @id @default(uuid())
   name      String
+  gstNumber String?
+  address   String?
   ownerId   Int      @unique
   createdAt DateTime @default(now())
 
@@ -119,6 +121,7 @@ model Sale {
   businessId  String
   customerId  String
   totalAmount Float
+  reminderDate DateTime?
   createdAt   DateTime @default(now())
 
   business Business  @relation(fields: [businessId], references: [id])
@@ -184,6 +187,7 @@ model Product {
   businessId      String
   name            String
   category        String
+  costPrice       Float
   price           Float
   quantity        Int
   minimumQuantity Int

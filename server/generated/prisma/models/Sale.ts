@@ -40,6 +40,7 @@ export type SaleMinAggregateOutputType = {
   businessId: string | null
   customerId: string | null
   totalAmount: number | null
+  reminderDate: Date | null
   createdAt: Date | null
 }
 
@@ -48,6 +49,7 @@ export type SaleMaxAggregateOutputType = {
   businessId: string | null
   customerId: string | null
   totalAmount: number | null
+  reminderDate: Date | null
   createdAt: Date | null
 }
 
@@ -56,6 +58,7 @@ export type SaleCountAggregateOutputType = {
   businessId: number
   customerId: number
   totalAmount: number
+  reminderDate: number
   createdAt: number
   _all: number
 }
@@ -74,6 +77,7 @@ export type SaleMinAggregateInputType = {
   businessId?: true
   customerId?: true
   totalAmount?: true
+  reminderDate?: true
   createdAt?: true
 }
 
@@ -82,6 +86,7 @@ export type SaleMaxAggregateInputType = {
   businessId?: true
   customerId?: true
   totalAmount?: true
+  reminderDate?: true
   createdAt?: true
 }
 
@@ -90,6 +95,7 @@ export type SaleCountAggregateInputType = {
   businessId?: true
   customerId?: true
   totalAmount?: true
+  reminderDate?: true
   createdAt?: true
   _all?: true
 }
@@ -185,6 +191,7 @@ export type SaleGroupByOutputType = {
   businessId: string
   customerId: string
   totalAmount: number
+  reminderDate: Date | null
   createdAt: Date
   _count: SaleCountAggregateOutputType | null
   _avg: SaleAvgAggregateOutputType | null
@@ -216,6 +223,7 @@ export type SaleWhereInput = {
   businessId?: Prisma.StringFilter<"Sale"> | string
   customerId?: Prisma.StringFilter<"Sale"> | string
   totalAmount?: Prisma.FloatFilter<"Sale"> | number
+  reminderDate?: Prisma.DateTimeNullableFilter<"Sale"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Sale"> | Date | string
   business?: Prisma.XOR<Prisma.BusinessScalarRelationFilter, Prisma.BusinessWhereInput>
   customer?: Prisma.XOR<Prisma.CustomerScalarRelationFilter, Prisma.CustomerWhereInput>
@@ -229,6 +237,7 @@ export type SaleOrderByWithRelationInput = {
   businessId?: Prisma.SortOrder
   customerId?: Prisma.SortOrder
   totalAmount?: Prisma.SortOrder
+  reminderDate?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   business?: Prisma.BusinessOrderByWithRelationInput
   customer?: Prisma.CustomerOrderByWithRelationInput
@@ -245,6 +254,7 @@ export type SaleWhereUniqueInput = Prisma.AtLeast<{
   businessId?: Prisma.StringFilter<"Sale"> | string
   customerId?: Prisma.StringFilter<"Sale"> | string
   totalAmount?: Prisma.FloatFilter<"Sale"> | number
+  reminderDate?: Prisma.DateTimeNullableFilter<"Sale"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Sale"> | Date | string
   business?: Prisma.XOR<Prisma.BusinessScalarRelationFilter, Prisma.BusinessWhereInput>
   customer?: Prisma.XOR<Prisma.CustomerScalarRelationFilter, Prisma.CustomerWhereInput>
@@ -258,6 +268,7 @@ export type SaleOrderByWithAggregationInput = {
   businessId?: Prisma.SortOrder
   customerId?: Prisma.SortOrder
   totalAmount?: Prisma.SortOrder
+  reminderDate?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.SaleCountOrderByAggregateInput
   _avg?: Prisma.SaleAvgOrderByAggregateInput
@@ -274,12 +285,14 @@ export type SaleScalarWhereWithAggregatesInput = {
   businessId?: Prisma.StringWithAggregatesFilter<"Sale"> | string
   customerId?: Prisma.StringWithAggregatesFilter<"Sale"> | string
   totalAmount?: Prisma.FloatWithAggregatesFilter<"Sale"> | number
+  reminderDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Sale"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Sale"> | Date | string
 }
 
 export type SaleCreateInput = {
   id?: string
   totalAmount: number
+  reminderDate?: Date | string | null
   createdAt?: Date | string
   business: Prisma.BusinessCreateNestedOneWithoutSalesInput
   customer: Prisma.CustomerCreateNestedOneWithoutSalesInput
@@ -293,6 +306,7 @@ export type SaleUncheckedCreateInput = {
   businessId: string
   customerId: string
   totalAmount: number
+  reminderDate?: Date | string | null
   createdAt?: Date | string
   invoice?: Prisma.InvoiceUncheckedCreateNestedOneWithoutSaleInput
   items?: Prisma.SaleItemUncheckedCreateNestedManyWithoutSaleInput
@@ -302,6 +316,7 @@ export type SaleUncheckedCreateInput = {
 export type SaleUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   business?: Prisma.BusinessUpdateOneRequiredWithoutSalesNestedInput
   customer?: Prisma.CustomerUpdateOneRequiredWithoutSalesNestedInput
@@ -315,6 +330,7 @@ export type SaleUncheckedUpdateInput = {
   businessId?: Prisma.StringFieldUpdateOperationsInput | string
   customerId?: Prisma.StringFieldUpdateOperationsInput | string
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   invoice?: Prisma.InvoiceUncheckedUpdateOneWithoutSaleNestedInput
   items?: Prisma.SaleItemUncheckedUpdateManyWithoutSaleNestedInput
@@ -326,12 +342,14 @@ export type SaleCreateManyInput = {
   businessId: string
   customerId: string
   totalAmount: number
+  reminderDate?: Date | string | null
   createdAt?: Date | string
 }
 
 export type SaleUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -340,6 +358,7 @@ export type SaleUncheckedUpdateManyInput = {
   businessId?: Prisma.StringFieldUpdateOperationsInput | string
   customerId?: Prisma.StringFieldUpdateOperationsInput | string
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -358,6 +377,7 @@ export type SaleCountOrderByAggregateInput = {
   businessId?: Prisma.SortOrder
   customerId?: Prisma.SortOrder
   totalAmount?: Prisma.SortOrder
+  reminderDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -370,6 +390,7 @@ export type SaleMaxOrderByAggregateInput = {
   businessId?: Prisma.SortOrder
   customerId?: Prisma.SortOrder
   totalAmount?: Prisma.SortOrder
+  reminderDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -378,6 +399,7 @@ export type SaleMinOrderByAggregateInput = {
   businessId?: Prisma.SortOrder
   customerId?: Prisma.SortOrder
   totalAmount?: Prisma.SortOrder
+  reminderDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -519,6 +541,7 @@ export type SaleUpdateOneRequiredWithoutPaymentsNestedInput = {
 export type SaleCreateWithoutBusinessInput = {
   id?: string
   totalAmount: number
+  reminderDate?: Date | string | null
   createdAt?: Date | string
   customer: Prisma.CustomerCreateNestedOneWithoutSalesInput
   invoice?: Prisma.InvoiceCreateNestedOneWithoutSaleInput
@@ -530,6 +553,7 @@ export type SaleUncheckedCreateWithoutBusinessInput = {
   id?: string
   customerId: string
   totalAmount: number
+  reminderDate?: Date | string | null
   createdAt?: Date | string
   invoice?: Prisma.InvoiceUncheckedCreateNestedOneWithoutSaleInput
   items?: Prisma.SaleItemUncheckedCreateNestedManyWithoutSaleInput
@@ -570,12 +594,14 @@ export type SaleScalarWhereInput = {
   businessId?: Prisma.StringFilter<"Sale"> | string
   customerId?: Prisma.StringFilter<"Sale"> | string
   totalAmount?: Prisma.FloatFilter<"Sale"> | number
+  reminderDate?: Prisma.DateTimeNullableFilter<"Sale"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Sale"> | Date | string
 }
 
 export type SaleCreateWithoutCustomerInput = {
   id?: string
   totalAmount: number
+  reminderDate?: Date | string | null
   createdAt?: Date | string
   business: Prisma.BusinessCreateNestedOneWithoutSalesInput
   invoice?: Prisma.InvoiceCreateNestedOneWithoutSaleInput
@@ -587,6 +613,7 @@ export type SaleUncheckedCreateWithoutCustomerInput = {
   id?: string
   businessId: string
   totalAmount: number
+  reminderDate?: Date | string | null
   createdAt?: Date | string
   invoice?: Prisma.InvoiceUncheckedCreateNestedOneWithoutSaleInput
   items?: Prisma.SaleItemUncheckedCreateNestedManyWithoutSaleInput
@@ -622,6 +649,7 @@ export type SaleUpdateManyWithWhereWithoutCustomerInput = {
 export type SaleCreateWithoutItemsInput = {
   id?: string
   totalAmount: number
+  reminderDate?: Date | string | null
   createdAt?: Date | string
   business: Prisma.BusinessCreateNestedOneWithoutSalesInput
   customer: Prisma.CustomerCreateNestedOneWithoutSalesInput
@@ -634,6 +662,7 @@ export type SaleUncheckedCreateWithoutItemsInput = {
   businessId: string
   customerId: string
   totalAmount: number
+  reminderDate?: Date | string | null
   createdAt?: Date | string
   invoice?: Prisma.InvoiceUncheckedCreateNestedOneWithoutSaleInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutSaleInput
@@ -658,6 +687,7 @@ export type SaleUpdateToOneWithWhereWithoutItemsInput = {
 export type SaleUpdateWithoutItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   business?: Prisma.BusinessUpdateOneRequiredWithoutSalesNestedInput
   customer?: Prisma.CustomerUpdateOneRequiredWithoutSalesNestedInput
@@ -670,6 +700,7 @@ export type SaleUncheckedUpdateWithoutItemsInput = {
   businessId?: Prisma.StringFieldUpdateOperationsInput | string
   customerId?: Prisma.StringFieldUpdateOperationsInput | string
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   invoice?: Prisma.InvoiceUncheckedUpdateOneWithoutSaleNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutSaleNestedInput
@@ -678,6 +709,7 @@ export type SaleUncheckedUpdateWithoutItemsInput = {
 export type SaleCreateWithoutInvoiceInput = {
   id?: string
   totalAmount: number
+  reminderDate?: Date | string | null
   createdAt?: Date | string
   business: Prisma.BusinessCreateNestedOneWithoutSalesInput
   customer: Prisma.CustomerCreateNestedOneWithoutSalesInput
@@ -690,6 +722,7 @@ export type SaleUncheckedCreateWithoutInvoiceInput = {
   businessId: string
   customerId: string
   totalAmount: number
+  reminderDate?: Date | string | null
   createdAt?: Date | string
   items?: Prisma.SaleItemUncheckedCreateNestedManyWithoutSaleInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutSaleInput
@@ -714,6 +747,7 @@ export type SaleUpdateToOneWithWhereWithoutInvoiceInput = {
 export type SaleUpdateWithoutInvoiceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   business?: Prisma.BusinessUpdateOneRequiredWithoutSalesNestedInput
   customer?: Prisma.CustomerUpdateOneRequiredWithoutSalesNestedInput
@@ -726,6 +760,7 @@ export type SaleUncheckedUpdateWithoutInvoiceInput = {
   businessId?: Prisma.StringFieldUpdateOperationsInput | string
   customerId?: Prisma.StringFieldUpdateOperationsInput | string
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.SaleItemUncheckedUpdateManyWithoutSaleNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutSaleNestedInput
@@ -734,6 +769,7 @@ export type SaleUncheckedUpdateWithoutInvoiceInput = {
 export type SaleCreateWithoutPaymentsInput = {
   id?: string
   totalAmount: number
+  reminderDate?: Date | string | null
   createdAt?: Date | string
   business: Prisma.BusinessCreateNestedOneWithoutSalesInput
   customer: Prisma.CustomerCreateNestedOneWithoutSalesInput
@@ -746,6 +782,7 @@ export type SaleUncheckedCreateWithoutPaymentsInput = {
   businessId: string
   customerId: string
   totalAmount: number
+  reminderDate?: Date | string | null
   createdAt?: Date | string
   invoice?: Prisma.InvoiceUncheckedCreateNestedOneWithoutSaleInput
   items?: Prisma.SaleItemUncheckedCreateNestedManyWithoutSaleInput
@@ -770,6 +807,7 @@ export type SaleUpdateToOneWithWhereWithoutPaymentsInput = {
 export type SaleUpdateWithoutPaymentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   business?: Prisma.BusinessUpdateOneRequiredWithoutSalesNestedInput
   customer?: Prisma.CustomerUpdateOneRequiredWithoutSalesNestedInput
@@ -782,6 +820,7 @@ export type SaleUncheckedUpdateWithoutPaymentsInput = {
   businessId?: Prisma.StringFieldUpdateOperationsInput | string
   customerId?: Prisma.StringFieldUpdateOperationsInput | string
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   invoice?: Prisma.InvoiceUncheckedUpdateOneWithoutSaleNestedInput
   items?: Prisma.SaleItemUncheckedUpdateManyWithoutSaleNestedInput
@@ -791,12 +830,14 @@ export type SaleCreateManyBusinessInput = {
   id?: string
   customerId: string
   totalAmount: number
+  reminderDate?: Date | string | null
   createdAt?: Date | string
 }
 
 export type SaleUpdateWithoutBusinessInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   customer?: Prisma.CustomerUpdateOneRequiredWithoutSalesNestedInput
   invoice?: Prisma.InvoiceUpdateOneWithoutSaleNestedInput
@@ -808,6 +849,7 @@ export type SaleUncheckedUpdateWithoutBusinessInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   customerId?: Prisma.StringFieldUpdateOperationsInput | string
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   invoice?: Prisma.InvoiceUncheckedUpdateOneWithoutSaleNestedInput
   items?: Prisma.SaleItemUncheckedUpdateManyWithoutSaleNestedInput
@@ -818,6 +860,7 @@ export type SaleUncheckedUpdateManyWithoutBusinessInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   customerId?: Prisma.StringFieldUpdateOperationsInput | string
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -825,12 +868,14 @@ export type SaleCreateManyCustomerInput = {
   id?: string
   businessId: string
   totalAmount: number
+  reminderDate?: Date | string | null
   createdAt?: Date | string
 }
 
 export type SaleUpdateWithoutCustomerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   business?: Prisma.BusinessUpdateOneRequiredWithoutSalesNestedInput
   invoice?: Prisma.InvoiceUpdateOneWithoutSaleNestedInput
@@ -842,6 +887,7 @@ export type SaleUncheckedUpdateWithoutCustomerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   businessId?: Prisma.StringFieldUpdateOperationsInput | string
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   invoice?: Prisma.InvoiceUncheckedUpdateOneWithoutSaleNestedInput
   items?: Prisma.SaleItemUncheckedUpdateManyWithoutSaleNestedInput
@@ -852,6 +898,7 @@ export type SaleUncheckedUpdateManyWithoutCustomerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   businessId?: Prisma.StringFieldUpdateOperationsInput | string
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -900,6 +947,7 @@ export type SaleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   businessId?: boolean
   customerId?: boolean
   totalAmount?: boolean
+  reminderDate?: boolean
   createdAt?: boolean
   business?: boolean | Prisma.BusinessDefaultArgs<ExtArgs>
   customer?: boolean | Prisma.CustomerDefaultArgs<ExtArgs>
@@ -914,6 +962,7 @@ export type SaleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   businessId?: boolean
   customerId?: boolean
   totalAmount?: boolean
+  reminderDate?: boolean
   createdAt?: boolean
   business?: boolean | Prisma.BusinessDefaultArgs<ExtArgs>
   customer?: boolean | Prisma.CustomerDefaultArgs<ExtArgs>
@@ -924,6 +973,7 @@ export type SaleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   businessId?: boolean
   customerId?: boolean
   totalAmount?: boolean
+  reminderDate?: boolean
   createdAt?: boolean
   business?: boolean | Prisma.BusinessDefaultArgs<ExtArgs>
   customer?: boolean | Prisma.CustomerDefaultArgs<ExtArgs>
@@ -934,10 +984,11 @@ export type SaleSelectScalar = {
   businessId?: boolean
   customerId?: boolean
   totalAmount?: boolean
+  reminderDate?: boolean
   createdAt?: boolean
 }
 
-export type SaleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "businessId" | "customerId" | "totalAmount" | "createdAt", ExtArgs["result"]["sale"]>
+export type SaleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "businessId" | "customerId" | "totalAmount" | "reminderDate" | "createdAt", ExtArgs["result"]["sale"]>
 export type SaleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   business?: boolean | Prisma.BusinessDefaultArgs<ExtArgs>
   customer?: boolean | Prisma.CustomerDefaultArgs<ExtArgs>
@@ -969,6 +1020,7 @@ export type $SalePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     businessId: string
     customerId: string
     totalAmount: number
+    reminderDate: Date | null
     createdAt: Date
   }, ExtArgs["result"]["sale"]>
   composites: {}
@@ -1402,6 +1454,7 @@ export interface SaleFieldRefs {
   readonly businessId: Prisma.FieldRef<"Sale", 'String'>
   readonly customerId: Prisma.FieldRef<"Sale", 'String'>
   readonly totalAmount: Prisma.FieldRef<"Sale", 'Float'>
+  readonly reminderDate: Prisma.FieldRef<"Sale", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Sale", 'DateTime'>
 }
     

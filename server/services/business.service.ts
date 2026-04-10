@@ -11,6 +11,8 @@ export type CreateBusinessParams = {
 export type UpdateBusinessParams = {
   userId: number;
   name?: string;
+  gstNumber?: string | null;
+  address?: string | null;
 };
 
 export const getBusiness = async (userId: number) => {
@@ -49,6 +51,8 @@ export const updateBusiness = async (data: UpdateBusinessParams) => {
     where: { id: business.id },
     data: {
       ...(data.name !== undefined && { name: data.name }),
+      ...(data.gstNumber !== undefined && { gstNumber: data.gstNumber }),
+      ...(data.address !== undefined && { address: data.address }),
     },
     select: businessSelect,
   });

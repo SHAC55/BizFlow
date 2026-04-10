@@ -13,6 +13,7 @@ export const saleItemSelect = {
       name: true,
       category: true,
       sku: true,
+      costPrice: true,
     },
   },
 } satisfies Prisma.SaleItemSelect;
@@ -28,6 +29,7 @@ export const saleListSelect = {
   businessId: true,
   customerId: true,
   totalAmount: true,
+  reminderDate: true,
   createdAt: true,
   customer: {
     select: {
@@ -47,6 +49,14 @@ export const saleListSelect = {
 
 export const saleDetailSelect = {
   ...saleListSelect,
+  business: {
+    select: {
+      id: true,
+      name: true,
+      gstNumber: true,
+      address: true,
+    },
+  },
   invoice: {
     select: {
       id: true,

@@ -3,6 +3,7 @@ export const safeUserSelect = {
   name: true, // username
   mobile: true, // mobile number
   email: true,
+  provider: true,
   verified: true,
   createdAt: true,
   updatedAt: true,
@@ -11,6 +12,8 @@ export const safeUserSelect = {
     select: {
       id: true,
       name: true,
+      gstNumber: true,
+      address: true,
       createdAt: true,
     },
   },

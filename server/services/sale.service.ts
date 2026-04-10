@@ -15,6 +15,7 @@ export type CreateSaleParams = {
   }>;
   totalAmount: number;
   paidAmount?: number;
+  reminderDate?: Date;
 };
 
 export type GetSalesParams = {
@@ -38,6 +39,25 @@ type SaleListItem = Prisma.SaleGetPayload<{
 type SaleDetailItem = Prisma.SaleGetPayload<{
   select: typeof saleDetailSelect;
 }>;
+
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 2,
+  }).format(value);
+
+const formatReminderDate = (value: Date | null | undefined) => {
+  if (!value) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(value);
+};
 
 const getBusinessByOwnerId = async (userId: number) => {
   const business = await prisma.business.findUnique({
@@ -77,14 +97,23 @@ const mapSaleMetrics = (sale: SaleListItem | SaleDetailItem) => {
   );
   const dueAmount = sale.totalAmount - paidAmount;
   const discountAmount = subtotalAmount - sale.totalAmount;
+  const estimatedCostAmount = sale.items.reduce(
+    (sum, item) => sum + item.quantity * (item.product.costPrice ?? 0),
+    0,
+  );
+  const estimatedProfitAmount = sale.totalAmount - estimatedCostAmount;
 
   return {
     id: sale.id,
     businessId: sale.businessId,
     customerId: sale.customerId,
     totalAmount: sale.totalAmount,
+    business: "business" in sale ? sale.business : undefined,
+    reminderDate: sale.reminderDate,
     subtotalAmount,
     discountAmount,
+    estimatedCostAmount,
+    estimatedProfitAmount,
     paidAmount,
     dueAmount,
     status:
@@ -101,6 +130,39 @@ const mapSaleMetrics = (sale: SaleListItem | SaleDetailItem) => {
       product: item.product,
     })),
     payments: sale.payments,
+  };
+};
+
+const buildSaleReminder = (sale: ReturnType<typeof mapSaleMetrics>) => {
+  if (sale.dueAmount <= 0 || !sale.customer.mobile) {
+    return null;
+  }
+
+  const businessName = "business" in sale && sale.business?.name
+    ? sale.business.name
+    : "your business";
+  const reminderSuffix = sale.reminderDate
+    ? ` on ${formatReminderDate(sale.reminderDate)}`
+    : "";
+  const message = [
+    `Hi ${sale.customer.name},`,
+    `This is a reminder from ${businessName} for invoice #${sale.id.slice(0, 8).toUpperCase()}.`,
+    `Outstanding amount: ${formatCurrency(sale.dueAmount)}.`,
+    sale.reminderDate
+      ? `Requested payment date: ${formatReminderDate(sale.reminderDate)}.`
+      : "Please clear the due amount at your earliest convenience.",
+    "Reply on WhatsApp if you need the invoice copy or payment details.",
+  ].join(" ");
+  const whatsappUrl = `https://wa.me/${sale.customer.mobile.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`;
+
+  return {
+    customerMobile: sale.customer.mobile,
+    scheduledFor: sale.reminderDate,
+    reminderLabel: reminderSuffix
+      ? `Reminder${reminderSuffix}`
+      : "Reminder ready",
+    message,
+    whatsappUrl,
   };
 };
 
@@ -156,6 +218,7 @@ export const createSale = async (data: CreateSaleParams) => {
         businessId: business.id,
         customerId: customer.id,
         totalAmount: data.totalAmount,
+        reminderDate: data.reminderDate,
       },
       select: {
         id: true,
@@ -390,6 +453,22 @@ export const getSaleById = async (userId: number, saleId: string) => {
   appAssert(detail, NOT_FOUND, "sale not found");
 
   return mapSaleMetrics(detail);
+};
+
+export const getSaleReminder = async (userId: number, saleId: string) => {
+  const sale = await getOwnedSale(userId, saleId);
+
+  const detail = await prisma.sale.findUnique({
+    where: { id: sale.id },
+    select: saleDetailSelect,
+  });
+  appAssert(detail, NOT_FOUND, "sale not found");
+
+  const mappedSale = mapSaleMetrics(detail);
+  const reminder = buildSaleReminder(mappedSale);
+  appAssert(reminder, CONFLICT, "sale has no due reminder to send");
+
+  return reminder;
 };
 
 export const createSalePayment = async (data: CreateSalePaymentParams) => {

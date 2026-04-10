@@ -4,6 +4,7 @@ import {
   createSalePayment,
   createSale,
   getSaleById,
+  getSaleReminder,
   getSales,
 } from "../services/sale.service";
 import appAssert from "../utils/appAssert";
@@ -12,6 +13,7 @@ import {
   createSalePaymentSchema,
   createSaleSchema,
   getSalesQuerySchema,
+  saleReminderParamsSchema,
 } from "./sale.schemas";
 
 export const createSaleHandler = catchErrors(async (req, res) => {
@@ -72,4 +74,14 @@ export const createSalePaymentHandler = catchErrors(async (req, res) => {
     message: "payment recorded",
     sale,
   });
+});
+
+export const getSaleReminderHandler = catchErrors(async (req, res) => {
+  const userId = req.userId;
+  appAssert(userId, UNAUTHORIZED, "not authenticated");
+
+  const { id } = saleReminderParamsSchema.parse(req.params);
+  const reminder = await getSaleReminder(userId, id);
+
+  return res.status(OK).json(reminder);
 });

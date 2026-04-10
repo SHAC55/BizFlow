@@ -28,12 +28,14 @@ export type AggregateProduct = {
 }
 
 export type ProductAvgAggregateOutputType = {
+  costPrice: number | null
   price: number | null
   quantity: number | null
   minimumQuantity: number | null
 }
 
 export type ProductSumAggregateOutputType = {
+  costPrice: number | null
   price: number | null
   quantity: number | null
   minimumQuantity: number | null
@@ -44,6 +46,7 @@ export type ProductMinAggregateOutputType = {
   businessId: string | null
   name: string | null
   category: string | null
+  costPrice: number | null
   price: number | null
   quantity: number | null
   minimumQuantity: number | null
@@ -57,6 +60,7 @@ export type ProductMaxAggregateOutputType = {
   businessId: string | null
   name: string | null
   category: string | null
+  costPrice: number | null
   price: number | null
   quantity: number | null
   minimumQuantity: number | null
@@ -70,6 +74,7 @@ export type ProductCountAggregateOutputType = {
   businessId: number
   name: number
   category: number
+  costPrice: number
   price: number
   quantity: number
   minimumQuantity: number
@@ -81,12 +86,14 @@ export type ProductCountAggregateOutputType = {
 
 
 export type ProductAvgAggregateInputType = {
+  costPrice?: true
   price?: true
   quantity?: true
   minimumQuantity?: true
 }
 
 export type ProductSumAggregateInputType = {
+  costPrice?: true
   price?: true
   quantity?: true
   minimumQuantity?: true
@@ -97,6 +104,7 @@ export type ProductMinAggregateInputType = {
   businessId?: true
   name?: true
   category?: true
+  costPrice?: true
   price?: true
   quantity?: true
   minimumQuantity?: true
@@ -110,6 +118,7 @@ export type ProductMaxAggregateInputType = {
   businessId?: true
   name?: true
   category?: true
+  costPrice?: true
   price?: true
   quantity?: true
   minimumQuantity?: true
@@ -123,6 +132,7 @@ export type ProductCountAggregateInputType = {
   businessId?: true
   name?: true
   category?: true
+  costPrice?: true
   price?: true
   quantity?: true
   minimumQuantity?: true
@@ -223,6 +233,7 @@ export type ProductGroupByOutputType = {
   businessId: string
   name: string
   category: string
+  costPrice: number
   price: number
   quantity: number
   minimumQuantity: number
@@ -259,6 +270,7 @@ export type ProductWhereInput = {
   businessId?: Prisma.StringFilter<"Product"> | string
   name?: Prisma.StringFilter<"Product"> | string
   category?: Prisma.StringFilter<"Product"> | string
+  costPrice?: Prisma.FloatFilter<"Product"> | number
   price?: Prisma.FloatFilter<"Product"> | number
   quantity?: Prisma.IntFilter<"Product"> | number
   minimumQuantity?: Prisma.IntFilter<"Product"> | number
@@ -275,6 +287,7 @@ export type ProductOrderByWithRelationInput = {
   businessId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   category?: Prisma.SortOrder
+  costPrice?: Prisma.SortOrder
   price?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   minimumQuantity?: Prisma.SortOrder
@@ -295,6 +308,7 @@ export type ProductWhereUniqueInput = Prisma.AtLeast<{
   businessId?: Prisma.StringFilter<"Product"> | string
   name?: Prisma.StringFilter<"Product"> | string
   category?: Prisma.StringFilter<"Product"> | string
+  costPrice?: Prisma.FloatFilter<"Product"> | number
   price?: Prisma.FloatFilter<"Product"> | number
   quantity?: Prisma.IntFilter<"Product"> | number
   minimumQuantity?: Prisma.IntFilter<"Product"> | number
@@ -311,6 +325,7 @@ export type ProductOrderByWithAggregationInput = {
   businessId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   category?: Prisma.SortOrder
+  costPrice?: Prisma.SortOrder
   price?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   minimumQuantity?: Prisma.SortOrder
@@ -332,6 +347,7 @@ export type ProductScalarWhereWithAggregatesInput = {
   businessId?: Prisma.StringWithAggregatesFilter<"Product"> | string
   name?: Prisma.StringWithAggregatesFilter<"Product"> | string
   category?: Prisma.StringWithAggregatesFilter<"Product"> | string
+  costPrice?: Prisma.FloatWithAggregatesFilter<"Product"> | number
   price?: Prisma.FloatWithAggregatesFilter<"Product"> | number
   quantity?: Prisma.IntWithAggregatesFilter<"Product"> | number
   minimumQuantity?: Prisma.IntWithAggregatesFilter<"Product"> | number
@@ -344,6 +360,7 @@ export type ProductCreateInput = {
   id?: string
   name: string
   category: string
+  costPrice: number
   price: number
   quantity: number
   minimumQuantity: number
@@ -360,6 +377,7 @@ export type ProductUncheckedCreateInput = {
   businessId: string
   name: string
   category: string
+  costPrice: number
   price: number
   quantity: number
   minimumQuantity: number
@@ -374,6 +392,7 @@ export type ProductUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  costPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   minimumQuantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -390,6 +409,7 @@ export type ProductUncheckedUpdateInput = {
   businessId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  costPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   minimumQuantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -405,6 +425,7 @@ export type ProductCreateManyInput = {
   businessId: string
   name: string
   category: string
+  costPrice: number
   price: number
   quantity: number
   minimumQuantity: number
@@ -417,6 +438,7 @@ export type ProductUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  costPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   minimumQuantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -430,6 +452,7 @@ export type ProductUncheckedUpdateManyInput = {
   businessId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  costPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   minimumQuantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -463,6 +486,7 @@ export type ProductCountOrderByAggregateInput = {
   businessId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   category?: Prisma.SortOrder
+  costPrice?: Prisma.SortOrder
   price?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   minimumQuantity?: Prisma.SortOrder
@@ -472,6 +496,7 @@ export type ProductCountOrderByAggregateInput = {
 }
 
 export type ProductAvgOrderByAggregateInput = {
+  costPrice?: Prisma.SortOrder
   price?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   minimumQuantity?: Prisma.SortOrder
@@ -482,6 +507,7 @@ export type ProductMaxOrderByAggregateInput = {
   businessId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   category?: Prisma.SortOrder
+  costPrice?: Prisma.SortOrder
   price?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   minimumQuantity?: Prisma.SortOrder
@@ -495,6 +521,7 @@ export type ProductMinOrderByAggregateInput = {
   businessId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   category?: Prisma.SortOrder
+  costPrice?: Prisma.SortOrder
   price?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   minimumQuantity?: Prisma.SortOrder
@@ -504,6 +531,7 @@ export type ProductMinOrderByAggregateInput = {
 }
 
 export type ProductSumOrderByAggregateInput = {
+  costPrice?: Prisma.SortOrder
   price?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   minimumQuantity?: Prisma.SortOrder
@@ -583,6 +611,7 @@ export type ProductCreateWithoutBusinessInput = {
   id?: string
   name: string
   category: string
+  costPrice: number
   price: number
   quantity: number
   minimumQuantity: number
@@ -597,6 +626,7 @@ export type ProductUncheckedCreateWithoutBusinessInput = {
   id?: string
   name: string
   category: string
+  costPrice: number
   price: number
   quantity: number
   minimumQuantity: number
@@ -641,6 +671,7 @@ export type ProductScalarWhereInput = {
   businessId?: Prisma.StringFilter<"Product"> | string
   name?: Prisma.StringFilter<"Product"> | string
   category?: Prisma.StringFilter<"Product"> | string
+  costPrice?: Prisma.FloatFilter<"Product"> | number
   price?: Prisma.FloatFilter<"Product"> | number
   quantity?: Prisma.IntFilter<"Product"> | number
   minimumQuantity?: Prisma.IntFilter<"Product"> | number
@@ -653,6 +684,7 @@ export type ProductCreateWithoutSaleItemsInput = {
   id?: string
   name: string
   category: string
+  costPrice: number
   price: number
   quantity: number
   minimumQuantity: number
@@ -668,6 +700,7 @@ export type ProductUncheckedCreateWithoutSaleItemsInput = {
   businessId: string
   name: string
   category: string
+  costPrice: number
   price: number
   quantity: number
   minimumQuantity: number
@@ -697,6 +730,7 @@ export type ProductUpdateWithoutSaleItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  costPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   minimumQuantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -712,6 +746,7 @@ export type ProductUncheckedUpdateWithoutSaleItemsInput = {
   businessId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  costPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   minimumQuantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -725,6 +760,7 @@ export type ProductCreateWithoutMovementsInput = {
   id?: string
   name: string
   category: string
+  costPrice: number
   price: number
   quantity: number
   minimumQuantity: number
@@ -740,6 +776,7 @@ export type ProductUncheckedCreateWithoutMovementsInput = {
   businessId: string
   name: string
   category: string
+  costPrice: number
   price: number
   quantity: number
   minimumQuantity: number
@@ -769,6 +806,7 @@ export type ProductUpdateWithoutMovementsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  costPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   minimumQuantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -784,6 +822,7 @@ export type ProductUncheckedUpdateWithoutMovementsInput = {
   businessId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  costPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   minimumQuantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -797,6 +836,7 @@ export type ProductCreateManyBusinessInput = {
   id?: string
   name: string
   category: string
+  costPrice: number
   price: number
   quantity: number
   minimumQuantity: number
@@ -809,6 +849,7 @@ export type ProductUpdateWithoutBusinessInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  costPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   minimumQuantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -823,6 +864,7 @@ export type ProductUncheckedUpdateWithoutBusinessInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  costPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   minimumQuantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -837,6 +879,7 @@ export type ProductUncheckedUpdateManyWithoutBusinessInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  costPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   price?: Prisma.FloatFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   minimumQuantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -890,6 +933,7 @@ export type ProductSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   businessId?: boolean
   name?: boolean
   category?: boolean
+  costPrice?: boolean
   price?: boolean
   quantity?: boolean
   minimumQuantity?: boolean
@@ -907,6 +951,7 @@ export type ProductSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   businessId?: boolean
   name?: boolean
   category?: boolean
+  costPrice?: boolean
   price?: boolean
   quantity?: boolean
   minimumQuantity?: boolean
@@ -921,6 +966,7 @@ export type ProductSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   businessId?: boolean
   name?: boolean
   category?: boolean
+  costPrice?: boolean
   price?: boolean
   quantity?: boolean
   minimumQuantity?: boolean
@@ -935,6 +981,7 @@ export type ProductSelectScalar = {
   businessId?: boolean
   name?: boolean
   category?: boolean
+  costPrice?: boolean
   price?: boolean
   quantity?: boolean
   minimumQuantity?: boolean
@@ -943,7 +990,7 @@ export type ProductSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ProductOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "businessId" | "name" | "category" | "price" | "quantity" | "minimumQuantity" | "sku" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
+export type ProductOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "businessId" | "name" | "category" | "costPrice" | "price" | "quantity" | "minimumQuantity" | "sku" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
 export type ProductInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   business?: boolean | Prisma.BusinessDefaultArgs<ExtArgs>
   movements?: boolean | Prisma.Product$movementsArgs<ExtArgs>
@@ -969,6 +1016,7 @@ export type $ProductPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     businessId: string
     name: string
     category: string
+    costPrice: number
     price: number
     quantity: number
     minimumQuantity: number
@@ -1405,6 +1453,7 @@ export interface ProductFieldRefs {
   readonly businessId: Prisma.FieldRef<"Product", 'String'>
   readonly name: Prisma.FieldRef<"Product", 'String'>
   readonly category: Prisma.FieldRef<"Product", 'String'>
+  readonly costPrice: Prisma.FieldRef<"Product", 'Float'>
   readonly price: Prisma.FieldRef<"Product", 'Float'>
   readonly quantity: Prisma.FieldRef<"Product", 'Int'>
   readonly minimumQuantity: Prisma.FieldRef<"Product", 'Int'>

@@ -1307,6 +1307,8 @@ export type VerificationCodeScalarFieldEnum = (typeof VerificationCodeScalarFiel
 export const BusinessScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  gstNumber: 'gstNumber',
+  address: 'address',
   ownerId: 'ownerId',
   createdAt: 'createdAt'
 } as const
@@ -1335,6 +1337,7 @@ export const SaleScalarFieldEnum = {
   businessId: 'businessId',
   customerId: 'customerId',
   totalAmount: 'totalAmount',
+  reminderDate: 'reminderDate',
   createdAt: 'createdAt'
 } as const
 
@@ -1379,6 +1382,7 @@ export const ProductScalarFieldEnum = {
   businessId: 'businessId',
   name: 'name',
   category: 'category',
+  costPrice: 'costPrice',
   price: 'price',
   quantity: 'quantity',
   minimumQuantity: 'minimumQuantity',

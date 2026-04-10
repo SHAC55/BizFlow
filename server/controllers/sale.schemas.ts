@@ -16,6 +16,7 @@ export const createSaleSchema = z
       .min(1),
     totalAmount: z.number().positive(),
     paidAmount: z.number().nonnegative().optional().default(0),
+    reminderDate: z.coerce.date().optional(),
   })
   .superRefine((data, context) => {
     const productIds = new Set<string>();
@@ -53,6 +54,10 @@ export const createSaleSchema = z
       });
     }
   });
+
+export const saleReminderParamsSchema = z.object({
+  id: z.string().uuid(),
+});
 
 export const getSalesQuerySchema = z.object({
   page: z.coerce.number().int().min(1).optional().default(1),

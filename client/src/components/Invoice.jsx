@@ -14,6 +14,7 @@ const Invoice = forwardRef(({ sale }, ref) => {
     Number(n).toLocaleString("en-IN", { minimumFractionDigits: 2 });
 
   const dateOpts = { day: "numeric", month: "long", year: "numeric" };
+  const invoiceBusiness = sale.business || user?.business || {};
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center px-6 py-12">
@@ -29,16 +30,18 @@ const Invoice = forwardRef(({ sale }, ref) => {
         <div className="px-11 pt-9 pb-7 flex justify-between items-start border-b border-gray-200">
           <div>
             <div className="text-[26px] font-extrabold text-gray-900 tracking-tight leading-none mb-1.5">
-              {user.business?.name || "-"}
+              {invoiceBusiness.name || "-"}
             </div>
             <div className="text-[11px] text-gray-500 leading-loose">
-              123 Business Avenue, Tech Park
+              {invoiceBusiness.address || "Business address not added"}
               <br />
               <span className="text-gray-400">
                 Contact: {user.mobile || "-"}
               </span>
               <br />
-              <span className="text-gray-400">GST: 29ABCDE1234F1Z5</span>
+              <span className="text-gray-400">
+                GST: {invoiceBusiness.gstNumber || "Not added"}
+              </span>
               &nbsp;&nbsp;
               <span className="text-gray-300">|</span>
               &nbsp;&nbsp;
