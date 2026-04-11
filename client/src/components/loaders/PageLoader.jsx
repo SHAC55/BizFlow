@@ -2,7 +2,7 @@ import LoadingTips from "./LoadingTips";
 
 export default function PageLoader() {
   return (
-    <div className="relative flex flex-col w-full md:ml-72 items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100">
+    <div className="relative flex flex-col w-full md:ml-24 items-center justify-center min-h-screen bg-white">
       {/* Floating bubbles animation - uncomment if needed */}
       {/* <div className="absolute inset-0 overflow-hidden">
         {[...Array(15)].map((_, i) => (
@@ -32,7 +32,7 @@ export default function PageLoader() {
       <div className="relative z-10 flex flex-col items-center justify-center p-8 max-w-md mx-4">
         {/* Loading text with creative styling */}
         <div className="text-center space-y-3">
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-sky-600 bg-clip-text text-transparent">
+          <h2 className="text-2xl font-bold text-black">
             Preparing Your Dashboard
           </h2>
 
@@ -40,16 +40,16 @@ export default function PageLoader() {
 
           {/* Animated progress bar */}
           <div className="mt-4 w-64 mx-auto">
-            <div className="h-1 bg-blue-100 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-blue-400 to-sky-400 rounded-full animate-loading-bar"></div>
+            <div className="h-1 bg-black rounded-full overflow-hidden">
+              <div className="h-full bg-gray-300 rounded-full animate-loading-bar"></div>
             </div>
           </div>
 
           {/* Creative dots */}
           <div className="flex items-center justify-center gap-2 mt-4">
-            <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce-slow"></div>
-            <div className="w-1.5 h-1.5 bg-sky-400 rounded-full animate-bounce-slow [animation-delay:0.2s]"></div>
-            <div className="w-1.5 h-1.5 bg-blue-300 rounded-full animate-bounce-slow [animation-delay:0.4s]"></div>
+            <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce-slow"></div>
+            <div className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce-slow [animation-delay:0.2s]"></div>
+            <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce-slow [animation-delay:0.4s]"></div>
           </div>
         </div>
 

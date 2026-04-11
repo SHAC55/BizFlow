@@ -55,12 +55,12 @@ const Profile = () => {
 
   return (
     <div className="w-screen">
-      <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 to-indigo-100 p-6 md:mt-0 mt-12">
+      <div className="min-h-screen w-full bg-black p-6 md:mt-0 mt-12">
         <div className="max-w-4xl mx-auto space-y-6">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-800">User Profile</h1>
-              <p className="text-gray-500 mt-1">{user.name || "User"}!</p>
+              <h1 className="text-3xl font-bold text-gray-200">User Profile</h1>
+              <p className="text-gray-300 mt-1">{user.name || "User"}!</p>
             </div>
             <button
               onClick={logout}

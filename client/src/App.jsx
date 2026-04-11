@@ -45,11 +45,13 @@ const App = () => {
     "/password/reset",
     "/add-customer",
     "/add-transaction",
+
   ];
 
   const shouldHideNavbar =
     hideNavbarRoutes.includes(location.pathname) ||
     location.pathname.startsWith("/email/verify/");
+    location.pathname.startsWith("/sales/");
 
   return (
     <div className="flex min-w-[350px] bg-gradient-to-b from-neutral-900 to-black">

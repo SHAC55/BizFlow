@@ -136,19 +136,16 @@ const AddTransaction = () => {
     setValue(`items.${index}.unitPrice`, product?.price ?? 0, {
       shouldValidate: true,
     });
-    // Reset manual edit flag when product changes (total amount will auto-update)
     setIsTotalEdited(false);
   };
 
   const handleQuantityChange = (index, value) => {
     setValue(`items.${index}.quantity`, value, { shouldValidate: true });
-    // Reset manual edit flag when quantity changes
     setIsTotalEdited(false);
   };
 
   const handleUnitPriceChange = (index, value) => {
     setValue(`items.${index}.unitPrice`, value, { shouldValidate: true });
-    // Reset manual edit flag when price changes
     setIsTotalEdited(false);
   };
 
@@ -201,7 +198,6 @@ const AddTransaction = () => {
     navigate(`/sales/${response.sale.id}`);
   };
 
-  // Filter customers based on search input
   const filteredCustomers = useMemo(() => {
     if (!customerSearch.trim()) return customers;
     const searchTerm = customerSearch.toLowerCase().trim();
@@ -213,48 +209,49 @@ const AddTransaction = () => {
   }, [customers, customerSearch]);
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/20 px-4 py-8">
-      <div className="mx-auto w-full max-w-5xl">
+    <div className="min-h-screen w-full bg-white px-4 py-8 md:ml-20">
+      <div className="mx-auto w-full max-w-6xl">
         <button
           onClick={() => navigate("/sales")}
-          className="mb-6 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-900"
+          className="mb-6 inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 hover:border-gray-300 group"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
           Back to sales
         </button>
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_360px]">
-          <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl md:p-8">
+          {/* Main Form Card */}
+          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm md:p-8">
             <div className="mb-8 flex items-start gap-4">
-              <div className="rounded-2xl bg-blue-100 p-3 text-blue-700">
-                <ShoppingCart className="h-7 w-7" />
+              <div className="rounded-xl bg-black p-3">
+                <ShoppingCart className="h-7 w-7 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold tracking-tight text-slate-800">
+                <h1 className="text-3xl font-bold tracking-tight text-gray-900">
                   Record Sale
                 </h1>
-                <p className="mt-2 text-sm text-slate-500">
-                  Select a customer, add products, and record any discount or
-                  upfront payment.
+                <p className="mt-1 text-sm text-gray-500">
+                  Select a customer, add products, and record payments
                 </p>
               </div>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+              {/* Customer Section */}
               <section className="space-y-4">
-                <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                  <User className="h-4 w-4 text-blue-600" />
-                  Customer
+                <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                  <User className="h-4 w-4 text-gray-700" />
+                  Customer Information
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-                  {/* Search Customer Field with Autocomplete */}
+                <div className="grid gap-4 md:grid-cols-2">
+                  {/* Search Customer Field */}
                   <div className="relative">
-                    <label className="mb-2 block text-xs font-semibold uppercase tracking-widest text-slate-400">
+                    <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-500">
                       Search Customer
                     </label>
                     <div className="relative">
-                      <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                      <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                       <input
                         type="text"
                         value={customerSearch}
@@ -264,13 +261,13 @@ const AddTransaction = () => {
                         }}
                         onFocus={() => setShowCustomerDropdown(true)}
                         placeholder="Search by name or mobile..."
-                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 pl-10 pr-10 py-3 text-sm text-slate-700 outline-none transition-colors focus:border-blue-400 focus:bg-white"
+                        className="w-full rounded-xl border border-gray-300 bg-white pl-10 pr-10 py-2.5 text-sm text-gray-900 outline-none transition-all focus:border-gray-500 focus:ring-1 focus:ring-gray-200"
                       />
                       {customerSearch && (
                         <button
                           type="button"
                           onClick={clearCustomerSearch}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                         >
                           <X className="h-4 w-4" />
                         </button>
@@ -279,10 +276,10 @@ const AddTransaction = () => {
 
                     {/* Customer Dropdown */}
                     {showCustomerDropdown && customerSearch && (
-                      <div className="absolute z-10 mt-1 w-full rounded-xl border border-slate-200 bg-white shadow-lg max-h-64 overflow-y-auto">
+                      <div className="absolute z-10 mt-1 w-full rounded-xl border border-gray-200 bg-white shadow-lg max-h-64 overflow-y-auto">
                         {customersLoading ? (
                           <div className="flex items-center justify-center p-4">
-                            <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+                            <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
                           </div>
                         ) : filteredCustomers.length > 0 ? (
                           filteredCustomers.map((customer) => (
@@ -290,18 +287,18 @@ const AddTransaction = () => {
                               key={customer.id}
                               type="button"
                               onClick={() => handleCustomerSelect(customer.id)}
-                              className="w-full px-4 py-3 text-left hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0"
+                              className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0"
                             >
-                              <p className="font-medium text-slate-700">
+                              <p className="font-medium text-gray-900">
                                 {customer.name}
                               </p>
-                              <p className="text-xs text-slate-500">
+                              <p className="text-xs text-gray-500">
                                 {customer.mobile}
                               </p>
                             </button>
                           ))
                         ) : (
-                          <div className="p-4 text-center text-sm text-slate-500">
+                          <div className="p-4 text-center text-sm text-gray-500">
                             No customers found
                           </div>
                         )}
@@ -311,21 +308,21 @@ const AddTransaction = () => {
 
                   {/* Selected Customer Display */}
                   <div>
-                    <label className="mb-2 block text-xs font-semibold uppercase tracking-widest text-slate-400">
+                    <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-500">
                       Selected Customer
                     </label>
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 min-h-[50px]">
+                    <div className="rounded-xl border border-gray-300 bg-gray-50 px-4 py-2.5 min-h-[50px]">
                       {selectedCustomer ? (
                         <div>
-                          <p className="text-sm font-semibold text-slate-700">
+                          <p className="text-sm font-semibold text-gray-900">
                             {selectedCustomer.name}
                           </p>
-                          <p className="text-xs text-slate-500">
+                          <p className="text-xs text-gray-500">
                             {selectedCustomer.mobile}
                           </p>
                         </div>
                       ) : (
-                        <p className="text-sm text-slate-400">
+                        <p className="text-sm text-gray-400">
                           No customer selected
                         </p>
                       )}
@@ -337,7 +334,7 @@ const AddTransaction = () => {
                       })}
                     />
                     {errors.customerId && (
-                      <p className="mt-2 text-xs text-rose-500">
+                      <p className="mt-2 text-xs text-red-500">
                         {errors.customerId.message}
                       </p>
                     )}
@@ -345,10 +342,11 @@ const AddTransaction = () => {
                 </div>
               </section>
 
+              {/* Products Section */}
               <section className="space-y-4">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                    <Package className="h-4 w-4 text-blue-600" />
+                  <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                    <Package className="h-4 w-4 text-gray-700" />
                     Products
                   </div>
                   <button
@@ -360,7 +358,7 @@ const AddTransaction = () => {
                         unitPrice: 0,
                       })
                     }
-                    className="inline-flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100"
+                    className="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 hover:border-gray-400"
                   >
                     <Plus className="h-4 w-4" />
                     Add product
@@ -379,17 +377,17 @@ const AddTransaction = () => {
                     return (
                       <div
                         key={field.id}
-                        className="rounded-3xl border border-slate-100 bg-slate-50 p-4"
+                        className="rounded-xl border border-gray-200 bg-gray-50 p-4"
                       >
                         <div className="mb-4 flex items-center justify-between gap-3">
-                          <p className="text-sm font-semibold text-slate-700">
-                            Line item {index + 1}
+                          <p className="text-sm font-semibold text-gray-700">
+                            Item {index + 1}
                           </p>
                           {fields.length > 1 && (
                             <button
                               type="button"
                               onClick={() => remove(index)}
-                              className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-rose-500 transition-colors hover:bg-rose-50"
+                              className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-red-500 transition-colors hover:bg-red-50"
                             >
                               <Trash2 className="h-4 w-4" />
                               Remove
@@ -399,7 +397,7 @@ const AddTransaction = () => {
 
                         <div className="grid gap-4 md:grid-cols-[minmax(0,1.5fr)_120px_150px]">
                           <div>
-                            <label className="mb-2 block text-xs font-semibold uppercase tracking-widest text-slate-400">
+                            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-500">
                               Product
                             </label>
                             <select
@@ -410,7 +408,7 @@ const AddTransaction = () => {
                                 handleProductChange(index, event.target.value)
                               }
                               disabled={productsLoading}
-                              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition-colors focus:border-blue-400 disabled:cursor-not-allowed disabled:bg-slate-100"
+                              className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition-all focus:border-gray-500 focus:ring-1 focus:ring-gray-200 disabled:cursor-not-allowed disabled:bg-gray-100"
                             >
                               <option value="">
                                 {productsLoading
@@ -419,25 +417,24 @@ const AddTransaction = () => {
                               </option>
                               {products.map((product) => (
                                 <option key={product.id} value={product.id}>
-                                  {product.name} ·{" "}
-                                  {formatCurrency(product.price)}
+                                  {product.name} · {formatCurrency(product.price)}
                                 </option>
                               ))}
                             </select>
                             {errors.items?.[index]?.productId && (
-                              <p className="mt-2 text-xs text-rose-500">
+                              <p className="mt-2 text-xs text-red-500">
                                 {errors.items[index].productId.message}
                               </p>
                             )}
                             {selectedProduct && (
-                              <p className="mt-2 text-xs text-slate-500">
-                                Stock available: {availableQuantity}
+                              <p className="mt-2 text-xs text-gray-500">
+                                Stock: {availableQuantity} available
                               </p>
                             )}
                           </div>
 
                           <div>
-                            <label className="mb-2 block text-xs font-semibold uppercase tracking-widest text-slate-400">
+                            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-500">
                               Quantity
                             </label>
                             <input
@@ -450,17 +447,17 @@ const AddTransaction = () => {
                                   Number(event.target.value),
                                 )
                               }
-                              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition-colors focus:border-blue-400"
+                              className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition-all focus:border-gray-500 focus:ring-1 focus:ring-gray-200"
                             />
                             {errors.items?.[index]?.quantity && (
-                              <p className="mt-2 text-xs text-rose-500">
+                              <p className="mt-2 text-xs text-red-500">
                                 {errors.items[index].quantity.message}
                               </p>
                             )}
                           </div>
 
                           <div>
-                            <label className="mb-2 block text-xs font-semibold uppercase tracking-widest text-slate-400">
+                            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-500">
                               Unit Price
                             </label>
                             <input
@@ -474,22 +471,21 @@ const AddTransaction = () => {
                                   Number(event.target.value),
                                 )
                               }
-                              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition-colors focus:border-blue-400"
+                              className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition-all focus:border-gray-500 focus:ring-1 focus:ring-gray-200"
                             />
                             {errors.items?.[index]?.unitPrice && (
-                              <p className="mt-2 text-xs text-rose-500">
+                              <p className="mt-2 text-xs text-red-500">
                                 {errors.items[index].unitPrice.message}
                               </p>
                             )}
                           </div>
                         </div>
 
-                        {/* Auto-calculated line total */}
-                        <div className="mt-3 pt-3 border-t border-slate-200">
+                        <div className="mt-3 pt-3 border-t border-gray-200">
                           <div className="flex justify-end">
-                            <p className="text-sm text-slate-600">
+                            <p className="text-sm text-gray-600">
                               Line total:{" "}
-                              <span className="font-semibold text-slate-800">
+                              <span className="font-semibold text-gray-900">
                                 {formatCurrency(
                                   currentQuantity *
                                     (watchedItems[index]?.unitPrice || 0),
@@ -504,13 +500,14 @@ const AddTransaction = () => {
                 </div>
               </section>
 
+              {/* Amount Section */}
               <section className="grid gap-4 md:grid-cols-2">
                 <div>
-                  <label className="mb-2 block text-xs font-semibold uppercase tracking-widest text-slate-400">
+                  <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-500">
                     Final Amount
                   </label>
                   <div className="relative">
-                    <DollarSign className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <DollarSign className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                     <input
                       type="number"
                       min="0.01"
@@ -528,16 +525,16 @@ const AddTransaction = () => {
                           },
                         );
                       }}
-                      className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm text-slate-700 outline-none transition-colors focus:border-blue-400"
+                      className="w-full rounded-xl border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition-all focus:border-gray-500 focus:ring-1 focus:ring-gray-200"
                     />
                   </div>
                   {errors.totalAmount && (
-                    <p className="mt-2 text-xs text-rose-500">
+                    <p className="mt-2 text-xs text-red-500">
                       {errors.totalAmount.message}
                     </p>
                   )}
-                  <p className="mt-2 text-xs text-slate-500">
-                    Edit this if you want to apply a discount.
+                  <p className="mt-2 text-xs text-gray-500">
+                    Edit to apply discount
                   </p>
                   {isTotalEdited && (
                     <button
@@ -549,19 +546,19 @@ const AddTransaction = () => {
                           shouldValidate: true,
                         });
                       }}
-                      className="mt-2 text-xs font-medium text-blue-600 transition-colors hover:text-blue-700"
+                      className="mt-2 text-xs font-medium text-gray-600 hover:text-black transition-colors"
                     >
-                      Reset to original price
+                      Reset to original
                     </button>
                   )}
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-xs font-semibold uppercase tracking-widest text-slate-400">
+                  <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-500">
                     Paid Now
                   </label>
                   <div className="relative">
-                    <DollarSign className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <DollarSign className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                     <input
                       type="number"
                       min="0"
@@ -578,34 +575,35 @@ const AddTransaction = () => {
                           },
                         )
                       }
-                      className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm text-slate-700 outline-none transition-colors focus:border-blue-400"
+                      className="w-full rounded-xl border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition-all focus:border-gray-500 focus:ring-1 focus:ring-gray-200"
                     />
                   </div>
                   {errors.paidAmount && (
-                    <p className="mt-2 text-xs text-rose-500">
+                    <p className="mt-2 text-xs text-red-500">
                       {errors.paidAmount.message}
                     </p>
                   )}
                 </div>
               </section>
 
-              <section className="rounded-3xl border border-slate-100 bg-slate-50 p-4">
+              {/* Reminder Section */}
+              <section className="rounded-xl border border-gray-200 bg-gray-50 p-5">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-sm font-semibold text-slate-700">
-                      Due reminder
+                    <p className="text-sm font-semibold text-gray-900">
+                      Due Reminder
                     </p>
-                    <p className="mt-1 text-xs text-slate-500">
-                      Schedule a WhatsApp-ready reminder when some amount is still due.
+                    <p className="mt-1 text-xs text-gray-500">
+                      Schedule a reminder for outstanding payments
                     </p>
                   </div>
-                  <label className="inline-flex items-center gap-2 text-sm font-medium text-slate-700">
+                  <label className="inline-flex items-center gap-2 text-sm font-medium text-gray-700">
                     <input
                       type="checkbox"
                       checked={dueAmount > 0 && reminderEnabled}
                       onChange={(event) => setReminderEnabled(event.target.checked)}
                       disabled={dueAmount <= 0}
-                      className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                      className="h-4 w-4 rounded border-gray-300 text-black focus:ring-gray-500"
                     />
                     Schedule
                   </label>
@@ -613,27 +611,27 @@ const AddTransaction = () => {
 
                 <div className="mt-4 grid gap-4 md:grid-cols-2">
                   <div>
-                    <label className="mb-2 block text-xs font-semibold uppercase tracking-widest text-slate-400">
+                    <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-500">
                       Reminder Date
                     </label>
                     <input
                       type="date"
                       {...register("reminderDate")}
                       disabled={!reminderEnabled || dueAmount <= 0}
-                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition-colors focus:border-blue-400 disabled:cursor-not-allowed disabled:bg-slate-100"
+                      className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition-all focus:border-gray-500 focus:ring-1 focus:ring-gray-200 disabled:cursor-not-allowed disabled:bg-gray-100"
                     />
                   </div>
 
-                  <div className="rounded-2xl bg-white p-4">
-                    <p className="text-xs uppercase tracking-widest text-slate-400">
+                  <div className="rounded-xl bg-white p-4 border border-gray-200">
+                    <p className="text-xs uppercase tracking-wider text-gray-500">
                       Reminder Status
                     </p>
-                    <p className="mt-2 text-sm font-semibold text-slate-700">
+                    <p className="mt-2 text-sm font-medium text-gray-900">
                       {dueAmount <= 0
-                        ? "No reminder needed for fully paid sale"
+                        ? "No reminder needed - fully paid"
                         : reminderEnabled
-                          ? "WhatsApp reminder will be available after saving"
-                          : "Reminder will not be scheduled for this due"}
+                          ? "Reminder will be sent"
+                          : "Reminder disabled"}
                     </p>
                   </div>
                 </div>
@@ -642,48 +640,49 @@ const AddTransaction = () => {
               <button
                 type="submit"
                 disabled={isSubmitting || isCreatingSale}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-black px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-gray-900 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {(isSubmitting || isCreatingSale) && (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 )}
-                Save sale
+                Save Sale
               </button>
             </form>
           </div>
 
+          {/* Summary Sidebar */}
           <aside className="space-y-4">
-            <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl">
-              <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-700">
-                <Calculator className="h-4 w-4 text-blue-600" />
+            <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+              <div className="mb-5 flex items-center gap-2 text-sm font-semibold text-gray-900">
+                <Calculator className="h-4 w-4 text-gray-700" />
                 Sale Summary
               </div>
 
               <div className="space-y-3">
-                <div className="rounded-2xl bg-slate-50 p-4">
-                  <p className="text-xs uppercase tracking-widest text-slate-400">
+                <div className="rounded-xl bg-gray-50 p-4 border border-gray-100">
+                  <p className="text-xs uppercase tracking-wider text-gray-500">
                     Customer
                   </p>
-                  <p className="mt-2 text-sm font-semibold text-slate-700">
-                    {selectedCustomer?.name || "No customer selected"}
+                  <p className="mt-2 text-sm font-semibold text-gray-900">
+                    {selectedCustomer?.name || "Not selected"}
                   </p>
-                  <p className="mt-1 text-xs text-slate-500">
-                    {selectedCustomer?.mobile || "Select from your customers"}
+                  <p className="mt-1 text-xs text-gray-500">
+                    {selectedCustomer?.mobile || "Select from customers"}
                   </p>
                 </div>
 
-                <div className="rounded-2xl bg-slate-50 p-4">
-                  <p className="text-xs uppercase tracking-widest text-slate-400">
+                <div className="rounded-xl bg-gray-50 p-4 border border-gray-100">
+                  <p className="text-xs uppercase tracking-wider text-gray-500">
                     Subtotal
                   </p>
-                  <p className="mt-2 text-2xl font-bold text-slate-800">
+                  <p className="mt-2 text-2xl font-bold text-gray-900">
                     {formatCurrency(subtotalAmount)}
                   </p>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-                  <div className="rounded-2xl bg-emerald-50 p-4 text-emerald-700">
-                    <p className="text-xs uppercase tracking-widest opacity-70">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-xl bg-gray-900 p-4 text-white">
+                    <p className="text-xs uppercase tracking-wider opacity-70">
                       Final Amount
                     </p>
                     <p className="mt-2 text-xl font-bold">
@@ -691,21 +690,19 @@ const AddTransaction = () => {
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-amber-50 p-4 text-amber-700">
-                    <p className="text-xs uppercase tracking-widest opacity-70">
+                  <div className="rounded-xl bg-gray-100 p-4 text-gray-700">
+                    <p className="text-xs uppercase tracking-wider opacity-70">
                       Discount
                     </p>
                     <p className="mt-2 text-xl font-bold">
-                      {formatCurrency(
-                        Math.max(subtotalAmount - totalAmount, 0),
-                      )}
+                      {formatCurrency(Math.max(subtotalAmount - totalAmount, 0))}
                     </p>
                   </div>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-                  <div className="rounded-2xl bg-blue-50 p-4 text-blue-700">
-                    <p className="text-xs uppercase tracking-widest opacity-70">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-xl bg-gray-800 p-4 text-white">
+                    <p className="text-xs uppercase tracking-wider opacity-70">
                       Paid Now
                     </p>
                     <p className="mt-2 text-xl font-bold">
@@ -713,8 +710,8 @@ const AddTransaction = () => {
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-rose-50 p-4 text-rose-700">
-                    <p className="text-xs uppercase tracking-widest opacity-70">
+                  <div className="rounded-xl bg-red-50 p-4 text-red-700 border border-red-100">
+                    <p className="text-xs uppercase tracking-wider opacity-70">
                       Due
                     </p>
                     <p className="mt-2 text-xl font-bold">
@@ -723,9 +720,9 @@ const AddTransaction = () => {
                   </div>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-                  <div className="rounded-2xl bg-slate-100 p-4 text-slate-700">
-                    <p className="text-xs uppercase tracking-widest opacity-70">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-xl bg-gray-50 p-4 text-gray-700 border border-gray-100">
+                    <p className="text-xs uppercase tracking-wider opacity-70">
                       Est. Cost
                     </p>
                     <p className="mt-2 text-xl font-bold">
@@ -734,13 +731,13 @@ const AddTransaction = () => {
                   </div>
 
                   <div
-                    className={`rounded-2xl p-4 ${
+                    className={`rounded-xl p-4 border ${
                       estimatedProfit >= 0
-                        ? "bg-emerald-50 text-emerald-700"
-                        : "bg-rose-50 text-rose-700"
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                        : "bg-red-50 text-red-700 border-red-100"
                     }`}
                   >
-                    <p className="text-xs uppercase tracking-widest opacity-70">
+                    <p className="text-xs uppercase tracking-wider opacity-70">
                       Est. Profit / Loss
                     </p>
                     <p className="mt-2 text-xl font-bold">
@@ -749,11 +746,11 @@ const AddTransaction = () => {
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-slate-100 bg-white p-4">
-                  <p className="text-xs uppercase tracking-widest text-slate-400">
+                <div className="rounded-xl border border-gray-200 bg-white p-4">
+                  <p className="text-xs uppercase tracking-wider text-gray-500">
                     Status
                   </p>
-                  <p className="mt-2 text-sm font-semibold capitalize text-slate-700">
+                  <p className="mt-2 text-sm font-semibold capitalize text-gray-900">
                     {saleStatus}
                   </p>
                 </div>

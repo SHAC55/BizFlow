@@ -89,12 +89,8 @@ const InventoryProducts = () => {
     refetch();
   };
 
-    if (isLoading) {
-      return <PageLoader />;
-    }
-
   return (
-    <div className=" h-full max-w-7xl mx-auto ">
+    <div className="">
       <AdjustStockModal
         product={adjustingProduct}
         isOpen={Boolean(adjustingProduct)}

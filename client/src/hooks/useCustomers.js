@@ -1,8 +1,4 @@
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDeferredValue } from "react";
 import toast from "react-hot-toast";
 import {
@@ -95,7 +91,9 @@ export const useCreateCustomer = () => {
     createCustomer: mutation.mutateAsync,
     isLoading: mutation.isPending,
     error:
-      mutation.error?.response?.data?.message || mutation.error?.message || null,
+      mutation.error?.response?.data?.message ||
+      mutation.error?.message ||
+      null,
   };
 };
 
@@ -107,7 +105,9 @@ export const useUpdateCustomer = () => {
     onMutate: async ({ customerId, data }) => {
       await queryClient.cancelQueries({ queryKey: customerKeys.all });
 
-      const previousCustomer = queryClient.getQueryData(customerKeys.detail(customerId));
+      const previousCustomer = queryClient.getQueryData(
+        customerKeys.detail(customerId),
+      );
       const previousLists = queryClient.getQueriesData({
         queryKey: customerKeys.lists(),
       });
@@ -154,7 +154,9 @@ export const useUpdateCustomer = () => {
       mutation.mutateAsync({ customerId, data }),
     isLoading: mutation.isPending,
     error:
-      mutation.error?.response?.data?.message || mutation.error?.message || null,
+      mutation.error?.response?.data?.message ||
+      mutation.error?.message ||
+      null,
   };
 };
 
@@ -166,7 +168,9 @@ export const useArchiveCustomer = () => {
     onMutate: async (customerId) => {
       await queryClient.cancelQueries({ queryKey: customerKeys.all });
 
-      const previousCustomer = queryClient.getQueryData(customerKeys.detail(customerId));
+      const previousCustomer = queryClient.getQueryData(
+        customerKeys.detail(customerId),
+      );
       const previousLists = queryClient.getQueriesData({
         queryKey: customerKeys.lists(),
       });
@@ -189,7 +193,9 @@ export const useArchiveCustomer = () => {
     },
     onSuccess: (_response, customerId) => {
       queryClient.invalidateQueries({ queryKey: customerKeys.all });
-      queryClient.invalidateQueries({ queryKey: customerKeys.detail(customerId) });
+      queryClient.invalidateQueries({
+        queryKey: customerKeys.detail(customerId),
+      });
       toast.success("Customer archived");
     },
     onError: (_error, customerId, context) => {
@@ -210,6 +216,8 @@ export const useArchiveCustomer = () => {
     archiveCustomer: mutation.mutateAsync,
     isLoading: mutation.isPending,
     error:
-      mutation.error?.response?.data?.message || mutation.error?.message || null,
+      mutation.error?.response?.data?.message ||
+      mutation.error?.message ||
+      null,
   };
 };
