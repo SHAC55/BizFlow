@@ -9,6 +9,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useCustomers } from "../hooks/useCustomers";
 import PageHeader from "./PageHeader";
+import PageLoader from "./loaders/PageLoader";
 
 const avatarPalettes = [
   { bg: "linear-gradient(135deg,#4f46e5,#6366f1)" },
@@ -182,6 +183,10 @@ const AllCustomer = () => {
     recentOnly,
     includeArchived,
   });
+
+  // if (isLoading) {
+  //   return <PageLoader />;
+  // }
 
   return (
     <div className=" min-h-screen bg-gradient-to-br from-blue-100 to-indigo-50 p-4 md:ml-72 md:mt-0 md:p-8 mt-12">

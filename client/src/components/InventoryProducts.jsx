@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { useDeleteProduct, useProducts } from "../hooks/useProducts";
 import AdjustStockModal from "./AdjustStockModal";
 import ProductMovementsPanel from "./ProductMovementsPanel";
+import PageLoader from "./loaders/PageLoader";
 
 const InventoryProducts = () => {
   const navigate = useNavigate();
@@ -87,6 +88,10 @@ const InventoryProducts = () => {
   const handleAdjustedProduct = () => {
     refetch();
   };
+
+    if (isLoading) {
+      return <PageLoader />;
+    }
 
   return (
     <div className=" h-full max-w-7xl mx-auto ">

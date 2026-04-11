@@ -6,7 +6,6 @@ import PageHeader from "../components/PageHeader";
 const Customers = () => {
   return (
     <div className="bg-gradient-to-br from-blue-100 to-indigo-50 w-screen ">
-     
       <AllCustomer />
     </div>
   );

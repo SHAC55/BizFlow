@@ -32,7 +32,6 @@ const SaleDetail = lazy(() => import("./pages/SaleDetail"));
 const App = () => {
   const location = useLocation();
 
-  //  Pages where Navbar should NOT show
   const hideNavbarRoutes = [
     "/",
     "/signin",
@@ -54,13 +53,17 @@ const App = () => {
 
   return (
     <div className="flex min-w-[350px]">
-      <div className="fixed">{!shouldHideNavbar && <Navbar />}</div>
+      
+      {/* Navbar */}
+      {!shouldHideNavbar && <Navbar />}
+
       <Toaster position="top-right" />
 
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/privacy" element={<Privacy />} />
+
           <Route
             path="/signup"
             element={
@@ -69,6 +72,7 @@ const App = () => {
               </PublicOnlyRoute>
             }
           />
+
           <Route
             path="/signin"
             element={
@@ -77,7 +81,9 @@ const App = () => {
               </PublicOnlyRoute>
             }
           />
+
           <Route path="/login" element={<Navigate to="/signin" replace />} />
+
           <Route
             path="/forgot-password"
             element={
@@ -86,6 +92,7 @@ const App = () => {
               </PublicOnlyRoute>
             }
           />
+
           <Route
             path="/password/reset"
             element={
@@ -94,7 +101,9 @@ const App = () => {
               </PublicOnlyRoute>
             }
           />
+
           <Route path="/email/verify/:code" element={<VerifyEmail />} />
+
           <Route
             path="/dashboard"
             element={
@@ -103,14 +112,16 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+
           <Route
-            path="/Profile"
+            path="/profile"
             element={
               <ProtectedRoute>
                 <Profile />
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/onboarding"
             element={
@@ -119,6 +130,7 @@ const App = () => {
               </OnboardingRoute>
             }
           />
+
           <Route
             path="/sales"
             element={
@@ -127,6 +139,7 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/customers"
             element={
@@ -135,6 +148,7 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/customers/:customerId"
             element={
@@ -143,6 +157,7 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/payments"
             element={
@@ -151,6 +166,7 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/inventory"
             element={
@@ -159,6 +175,7 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/add-inventory"
             element={
@@ -167,10 +184,12 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/add-item"
             element={<Navigate to="/add-inventory" replace />}
           />
+
           <Route
             path="/add-customer"
             element={
@@ -179,6 +198,7 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/add-transaction"
             element={
@@ -187,6 +207,7 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/sales/:id"
             element={

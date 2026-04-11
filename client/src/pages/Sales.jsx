@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useSales } from "../hooks/useSales";
 import PageHeader from "../components/PageHeader";
+import PageLoader from "../components/loaders/PageLoader";
 
 const formatCurrency = (value) =>
   `₹${Number(value || 0).toLocaleString("en-IN", {
@@ -91,6 +92,10 @@ const Sales = () => {
     ],
     [summary],
   );
+
+  if (isLoading && !sales?.length) {
+  return <PageLoader />;
+}
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-blue-100 to-indigo-50 p-4 md:ml-72 md:p-6 md:mt-0 mt-12">

@@ -149,7 +149,7 @@ const Navbar = () => {
       <div className="mx-5 my-3 h-px bg-gray-100" />
 
       {/* User card */}
-      <button onClick={() => navigate("/profile")} className=" w-full px-3 pb-5">
+      <div className=" w-full px-3 pb-5">
         <div className="flex items-center gap-3 bg-[#f5f7ff] border border-[#e8edf7] rounded-xl px-3.5 py-3">
           {/* Avatar */}
           <div
@@ -178,22 +178,31 @@ const Navbar = () => {
             <LogOut size={16} />
           </button>
         </div>
-      </button>
+      </div>
     </div>
   );
 
   return (
     <>
-      {/* ══ Desktop Sidebar ══ */}
-      <aside className="hidden md:flex flex-col w-72 h-screen bg-white border-r border-[#e8edf7] fixed z-30 shadow-[1px_0_0_#e8edf7]">
+      {/* ══ Desktop Sidebar - Hidden when mobile menu is open ══ */}
+      <aside
+        className={`hidden md:flex flex-col w-72 h-screen bg-white border-r border-[#e8edf7] fixed z-30 shadow-[1px_0_0_#e8edf7] transition-opacity duration-300 ${
+          isMobileMenuOpen ? "opacity-0 pointer-events-none" : "opacity-100"
+        }`}
+      >
         <SidebarContent />
       </aside>
 
-      {/* ══ Mobile Top Bar ══ */}
+      {/* ══ Mobile Top Bar - Hidden when mobile menu is open ══ */}
       <header
-        className="md:hidden fixed top-0 left-0 right-0 bg-white border-b border-[#e8edf7] z-50
+        className={`md:hidden fixed top-0 left-0 right-0 bg-white border-b border-[#e8edf7] z-50
                           px-4 h-14 flex items-center justify-between
-                          shadow-[0_1px_3px_rgba(0,0,0,0.06)]"
+                          shadow-[0_1px_3px_rgba(0,0,0,0.06)]
+                          transition-all duration-300 ${
+                            isMobileMenuOpen
+                              ? "opacity-0 pointer-events-none -translate-y-full"
+                              : "opacity-100 translate-y-0"
+                          }`}
       >
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center shadow">
@@ -237,8 +246,12 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile spacer */}
-      <div className="md:hidden h-14" />
+      {/* Mobile spacer - Hidden when mobile menu is open */}
+      <div
+        className={`md:hidden h-14 transition-opacity duration-300 ${
+          isMobileMenuOpen ? "opacity-0 pointer-events-none" : "opacity-100"
+        }`}
+      />
     </>
   );
 };
