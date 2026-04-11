@@ -1,257 +1,124 @@
-import { useQueryClient } from "@tanstack/react-query";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   LayoutDashboard,
   TrendingUp,
   Boxes,
   CreditCard,
   Users,
+  LogOut,
   Menu,
   X,
-  LogOut,
-  ChevronRight,
 } from "lucide-react";
-import { useAuthContext } from "../context/AuthContext";
-import { prefetchRouteData } from "../lib/prefetchRoutes";
-import { NavLink, useNavigate } from "react-router-dom";
-
-const navItems = [
-  { name: "Dashboard", icon: LayoutDashboard, to: "/dashboard" },
-  { name: "Sales", icon: TrendingUp, to: "/sales" },
-  { name: "Inventory", icon: Boxes, to: "/inventory" },
-  { name: "Payments", icon: CreditCard, to: "/payments" },
-  { name: "Customers", icon: Users, to: "/customers" },
-];
-
-/* ── Avatar initials helper ── */
-const getInitials = (name = "") => name.slice(0, 2).toUpperCase() || "U";
-
-/* ── Single nav link ── */
-const NavItem = ({ item, onClick, onPrefetch }) => {
-  const Icon = item.icon;
-  return (
-    <NavLink
-      to={item.to}
-      end={item.to === "/dashboard"}
-      onClick={onClick}
-      onMouseEnter={() => onPrefetch?.(item.to)}
-      onFocus={() => onPrefetch?.(item.to)}
-      className={({ isActive }) =>
-        `group flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 ${
-          isActive
-            ? "bg-blue-600 text-white shadow-[0_4px_12px_rgba(37,99,235,0.35)]"
-            : "text-gray-500 hover:bg-[#f0f5ff] hover:text-blue-600"
-        }`
-      }
-    >
-      {({ isActive }) => (
-        <>
-          <span
-            className={`flex-shrink-0 transition-transform duration-200 ${!isActive ? "group-hover:scale-110" : ""}`}
-          >
-            <Icon size={18} strokeWidth={isActive ? 2.2 : 1.8} />
-          </span>
-          <span className="text-[13.5px] font-semibold flex-1 tracking-tight">
-            {item.name}
-          </span>
-          {isActive && <ChevronRight size={14} className="opacity-60" />}
-        </>
-      )}
-    </NavLink>
-  );
-};
+import { NavLink } from "react-router-dom";
 
 const Navbar = () => {
-  const { user, logout } = useAuthContext();
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
-  /* Lock scroll + blur main content when drawer open */
-  useEffect(() => {
-    const main = document.getElementById("main-content");
-    if (isMobileMenuOpen) {
-      document.body.style.overflow = "hidden";
-      if (main) {
-        main.style.filter = "blur(4px)";
-        main.style.pointerEvents = "none";
-        main.style.userSelect = "none";
-        main.style.transition = "filter .25s ease";
-      }
-    } else {
-      document.body.style.overflow = "unset";
-      if (main) {
-        main.style.filter = "";
-        main.style.pointerEvents = "";
-        main.style.userSelect = "";
-      }
-    }
-    return () => {
-      document.body.style.overflow = "unset";
-      if (main) {
-        main.style.filter = "";
-        main.style.pointerEvents = "";
-      }
-    };
-  }, [isMobileMenuOpen]);
+  const links = [
+    { to: "/dashboard", icon: LayoutDashboard },
+    { to: "/sales", icon: TrendingUp },
+    { to: "/inventory", icon: Boxes },
+    { to: "/payments", icon: CreditCard },
+    { to: "/customers", icon: Users },
+  ];
 
-  const handleLogout = async () => {
-    await logout();
-    navigate("/login");
-  };
-
-  const closeMobile = () => setIsMobileMenuOpen(false);
-  const handlePrefetch = (path) => prefetchRouteData(queryClient, path);
-
-  /* ── Shared sidebar content ── */
-  const SidebarContent = ({ onClose }) => (
-    <div className="flex flex-col h-full">
-      {/* Logo */}
-      <div className="px-6 pt-7 pb-6 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center shadow-md">
-            <span className="text-white text-xs font-black tracking-tight">
-              Bz
-            </span>
-          </div>
-          <span className="text-[22px] font-extrabold tracking-tight text-gray-900">
-            Bize<span className="text-blue-600">zy</span>
-          </span>
-        </div>
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
-          >
-            <X size={17} />
-          </button>
-        )}
+  const Sidebar = () => (
+    <nav
+      className="
+      h-screen
+      w-20
+      p-4
+      bg-gradient-to-b from-neutral-900 to-black
+      flex flex-col
+      items-center
+      py-5
+      gap-6
+    "
+    >
+      {/* logo */}
+      <div className="w-10 h-10 rounded-2xl bg-[#f1eadf] flex items-center justify-center">
+        <span className="text-black font-semibold">Bz</span>
       </div>
 
-      {/* Section label */}
-      <p className="px-5 mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">
-        Main Menu
-      </p>
-
-      {/* Nav links */}
-      <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
-        {navItems.map((item) => (
-          <NavItem
-            key={item.name}
-            item={item}
-            onClick={onClose}
-            onPrefetch={handlePrefetch}
-          />
-        ))}
-      </nav>
-
-      {/* Divider */}
-      <div className="mx-5 my-3 h-px bg-gray-100" />
-
-      {/* User card */}
-      <div className=" w-full px-3 pb-5">
-        <div className="flex items-center gap-3 bg-[#f5f7ff] border border-[#e8edf7] rounded-xl px-3.5 py-3">
-          {/* Avatar */}
-          <div
-            className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center
-                          text-sm font-bold shadow-sm flex-shrink-0"
-          >
-            {getInitials(user?.name)}
-          </div>
-
-          {/* Info */}
-          <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-bold text-gray-800 truncate">
-              {user?.name || "-"}
-            </p>
-            <p className="text-[11px] text-gray-400 truncate">
-              {user?.email || ""}
-            </p>
-          </div>
-
-          {/* Logout */}
-          <button
-            onClick={handleLogout}
-            title="Logout"
-            className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all flex-shrink-0"
-          >
-            <LogOut size={16} />
-          </button>
-        </div>
+      {/* links */}
+      <div className="flex flex-col items-center gap-5 mt-2">
+        {links.map((item, i) => {
+          const Icon = item.icon;
+          return (
+            <NavLink
+              key={i}
+              to={item.to}
+              onClick={() => setOpen(false)}
+              className={({ isActive }) =>
+                `p-2.5 rounded-xl transition ${
+                  isActive
+                    ? "bg-white text-black"
+                    : "text-neutral-500 hover:text-white"
+                }`
+              }
+            >
+              <Icon size={18} />
+            </NavLink>
+          );
+        })}
       </div>
-    </div>
+
+      {/* logout */}
+      <div className="mt-auto">
+        <button className="p-2.5 text-neutral-500 hover:text-white transition">
+          <LogOut size={18} />
+        </button>
+      </div>
+    </nav>
   );
 
   return (
     <>
-      {/* ══ Desktop Sidebar - Hidden when mobile menu is open ══ */}
-      <aside
-        className={`hidden md:flex flex-col w-72 h-screen bg-white border-r border-[#e8edf7] fixed z-30 shadow-[1px_0_0_#e8edf7] transition-opacity duration-300 ${
-          isMobileMenuOpen ? "opacity-0 pointer-events-none" : "opacity-100"
-        }`}
-      >
-        <SidebarContent />
+      {/* Desktop Sidebar */}
+      <aside className="fixed left-0 top-0 z-40 hidden md:block">
+        <Sidebar />
       </aside>
 
-      {/* ══ Mobile Top Bar - Hidden when mobile menu is open ══ */}
-      <header
-        className={`md:hidden fixed top-0 left-0 right-0 bg-white border-b border-[#e8edf7] z-50
-                          px-4 h-14 flex items-center justify-between
-                          shadow-[0_1px_3px_rgba(0,0,0,0.06)]
-                          transition-all duration-300 ${
-                            isMobileMenuOpen
-                              ? "opacity-0 pointer-events-none -translate-y-full"
-                              : "opacity-100 translate-y-0"
-                          }`}
-      >
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center shadow">
-            <span className="text-white text-[10px] font-black">Bz</span>
+      {/* Mobile Top Bar */}
+      <header className="md:hidden fixed top-0 left-0 right-0 h-14 bg-neutral-900 flex items-center justify-between px-4 z-50">
+        <div className="flex items-center gap-2 text-white">
+          <div className="w-8 h-8 bg-white text-black rounded-lg flex items-center justify-center">
+            Bz
           </div>
-          <span className="text-lg font-extrabold tracking-tight text-gray-900">
-            Bize<span className="text-blue-600">zy</span>
-          </span>
+          <span className="font-semibold">Bizezy</span>
         </div>
 
-        <button
-          onClick={() => setIsMobileMenuOpen(true)}
-          className="p-2 rounded-xl text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-all"
-        >
-          <Menu size={20} />
+        <button onClick={() => setOpen(true)} className="text-white">
+          <Menu size={22} />
         </button>
       </header>
 
-      {/* ══ Mobile Drawer Overlay ══ */}
+      {/* Mobile Drawer */}
       <div
-        className={`fixed inset-0 z-40 md:hidden transition-all duration-300 ${
-          isMobileMenuOpen ? "visible" : "invisible pointer-events-none"
+        className={`fixed inset-0 z-50 md:hidden transition ${
+          open ? "visible" : "invisible"
         }`}
       >
-        {/* Backdrop */}
+        {/* overlay */}
         <div
-          onClick={closeMobile}
-          className={`absolute inset-0 bg-gray-900/60 backdrop-blur-[2px] transition-opacity duration-300 ${
-            isMobileMenuOpen ? "opacity-100" : "opacity-0"
+          className={`absolute inset-0 bg-black/40 transition ${
+            open ? "opacity-100" : "opacity-0"
           }`}
+          onClick={() => setOpen(false)}
         />
 
-        {/* Drawer panel */}
+        {/* drawer */}
         <div
-          className={`absolute left-0 top-0 h-full w-[280px] bg-white shadow-[4px_0_24px_rgba(0,0,0,0.1)]
-                      transform transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
-                        isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-                      }`}
+          className={`absolute left-0 top-0 transition-transform duration-300 ${
+            open ? "translate-x-0" : "-translate-x-full"
+          }`}
         >
-          <SidebarContent onClose={closeMobile} />
+          <Sidebar />
         </div>
       </div>
 
-      {/* Mobile spacer - Hidden when mobile menu is open */}
-      <div
-        className={`md:hidden h-14 transition-opacity duration-300 ${
-          isMobileMenuOpen ? "opacity-0 pointer-events-none" : "opacity-100"
-        }`}
-      />
+      {/* mobile spacer */}
+      <div className="h-14 md:hidden" />
     </>
   );
 };

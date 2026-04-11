@@ -52,8 +52,7 @@ const App = () => {
     location.pathname.startsWith("/email/verify/");
 
   return (
-    <div className="flex min-w-[350px]">
-      
+    <div className="flex min-w-[350px] bg-gradient-to-b from-neutral-900 to-black">
       {/* Navbar */}
       {!shouldHideNavbar && <Navbar />}
 
