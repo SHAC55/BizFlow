@@ -4,6 +4,7 @@ import { useAuthContext } from "../context/AuthContext";
 const Invoice = forwardRef(({ sale }, ref) => {
   const { user, isLoading } = useAuthContext();
 
+  console.log(user)
   const totalUnits = sale.items.reduce((s, i) => s + i.quantity, 0);
   const isPaid = sale.dueAmount <= 0;
   const issueDate = new Date(sale.createdAt);
@@ -250,7 +251,7 @@ const Invoice = forwardRef(({ sale }, ref) => {
         </div>
 
         {/* ── Terms ── */}
-        <div className="px-11 pb-8">
+        {/* <div className="px-11 pb-8">
           <div className="border-t border-gray-200 pt-4">
             <div className="text-[9px] tracking-[2.5px] uppercase text-gray-400 font-bold mb-2.5">
               Terms &amp; Conditions
@@ -265,7 +266,7 @@ const Invoice = forwardRef(({ sale }, ref) => {
               4. Interest @18% p.a. will be charged on delayed payments.
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* ── Footer ── */}
         <div className="border-t border-gray-200 px-11 py-3.5 flex justify-between items-center bg-gray-50">

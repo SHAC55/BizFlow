@@ -1,5 +1,10 @@
 import React from "react";
-import { Calendar, CreditCard, ReceiptText, ChevronRight, TrendingUp, Users, Clock } from "lucide-react";
+import {
+  Calendar,
+  CreditCard,
+  ReceiptText,
+  ChevronRight,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const formatCurrency = (value) =>
@@ -11,229 +16,183 @@ const formatDate = (value) =>
   new Date(value).toLocaleDateString("en-IN", {
     day: "numeric",
     month: "short",
-    year: "numeric",
   });
 
-const getStatusClasses = (status) => {
-  switch (status) {
-    case "paid":
-      return "bg-emerald-500/10 text-emerald-600 border-emerald-500/20";
-    case "partial":
-      return "bg-amber-500/10 text-amber-600 border-amber-500/20";
-    case "pending":
-    default:
-      return "bg-rose-500/10 text-rose-600 border-rose-500/20";
-  }
+const STATUS_CONFIG = {
+  paid: {
+    label: "Paid",
+    dot: "bg-[#16A34A]",
+    badge: "bg-[#F0FDF4] text-[#15803D]",
+  },
+  partial: {
+    label: "Partial",
+    dot: "bg-[#B45309]",
+    badge: "bg-[#FFFBEB] text-[#B45309]",
+  },
+  pending: {
+    label: "Pending",
+    dot: "bg-[#BE123C]",
+    badge: "bg-[#FFF1F2] text-[#BE123C]",
+  },
 };
 
-const getStatusIcon = (status) => {
-  switch (status) {
-    case "paid":
-      return <TrendingUp className="h-3 w-3" />;
-    case "partial":
-      return <Clock className="h-3 w-3" />;
-    default:
-      return <Clock className="h-3 w-3" />;
-  }
-};
+const getStatus = (status) => STATUS_CONFIG[status] || STATUS_CONFIG.pending;
 
 const DashboardRecentSales = ({ sales, isLoading, error }) => {
   const navigate = useNavigate();
-
-  // Calculate summary stats
-  const totalRevenue = sales?.reduce((sum, sale) => sum + sale.totalAmount, 0) || 0;
-  const totalPaid = sales?.reduce((sum, sale) => sum + sale.paidAmount, 0) || 0;
-  const totalDue = totalRevenue - totalPaid;
+  const recent = sales?.slice(0, 5) || [];
 
   return (
-    <div className="mt-8 px-4 md:px-6 ">
-      <div className="rounded-2xl bg-gradient-to-br from-white to-slate-50/80 border border-slate-200/50 overflow-hidden">
-        
-        {/* Header Section with Stats */}
-        <div className="p-6 pb-0">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-            <div>
-              <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                <ReceiptText className="h-5 w-5 text-indigo-500" />
-                Recent Sales
-              </h2>
-              <p className="text-sm text-slate-500 mt-1">
-                Latest transactions and payment insights
-              </p>
-            </div>
+    <div className="mt-6 px-4 md:px-6">
+      <div className="rounded-2xl border border-black/8 bg-white overflow-hidden">
 
-            <button
-              onClick={() => navigate("/sales")}
-              className="group inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-xl transition-all hover:bg-indigo-100 hover:gap-3"
-            >
-              View all sales
-              <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-            </button>
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-black/5">
+          <div>
+            <h2 className="text-sm font-semibold text-black">Recent Sales</h2>
+            <p className="text-xs text-black/40 mt-0.5">Latest transactions</p>
           </div>
-
-          {/* Stats Cards */}
-          {/* {!isLoading && sales?.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-xl p-4 border border-emerald-200">
-                <p className="text-xs font-medium text-emerald-600 uppercase tracking-wide">Total Revenue</p>
-                <p className="text-2xl font-bold text-emerald-700 mt-1">{formatCurrency(totalRevenue)}</p>
-              </div>
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-4 border border-blue-200">
-                <p className="text-xs font-medium text-blue-600 uppercase tracking-wide">Amount Collected</p>
-                <p className="text-2xl font-bold text-blue-700 mt-1">{formatCurrency(totalPaid)}</p>
-              </div>
-              <div className="bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-xl p-4 border border-amber-200">
-                <p className="text-xs font-medium text-amber-600 uppercase tracking-wide">Pending Due</p>
-                <p className="text-2xl font-bold text-amber-700 mt-1">{formatCurrency(totalDue)}</p>
-              </div>
-            </div>
-          )} */}
+          <button
+            onClick={() => navigate("/sales")}
+            className="group flex items-center gap-1 text-xs font-medium text-black/50 hover:text-black transition-colors"
+          >
+            View all
+            <ChevronRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+          </button>
         </div>
 
-        {/* Content Area */}
-        <div className="p-6 pt-0">
-          {isLoading ? (
-            <div className="flex min-h-[320px] items-center justify-center">
-              <div className="relative">
-                <div className="h-12 w-12 rounded-full border-4 border-slate-200 border-t-indigo-600 animate-spin" />
-                <p className="text-sm text-slate-500 mt-4">Loading sales data...</p>
-              </div>
+        {/* States */}
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-14 gap-3">
+            <div className="w-8 h-8 rounded-full border-2 border-black/10 border-t-black/50 animate-spin" />
+            <p className="text-xs text-black/30">Loading…</p>
+          </div>
+        ) : error ? (
+          <div className="py-10 text-center px-4">
+            <p className="text-sm text-[#BE123C]">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-2 text-xs text-black/40 underline underline-offset-2"
+            >
+              Try again
+            </button>
+          </div>
+        ) : recent.length === 0 ? (
+          <div className="py-14 text-center px-4">
+            <div className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center mx-auto mb-3">
+              <ReceiptText className="h-4 w-4 text-black/25" />
             </div>
-          ) : error ? (
-            <div className="rounded-xl border border-rose-200 bg-rose-50/50 backdrop-blur-sm px-4 py-6 text-center">
-              <div className="text-rose-600 text-sm font-medium">{error}</div>
-              <button 
-                onClick={() => window.location.reload()} 
-                className="mt-3 text-xs text-rose-500 underline"
-              >
-                Try again
-              </button>
-            </div>
-          ) : sales.length === 0 ? (
-            <div className="rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 px-4 py-12 text-center">
-              <ReceiptText className="h-12 w-12 text-slate-300 mx-auto mb-3" />
-              <p className="text-sm font-medium text-slate-600">No sales recorded yet</p>
-              <p className="text-xs text-slate-400 mt-1">Start by adding your first transaction</p>
-              <button
-                onClick={() => navigate("/add-transaction")}
-                className="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100"
-              >
-                Add Sale
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {sales.map((sale, idx) => (
+            <p className="text-sm text-black/40">No sales yet</p>
+            <button
+              onClick={() => navigate("/add-transaction")}
+              className="mt-3 text-xs font-medium text-black underline underline-offset-2"
+            >
+              Add your first sale
+            </button>
+          </div>
+        ) : (
+          <div className="divide-y divide-black/5">
+            {recent.map((sale) => {
+              const cfg = getStatus(sale.status);
+              const paidPct =
+                sale.totalAmount > 0
+                  ? Math.round((sale.paidAmount / sale.totalAmount) * 100)
+                  : 0;
+
+              return (
                 <button
                   key={sale.id}
                   onClick={() => navigate(`/sales/${sale.id}`)}
-                  className="group w-full text-left transition-all duration-200"
+                  className="w-full text-left px-5 py-4 hover:bg-black/[0.02] transition-colors duration-100 group"
                 >
-                  <div className="relative bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all overflow-hidden">
-                    
-                    {/* Animated Hover Gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-50/0 via-indigo-50/0 to-indigo-50/0 group-hover:from-indigo-50/30 group-hover:via-transparent group-hover:to-transparent transition-all duration-500" />
-                    
-                    <div className="relative p-5">
-                      {/* Top Row - Customer & Status */}
-                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="text-base font-bold text-slate-800">
-                              {sale.customer.name}
-                            </h3>
-                            <span
-                              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold capitalize ${getStatusClasses(
-                                sale.status,
-                              )}`}
-                            >
-                              {getStatusIcon(sale.status)}
-                              {sale.status}
-                            </span>
-                          </div>
-                          <p className="text-xs text-slate-500 mt-1.5 line-clamp-1">
-                            {sale.items
-                              .slice(0, 2)
-                              .map(
-                                (item) => `${item.quantity} × ${item.product.name}`,
-                              )
-                              .join(" • ")}
-                            {sale.items.length > 2
-                              ? ` • +${sale.items.length - 2} more items`
-                              : ""}
+                  <div className="flex items-start justify-between gap-3">
+                    {/* Left: avatar + info */}
+                    <div className="flex items-start gap-3 min-w-0">
+                      {/* Avatar */}
+                      <div className="w-9 h-9 rounded-full bg-black flex items-center justify-center text-white text-xs font-semibold flex-shrink-0 mt-0.5">
+                        {sale.customer.name.charAt(0).toUpperCase()}
+                      </div>
+
+                      <div className="min-w-0">
+                        {/* Name + badge */}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="text-sm font-semibold text-black leading-tight">
+                            {sale.customer.name}
                           </p>
-                        </div>
-                        
-                        {/* Amount Summary for Mobile */}
-                        <div className="sm:hidden flex items-center justify-between">
-                          <span className="text-lg font-bold text-slate-800">
-                            {formatCurrency(sale.totalAmount)}
+                          <span
+                            className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full ${cfg.badge}`}
+                          >
+                            <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+                            {cfg.label}
                           </span>
                         </div>
+
+                        {/* Items */}
+                        <p className="text-xs text-black/40 mt-0.5 truncate max-w-[220px]">
+                          {sale.items
+                            .slice(0, 2)
+                            .map((i) => `${i.quantity}× ${i.product.name}`)
+                            .join(" · ")}
+                          {sale.items.length > 2 &&
+                            ` · +${sale.items.length - 2} more`}
+                        </p>
+
+                        {/* Date */}
+                        <p className="text-[11px] text-black/30 mt-1">
+                          {formatDate(sale.createdAt)}
+                        </p>
                       </div>
+                    </div>
 
-                      {/* Stats Grid */}
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div className="flex items-center gap-3 text-sm">
-                          <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600">
-                            <ReceiptText className="h-4 w-4" />
-                          </div>
-                          <div>
-                            <p className="text-xs text-slate-500">Total Amount</p>
-                            <p className="font-semibold text-slate-700">{formatCurrency(sale.totalAmount)}</p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-3 text-sm">
-                          <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
-                            <CreditCard className="h-4 w-4" />
-                          </div>
-                          <div>
-                            <p className="text-xs text-slate-500">Payment</p>
-                            <p className="font-semibold text-slate-700">
-                              Paid {formatCurrency(sale.paidAmount)}
-                              {sale.dueAmount > 0 && (
-                                <span className="text-amber-600 text-xs font-normal ml-1">
-                                  (Due {formatCurrency(sale.dueAmount)})
-                                </span>
-                              )}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-3 text-sm">
-                          <div className="p-2 rounded-lg bg-slate-100 text-slate-600">
-                            <Calendar className="h-4 w-4" />
-                          </div>
-                          <div>
-                            <p className="text-xs text-slate-500">Date</p>
-                            <p className="font-medium text-slate-700">{formatDate(sale.createdAt)}</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Progress Bar for Partial Payments */}
-                      {sale.status === "partial" && sale.totalAmount > 0 && (
-                        <div className="mt-4">
-                          <div className="flex justify-between text-xs text-slate-500 mb-1">
-                            <span>Payment Progress</span>
-                            <span>{Math.round((sale.paidAmount / sale.totalAmount) * 100)}%</span>
-                          </div>
-                          <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-500"
-                              style={{ width: `${(sale.paidAmount / sale.totalAmount) * 100}%` }}
-                            />
-                          </div>
-                        </div>
+                    {/* Right: amounts */}
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-sm font-bold text-black">
+                        {formatCurrency(sale.totalAmount)}
+                      </p>
+                      {sale.dueAmount > 0 ? (
+                        <p className="text-[11px] text-[#B45309] mt-0.5">
+                          Due {formatCurrency(sale.dueAmount)}
+                        </p>
+                      ) : (
+                        <p className="text-[11px] text-[#15803D] mt-0.5">
+                          Fully paid
+                        </p>
                       )}
                     </div>
                   </div>
+
+                  {/* Progress bar for partial
+                  {sale.status === "partial" && (
+                    <div className="mt-3 ml-12">
+                      <div className="flex justify-between text-[10px] text-black/30 mb-1">
+                        <span>Payment progress</span>
+                        <span>{paidPct}%</span>
+                      </div>
+                      <div className="h-1 bg-black/8 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-[#B45309] rounded-full transition-all duration-500"
+                          style={{ width: `${paidPct}%` }}
+                        />
+                      </div>
+                    </div>
+                  )} */}
                 </button>
-              ))}
-            </div>
-          )}
-        </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Footer — total count hint */}
+        {!isLoading && !error && sales?.length > 5 && (
+          <div className="px-5 py-3 border-t border-black/5 bg-black/[0.01]">
+            <button
+              onClick={() => navigate("/sales")}
+              className="text-xs text-black/40 hover:text-black transition-colors w-full text-center"
+            >
+              +{sales.length - 5} more transactions — view all
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
