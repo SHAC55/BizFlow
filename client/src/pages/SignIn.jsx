@@ -38,7 +38,7 @@ const SignIn = () => {
   };
 
   return (
-    <section className="min-h-screen w-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <section className="min-h-screen w-screen bg-gradient-to-br from-gray-100 to-gray-300 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-5xl w-full flex flex-col md:flex-row transform transition-all duration-500 hover:shadow-3xl">
         {/* IMAGE SECTION */}
         <div className="md:w-1/2 relative overflow-hidden hidden md:block">
@@ -117,7 +117,7 @@ const SignIn = () => {
                 </label>
                 <NavLink
                   to="/forgot-password"
-                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                  className="text-sm text-black font-medium"
                 >
                   Forgot Password?
                 </NavLink>
@@ -173,7 +173,7 @@ const SignIn = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transform hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transform hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <div className="flex items-center justify-center space-x-2">
@@ -183,6 +183,7 @@ const SignIn = () => {
               ) : (
                 "Sign In"
               )}
+
             </button>
 
             {/* Divider */}
@@ -212,7 +213,7 @@ const SignIn = () => {
               Don't have an account?{" "}
               <NavLink
                 to="/signup"
-                className="text-blue-600 hover:text-blue-800 font-semibold hover:underline"
+                className="text-black font-bold hover:underline"
               >
                 Create Account
               </NavLink>

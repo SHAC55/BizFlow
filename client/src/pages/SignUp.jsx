@@ -45,7 +45,7 @@ const SignUp = () => {
   };
 
   return (
-    <section className="h-screen w-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4 overflow-hidden">
+    <section className="h-screen w-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4 overflow-hidden no-scrollbar">
       <div className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-5xl w-full flex flex-col md:flex-row h-[90vh] max-h-[850px]">
         {/* FORM SECTION */}
         <div className="md:w-1/2 p-8 lg:p-10 overflow-y-auto">

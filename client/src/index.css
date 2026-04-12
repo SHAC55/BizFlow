@@ -2,16 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Remove arrows in Chrome, Safari, Edge */
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+body {
+  @apply font-sans;
 }
 
-/* Remove arrows in Firefox */
-input[type="number"] {
-  -moz-appearance: textfield;
+/* Hide scrollbar but allow scroll */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
-
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+}
