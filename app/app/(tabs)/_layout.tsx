@@ -103,6 +103,12 @@ const TabLayout = () => {
             href: null,
           }}
         />
+        <Tabs.Screen
+          name="AddCustomer"
+          options={{
+            href: null,
+          }}
+        />
       </Tabs>
     </SafeAreaView>
   );

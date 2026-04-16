@@ -1,6 +1,7 @@
 import { View, Text, Pressable, FlatList, TextInput } from "react-native";
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 
 type Transaction = {
   id: string;
@@ -59,23 +60,28 @@ const TransactionRow = React.memo(({ item }: { item: Transaction }) => {
       </View>
 
       <View className="items-end mr-2">
-        <Text className="text-xs font-semibold text-black">
-          {item.amount}
-        </Text>
+        <Text className="text-xs font-semibold text-black">{item.amount}</Text>
         <Text
           className={`text-[10px] ${
             item.status === "Paid"
               ? "text-green-600"
               : item.status === "Pending"
-              ? "text-orange-600"
-              : "text-blue-600"
+                ? "text-orange-600"
+                : "text-blue-600"
           }`}
         >
           {item.status}
         </Text>
       </View>
 
-      <Pressable onPress={() => console.log("View", item.id)}>
+      <Pressable
+        onPress={() =>
+          router.push({
+            pathname: "/sales/[id]",
+            params: { id: item.id },
+          })
+        }
+      >
         <Ionicons name="chevron-forward" size={16} color="#9ca3af" />
       </Pressable>
     </View>
@@ -83,9 +89,9 @@ const TransactionRow = React.memo(({ item }: { item: Transaction }) => {
 });
 
 const SalesTransactions = () => {
-  const [filter, setFilter] = useState<
-    "All" | "Paid" | "Pending" | "Partial"
-  >("All");
+  const [filter, setFilter] = useState<"All" | "Paid" | "Pending" | "Partial">(
+    "All",
+  );
 
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -100,8 +106,7 @@ const SalesTransactions = () => {
 
   const filteredData = useMemo(() => {
     return DATA.filter((item) => {
-      const matchesFilter =
-        filter === "All" ? true : item.status === filter;
+      const matchesFilter = filter === "All" ? true : item.status === filter;
 
       const matchesSearch =
         item.customer.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
@@ -112,10 +117,8 @@ const SalesTransactions = () => {
   }, [filter, debouncedSearch]);
 
   const renderItem = useCallback(
-    ({ item }: { item: Transaction }) => (
-      <TransactionRow item={item} />
-    ),
-    []
+    ({ item }: { item: Transaction }) => <TransactionRow item={item} />,
+    [],
   );
 
   return (
@@ -150,11 +153,7 @@ const SalesTransactions = () => {
 
           {search.length > 0 && (
             <Pressable onPress={() => setSearch("")}>
-              <Ionicons
-                name="close-circle"
-                size={16}
-                color="#9ca3af"
-              />
+              <Ionicons name="close-circle" size={16} color="#9ca3af" />
             </Pressable>
           )}
         </View>
@@ -173,10 +172,10 @@ const SalesTransactions = () => {
                     ? item === "Paid"
                       ? "bg-green-600"
                       : item === "Pending"
-                      ? "bg-orange-500"
-                      : item === "Partial"
-                      ? "bg-blue-600"
-                      : "bg-black"
+                        ? "bg-orange-500"
+                        : item === "Partial"
+                          ? "bg-blue-600"
+                          : "bg-black"
                     : "bg-gray-100"
                 }`}
               >
@@ -193,15 +192,15 @@ const SalesTransactions = () => {
         </View>
       </View>
 
-      {/* 🔥 FIXED LIST */}
+      {/*  FIXED LIST */}
       <FlatList
         data={filteredData}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        style={{ flex: 1 }} // ✅ IMPORTANT
+        style={{ flex: 1 }}
         contentContainerStyle={{
           paddingHorizontal: 16,
-          paddingBottom: 120, // ✅ ensures visible above tab bar
+          paddingBottom: 120,
         }}
         showsVerticalScrollIndicator={false}
       />

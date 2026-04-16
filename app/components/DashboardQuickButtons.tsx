@@ -46,7 +46,7 @@ const DashboardQuickButtons = () => {
         <ActionButton
           title="Add Customer"
           icon="person-add-outline"
-          onPress={() => console.log("Add Customer")}
+          onPress={() => router.push('/AddCustomer')}
         />
       </View>
     </View>
