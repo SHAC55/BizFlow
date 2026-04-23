@@ -3,9 +3,10 @@ import appAssert from "../utils/appAssert";
 import { UNAUTHORIZED } from "../constants/http";
 import AppErrorCode from "../constants/appErrorCode";
 import { verifyToken } from "../utils/jwt";
+import { getAccessTokenFromRequest } from "../utils/requestAuth";
 
 const authenticate: RequestHandler = (req, res, next) => {
-  const accessToken = req.cookies["accessToken"];
+  const accessToken = getAccessTokenFromRequest(req);
   appAssert(
     accessToken,
     UNAUTHORIZED,

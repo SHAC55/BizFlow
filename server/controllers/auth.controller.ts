@@ -1,13 +1,13 @@
 import catchErrors from "../utils/catchErrors";
 import {
+  completeOnboarding,
   createAccount,
+  googleAuth,
   loginUser,
   refreshUserAccessToken,
   resetPassword,
   sendPasswordResetEmail,
   verifyEmail,
-  googleAuth,
-  completeOnboarding,
 } from "../services/auth.service";
 import { CREATED, OK, UNAUTHORIZED } from "../constants/http";
 import {
@@ -18,42 +18,61 @@ import {
 } from "../utils/cookies";
 import {
   loginSchema,
+  onboardingSchema,
   registerSchema,
   resetPasswordSchema,
   verificationCodeSchema,
-  onboardingSchema,
 } from "./auth.schemas";
 import { verifyToken } from "../utils/jwt";
 import { prisma } from "../config/db";
 import appAssert from "../utils/appAssert";
+import { APP_ORIGIN } from "../constants/env";
+import {
+  decodeGoogleMobileState,
+  getAccessTokenFromRequest,
+  getRefreshTokenFromRequest,
+  isMobileAuthRequest,
+} from "../utils/requestAuth";
 
-// ÄÄ Register ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 export const registerHandler = catchErrors(async (req, res) => {
   const request = registerSchema.parse({
     ...req.body,
     userAgent: req.headers["user-agent"],
   });
   const { user, accessToken, refreshToken } = await createAccount(request);
-  return setAuthCookies({ res, accessToken, refreshToken })
-    .status(CREATED)
-    .json(user);
+
+  setAuthCookies({ res, accessToken, refreshToken });
+
+  if (isMobileAuthRequest(req)) {
+    return res.status(CREATED).json({ user, accessToken, refreshToken });
+  }
+
+  return res.status(CREATED).json(user);
 });
 
-// ÄÄ Login ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 export const loginHandler = catchErrors(async (req, res) => {
   const request = loginSchema.parse({
     ...req.body,
     userAgent: req.headers["user-agent"],
   });
   const { safeUser, accessToken, refreshToken } = await loginUser(request);
-  return setAuthCookies({ res, accessToken, refreshToken })
-    .status(OK)
-    .json({ message: "login successful", user: safeUser });
+
+  setAuthCookies({ res, accessToken, refreshToken });
+
+  if (isMobileAuthRequest(req)) {
+    return res.status(OK).json({
+      message: "login successful",
+      user: safeUser,
+      accessToken,
+      refreshToken,
+    });
+  }
+
+  return res.status(OK).json({ message: "login successful", user: safeUser });
 });
 
-// ÄÄ Logout ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 export const logoutHandler = catchErrors(async (req, res) => {
-  const accessToken = req.cookies["accessToken"] as string | undefined;
+  const accessToken = getAccessTokenFromRequest(req);
   const { payload } = verifyToken(accessToken || "");
 
   if (payload) {
@@ -67,9 +86,8 @@ export const logoutHandler = catchErrors(async (req, res) => {
   });
 });
 
-// ÄÄ Refresh Token ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 export const refreshHandler = catchErrors(async (req, res) => {
-  const refreshToken = req.cookies["refreshToken"] as string | undefined;
+  const refreshToken = getRefreshTokenFromRequest(req);
   appAssert(refreshToken, UNAUTHORIZED, "missing refresh token");
 
   const { accessToken, newRefreshToken } =
@@ -79,20 +97,25 @@ export const refreshHandler = catchErrors(async (req, res) => {
     res.cookie("refreshToken", newRefreshToken, getRefreshTokenCookieOptions());
   }
 
-  return res
-    .status(OK)
-    .cookie("accessToken", accessToken, getAccessTokenCookieOptions())
-    .json({ message: "access token refreshed" });
+  res.cookie("accessToken", accessToken, getAccessTokenCookieOptions());
+
+  if (isMobileAuthRequest(req)) {
+    return res.status(OK).json({
+      message: "access token refreshed",
+      accessToken,
+      refreshToken: newRefreshToken || refreshToken,
+    });
+  }
+
+  return res.status(OK).json({ message: "access token refreshed" });
 });
 
-// ÄÄ Verify Email ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 export const verifyEmailHandler = catchErrors(async (req, res) => {
   const verificationCode = verificationCodeSchema.parse(req.params.code);
   await verifyEmail(verificationCode);
   return res.status(OK).json({ message: "email verified" });
 });
 
-// ÄÄ Forgot Password ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 export const forgotPasswordHandler = catchErrors(async (req, res) => {
   const { email } = req.body;
   appAssert(email, 400, "email is required");
@@ -100,7 +123,6 @@ export const forgotPasswordHandler = catchErrors(async (req, res) => {
   return res.status(OK).json({ message: "password reset email sent" });
 });
 
-// ÄÄ Reset Password ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 export const resetPasswordHandler = catchErrors(async (req, res) => {
   const request = resetPasswordSchema.parse(req.body);
   await resetPassword(request);
@@ -109,7 +131,6 @@ export const resetPasswordHandler = catchErrors(async (req, res) => {
   });
 });
 
-// ÄÄ Google OAuth Callback ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 export const googleAuthCallbackHandler = catchErrors(async (req, res) => {
   const { email, name, provider } = req.user as {
     email: string;
@@ -126,14 +147,29 @@ export const googleAuthCallbackHandler = catchErrors(async (req, res) => {
 
   setAuthCookies({ res, accessToken, refreshToken });
 
+  const mobileState = decodeGoogleMobileState(
+    typeof req.query.state === "string" ? req.query.state : undefined,
+  );
+
+  if (mobileState) {
+    const redirectUrl = new URL(mobileState.redirectUri);
+    redirectUrl.searchParams.set("accessToken", accessToken);
+    redirectUrl.searchParams.set("refreshToken", refreshToken);
+    redirectUrl.searchParams.set(
+      "onboarding",
+      isOnboardingComplete ? "0" : "1",
+    );
+
+    return res.redirect(redirectUrl.toString());
+  }
+
   const redirectUrl = isOnboardingComplete
-    ? `${process.env.APP_ORIGIN}/dashboard`
-    : `${process.env.APP_ORIGIN}/onboarding`;
+    ? `${APP_ORIGIN}/dashboard`
+    : `${APP_ORIGIN}/onboarding`;
 
   return res.redirect(redirectUrl);
 });
 
-// ÄÄ Onboarding ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 export const onboardingHandler = catchErrors(async (req, res) => {
   const request = onboardingSchema.parse(req.body);
   const userId = req.userId;

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import passport from "../config/passport";
+import { APP_ORIGIN } from "../constants/env";
 import authenticate from "../middleware/authenticate";
 import {
   forgotPasswordHandler,
@@ -12,6 +13,10 @@ import {
   resetPasswordHandler,
   verifyEmailHandler,
 } from "../controllers/auth.controller";
+import {
+  decodeGoogleMobileState,
+  encodeGoogleMobileState,
+} from "../utils/requestAuth";
 
 const authRoutes = Router();
 
@@ -25,21 +30,47 @@ authRoutes.post("/password/forgot", forgotPasswordHandler);
 authRoutes.post("/password/reset", resetPasswordHandler);
 
 // Google OAuth
-authRoutes.get(
-  "/google",
-  passport.authenticate("google", {
+authRoutes.get("/google", (req, res, next) => {
+  const mobileRedirectUri =
+    typeof req.query.mobile_redirect_uri === "string"
+      ? req.query.mobile_redirect_uri
+      : undefined;
+
+  const state = mobileRedirectUri
+    ? encodeGoogleMobileState({ redirectUri: mobileRedirectUri })
+    : undefined;
+
+  return passport.authenticate("google", {
     scope: ["profile", "email"],
     session: false,
-  }),
-);
-authRoutes.get(
-  "/google/callback",
-  passport.authenticate("google", {
-    session: false,
-    failureRedirect: `${process.env.APP_ORIGIN}/login?error=google_failed`,
-  }),
-  googleAuthCallbackHandler,
-);
+    state,
+  })(req, res, next);
+});
+
+authRoutes.get("/google/callback", (req, res, next) => {
+  const mobileState = decodeGoogleMobileState(
+    typeof req.query.state === "string" ? req.query.state : undefined,
+  );
+
+  return passport.authenticate(
+    "google",
+    { session: false },
+    (error: Error | null, user?: Express.User | false) => {
+      if (error || !user) {
+        if (mobileState) {
+          const redirectUrl = new URL(mobileState.redirectUri);
+          redirectUrl.searchParams.set("error", "google_failed");
+          return res.redirect(redirectUrl.toString());
+        }
+
+        return res.redirect(`${APP_ORIGIN}/login?error=google_failed`);
+      }
+
+      req.user = user;
+      return next();
+    },
+  )(req, res, next);
+}, googleAuthCallbackHandler);
 
 // Onboarding
 authRoutes.post("/onboarding", authenticate, onboardingHandler);
