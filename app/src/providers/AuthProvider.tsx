@@ -11,12 +11,12 @@ import { makeRedirectUri } from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
 import {
   buildGoogleAuthUrl,
+  completeOnboarding as completeOnboardingRequest,
   fetchCurrentUser,
   login as loginRequest,
   logout as logoutRequest,
   refreshSession,
   register as registerRequest,
-  toTokens,
 } from "../lib/api";
 import {
   clearStoredSession,
@@ -26,6 +26,7 @@ import {
 import type {
   AuthSession,
   LoginPayload,
+  OnboardingPayload,
   RegisterPayload,
   User,
 } from "../types/auth";
@@ -38,6 +39,7 @@ type AuthContextValue = {
   isBusy: boolean;
   login: (payload: LoginPayload) => Promise<void>;
   register: (payload: RegisterPayload) => Promise<void>;
+  completeOnboarding: (payload: OnboardingPayload) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
 };
@@ -126,6 +128,26 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     }
   };
 
+  const completeOnboarding = async (payload: OnboardingPayload) => {
+    const accessToken = session?.tokens.accessToken;
+    const refreshToken = session?.tokens.refreshToken;
+
+    if (!accessToken || !refreshToken) {
+      throw new Error("Session expired. Please sign in again.");
+    }
+
+    setIsBusy(true);
+
+    try {
+      await completeOnboardingRequest(accessToken, payload);
+      const user = await fetchCurrentUser(accessToken);
+      const nextSession = buildSession(user, accessToken, refreshToken);
+      await persistSession(nextSession);
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
   const loginWithGoogle = async () => {
     setIsBusy(true);
 
@@ -186,6 +208,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       isBusy,
       login,
       register,
+      completeOnboarding,
       loginWithGoogle,
       logout,
     }),

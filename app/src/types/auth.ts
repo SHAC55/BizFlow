@@ -41,3 +41,9 @@ export type RegisterPayload = {
   password: string;
   confirmPassword: string;
 };
+
+export type OnboardingPayload = {
+  businessName: string;
+  phone: string;
+  username: string;
+};
