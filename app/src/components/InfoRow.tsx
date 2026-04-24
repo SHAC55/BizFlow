@@ -1,5 +1,4 @@
 import { Text, View } from "react-native";
-import { authStyles as styles } from "../styles/authStyles";
 
 type InfoRowProps = {
   label: string;
@@ -7,8 +6,8 @@ type InfoRowProps = {
 };
 
 export const InfoRow = ({ label, value }: InfoRowProps) => (
-  <View style={styles.infoRow}>
-    <Text style={styles.infoLabel}>{label}</Text>
-    <Text style={styles.infoValue}>{value}</Text>
+  <View className="border-b border-gray-200 px-3.5 py-3">
+    <Text className="mb-1 text-xs text-gray-500">{label}</Text>
+    <Text className="text-[15px] font-semibold text-gray-900">{value}</Text>
   </View>
 );

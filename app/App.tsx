@@ -1,3 +1,4 @@
+import "./global.css";
 import { AuthProvider, useAuth } from "./src/providers/AuthProvider";
 import { AuthPage } from "./src/pages/AuthPage";
 import { AuthenticatedPage } from "./src/pages/AuthenticatedPage";
