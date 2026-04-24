@@ -245,25 +245,13 @@ export const getCustomers = async (data: GetCustomersParams) => {
     }),
   };
 
-  const [customers, total, allMatchingCustomers] = await prisma.$transaction([
-    prisma.customer.findMany({
-      where,
-      select: customerListSelect,
-      orderBy: {
-        createdAt: "desc",
-      },
-      skip,
-      take: limit,
-    }),
-    prisma.customer.count({ where }),
-    prisma.customer.findMany({
-      where,
-      select: customerListSelect,
-      orderBy: {
-        createdAt: "desc",
-      },
-    }),
-  ]);
+  const allMatchingCustomers = await prisma.customer.findMany({
+    where,
+    select: customerListSelect,
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 
   const filteredAndSortedCustomers = allMatchingCustomers
     .map(mapCustomerMetrics)

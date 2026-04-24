@@ -1,13 +1,29 @@
 declare module "passport" {
-  import type { RequestHandler } from "express";
+  import type {
+    NextFunction,
+    Request,
+    RequestHandler,
+    Response,
+  } from "express";
+
+  type AuthenticateCallback = (
+    error: Error | null,
+    user?: Express.User | false,
+    info?: unknown,
+    status?: number | Record<string, unknown>,
+  ) => void;
 
   const passport: {
     use: (strategy: unknown) => void;
     initialize: () => RequestHandler;
-    authenticate: (
-      strategy: string,
-      options?: Record<string, unknown>,
-    ) => RequestHandler;
+    authenticate: {
+      (strategy: string, options?: Record<string, unknown>): RequestHandler;
+      (
+        strategy: string,
+        options: Record<string, unknown>,
+        callback: AuthenticateCallback,
+      ): (req: Request, res: Response, next: NextFunction) => void;
+    };
   };
 
   export default passport;

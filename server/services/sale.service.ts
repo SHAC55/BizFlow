@@ -323,25 +323,13 @@ export const getSales = async (data: GetSalesParams) => {
     }),
   };
 
-  const [sales, total, allMatchingSales] = await prisma.$transaction([
-    prisma.sale.findMany({
-      where,
-      select: saleListSelect,
-      orderBy: {
-        createdAt: "desc",
-      },
-      skip,
-      take: limit,
-    }),
-    prisma.sale.count({ where }),
-    prisma.sale.findMany({
-      where,
-      select: saleListSelect,
-      orderBy: {
-        createdAt: "desc",
-      },
-    }),
-  ]);
+  const allMatchingSales = await prisma.sale.findMany({
+    where,
+    select: saleListSelect,
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 
   const filteredSales = allMatchingSales
     .map(mapSaleMetrics)
@@ -359,10 +347,7 @@ export const getSales = async (data: GetSalesParams) => {
       }
     });
 
-  const paginatedSales =
-    data.status === "all"
-      ? sales.map(mapSaleMetrics)
-      : filteredSales.slice(skip, skip + limit);
+  const paginatedSales = filteredSales.slice(skip, skip + limit);
 
   const now = new Date();
   const summary = filteredSales.reduce(
@@ -424,8 +409,8 @@ export const getSales = async (data: GetSalesParams) => {
     pagination: {
       page,
       limit,
-      total: data.status === "all" ? total : filteredTotal,
-      totalPages: Math.ceil((data.status === "all" ? total : filteredTotal) / limit),
+      total: filteredTotal,
+      totalPages: Math.ceil(filteredTotal / limit),
     },
     summary: {
       totalSales: summary.totalSales,
