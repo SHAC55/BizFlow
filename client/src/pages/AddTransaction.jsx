@@ -26,7 +26,6 @@ const formatCurrency = (value) =>
 const AddTransaction = () => {
   const navigate = useNavigate();
   const [customerSearch, setCustomerSearch] = useState("");
-  const [isTotalEdited, setIsTotalEdited] = useState(false);
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
   const [reminderEnabled, setReminderEnabled] = useState(true);
 
@@ -59,7 +58,8 @@ const AddTransaction = () => {
           unitPrice: 0,
         },
       ],
-      totalAmount: 0,
+      discountAmount: 0,
+      gstRate: 18,
       paidAmount: 0,
       reminderDate: "",
     },
@@ -71,7 +71,8 @@ const AddTransaction = () => {
   });
 
   const watchedItems = watch("items");
-  const totalAmount = Number(watch("totalAmount") || 0);
+  const discountAmount = Number(watch("discountAmount") || 0);
+  const gstRate = Number(watch("gstRate") || 0);
   const paidAmount = Number(watch("paidAmount") || 0);
   const reminderDate = watch("reminderDate");
   const selectedCustomerId = watch("customerId");
@@ -87,19 +88,13 @@ const AddTransaction = () => {
     [watchedItems],
   );
 
-  // Auto-update total amount when subtotal changes (if not manually edited)
-  useEffect(() => {
-    if (!isTotalEdited) {
-      setValue("totalAmount", subtotalAmount, {
-        shouldDirty: false,
-        shouldValidate: true,
-      });
-    }
-  }, [isTotalEdited, setValue, subtotalAmount]);
-
   const selectedCustomer = customers.find(
     (customer) => customer.id === selectedCustomerId,
   );
+  const normalizedDiscountAmount = Math.min(discountAmount, subtotalAmount);
+  const taxableAmount = Math.max(subtotalAmount - normalizedDiscountAmount, 0);
+  const gstAmount = Number(((taxableAmount * gstRate) / 100).toFixed(2));
+  const totalAmount = Number((taxableAmount + gstAmount).toFixed(2));
   const dueAmount = Math.max(totalAmount - paidAmount, 0);
   const saleStatus =
     dueAmount <= 0 ? "paid" : paidAmount > 0 ? "partial" : "pending";
@@ -112,7 +107,7 @@ const AddTransaction = () => {
       }, 0),
     [products, watchedItems],
   );
-  const estimatedProfit = totalAmount - estimatedCostAmount;
+  const estimatedProfit = taxableAmount - estimatedCostAmount;
 
   useEffect(() => {
     if (dueAmount <= 0) {
@@ -136,17 +131,14 @@ const AddTransaction = () => {
     setValue(`items.${index}.unitPrice`, product?.price ?? 0, {
       shouldValidate: true,
     });
-    setIsTotalEdited(false);
   };
 
   const handleQuantityChange = (index, value) => {
     setValue(`items.${index}.quantity`, value, { shouldValidate: true });
-    setIsTotalEdited(false);
   };
 
   const handleUnitPriceChange = (index, value) => {
     setValue(`items.${index}.unitPrice`, value, { shouldValidate: true });
-    setIsTotalEdited(false);
   };
 
   const handleCustomerSelect = (customerId) => {
@@ -168,7 +160,11 @@ const AddTransaction = () => {
         quantity: Number(item.quantity),
         unitPrice: Number(item.unitPrice),
       })),
-      totalAmount: Number(formData.totalAmount),
+      subtotalAmount,
+      discountAmount: normalizedDiscountAmount,
+      gstRate,
+      gstAmount,
+      totalAmount,
       paidAmount: Number(formData.paidAmount || 0),
       reminderDate:
         dueAmount > 0 && reminderEnabled && formData.reminderDate
@@ -187,12 +183,12 @@ const AddTransaction = () => {
           unitPrice: 0,
         },
       ],
-      totalAmount: 0,
+      discountAmount: 0,
+      gstRate: 18,
       paidAmount: 0,
       reminderDate: "",
     });
     setCustomerSearch("");
-    setIsTotalEdited(false);
     setShowCustomerDropdown(false);
     setReminderEnabled(true);
     navigate(`/sales/${response.sale.id}`);
@@ -504,53 +500,59 @@ const AddTransaction = () => {
               <section className="grid gap-4 md:grid-cols-2">
                 <div>
                   <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Final Amount
+                    Discount Amount
                   </label>
                   <div className="relative">
                     <DollarSign className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                     <input
                       type="number"
-                      min="0.01"
+                      min="0"
                       step="0.01"
-                      value={totalAmount}
-                      onChange={(event) => {
-                        const nextValue = event.target.value;
-                        setIsTotalEdited(true);
+                      value={discountAmount}
+                      onChange={(event) =>
                         setValue(
-                          "totalAmount",
-                          nextValue === "" ? 0 : Number(nextValue),
+                          "discountAmount",
+                          event.target.value === "" ? 0 : Number(event.target.value),
                           {
-                            shouldDirty: true,
                             shouldValidate: true,
                           },
-                        );
-                      }}
+                        )
+                      }
                       className="w-full rounded-xl border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition-all focus:border-gray-500 focus:ring-1 focus:ring-gray-200"
                     />
                   </div>
-                  {errors.totalAmount && (
-                    <p className="mt-2 text-xs text-red-500">
-                      {errors.totalAmount.message}
-                    </p>
-                  )}
                   <p className="mt-2 text-xs text-gray-500">
-                    Edit to apply discount
+                    Discount is applied before GST
                   </p>
-                  {isTotalEdited && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsTotalEdited(false);
-                        setValue("totalAmount", subtotalAmount, {
-                          shouldDirty: true,
-                          shouldValidate: true,
-                        });
-                      }}
-                      className="mt-2 text-xs font-medium text-gray-600 hover:text-black transition-colors"
-                    >
-                      Reset to original
-                    </button>
-                  )}
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                    GST Rate (%)
+                  </label>
+                  <div className="relative">
+                    <Calculator className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.01"
+                      value={gstRate}
+                      onChange={(event) =>
+                        setValue(
+                          "gstRate",
+                          event.target.value === "" ? 0 : Number(event.target.value),
+                          {
+                            shouldValidate: true,
+                          },
+                        )
+                      }
+                      className="w-full rounded-xl border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition-all focus:border-gray-500 focus:ring-1 focus:ring-gray-200"
+                    />
+                  </div>
+                  <p className="mt-2 text-xs text-gray-500">
+                    GST amount: {formatCurrency(gstAmount)}
+                  </p>
                 </div>
 
                 <div>
@@ -695,7 +697,27 @@ const AddTransaction = () => {
                       Discount
                     </p>
                     <p className="mt-2 text-xl font-bold">
-                      {formatCurrency(Math.max(subtotalAmount - totalAmount, 0))}
+                      {formatCurrency(normalizedDiscountAmount)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-xl bg-gray-50 p-4 text-gray-700 border border-gray-100">
+                    <p className="text-xs uppercase tracking-wider opacity-70">
+                      Taxable Amount
+                    </p>
+                    <p className="mt-2 text-xl font-bold">
+                      {formatCurrency(taxableAmount)}
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl bg-amber-50 p-4 text-amber-800 border border-amber-100">
+                    <p className="text-xs uppercase tracking-wider opacity-70">
+                      GST ({gstRate}%)
+                    </p>
+                    <p className="mt-2 text-xl font-bold">
+                      {formatCurrency(gstAmount)}
                     </p>
                   </div>
                 </div>

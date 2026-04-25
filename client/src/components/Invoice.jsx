@@ -217,12 +217,21 @@ const Invoice = forwardRef(({ sale }, ref) => {
               </div>
             )}
 
+            {sale.gstAmount > 0 && (
+              <div className="flex justify-between py-1.5 text-xs text-gray-500">
+                <span>GST ({fmt(sale.gstRate).replace(".00", "")}%)</span>
+                <span className="text-gray-900 font-semibold">
+                  ₹{fmt(sale.gstAmount)}
+                </span>
+              </div>
+            )}
+
             <div className="flex justify-between items-center py-3 mt-1.5 border-t-2 border-b-2 border-gray-900">
               <span className="text-[13px] font-bold text-gray-900">
                 Total Amount
               </span>
               <span className="text-xl font-extrabold text-gray-900 tracking-tight">
-                ₹{fmt(sale.subtotalAmount - (sale.discountAmount || 0))}
+                ₹{fmt(sale.totalAmount)}
               </span>
             </div>
 

@@ -455,6 +455,17 @@ const SaleDetail = () => {
                   </div>
                 )}
 
+                {sale.gstAmount > 0 && (
+                  <div className="rounded-xl bg-amber-50 p-5 border border-amber-200">
+                    <p className="text-xs uppercase tracking-wider text-amber-700">
+                      GST ({sale.gstRate}%)
+                    </p>
+                    <p className="mt-1 text-2xl font-bold text-amber-900">
+                      {formatCurrency(sale.gstAmount)}
+                    </p>
+                  </div>
+                )}
+
                 <div className="rounded-xl bg-gray-900 p-5 text-white">
                   <p className="text-xs uppercase tracking-wider opacity-70">
                     Final Amount
