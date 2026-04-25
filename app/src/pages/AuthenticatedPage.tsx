@@ -1,5 +1,6 @@
 import { StatusBar } from "expo-status-bar";
-import { Image, Pressable, SafeAreaView, Text, View } from "react-native";
+import { Image, Pressable, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { InfoRow } from "../components/InfoRow";
 import { authAssets } from "../constants/auth";
 import type { AuthSession } from "../types/auth";

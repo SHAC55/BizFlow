@@ -6,7 +6,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
-  SafeAreaView,
   ScrollView,
   Text,
   View,
@@ -15,6 +14,7 @@ import { authAssets } from "../constants/auth";
 import { useAuthPageState } from "../hooks/useAuthPageState";
 import { SignInPage } from "./SignInPage";
 import { SignUpPage } from "./SignUpPage";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export const AuthPage = () => {
   const {
