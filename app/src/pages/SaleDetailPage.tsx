@@ -9,6 +9,8 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
+import Toast from "react-native-toast-message";
 import { AppLayout } from "../components/AppLayout";
 import { createSalePayment, fetchSale } from "../lib/api";
 import { useAuth } from "../providers/AuthProvider";
@@ -67,6 +69,7 @@ export const SaleDetailPage = ({
     const token = session?.tokens.accessToken;
     if (!token || !sale) return;
 
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setIsPaying(true);
 
     try {
@@ -78,6 +81,12 @@ export const SaleDetailPage = ({
 
       setSale(updated);
       setPaymentAmount("");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Toast.show({ type: "success", text1: "Payment Recorded", text2: `₹${paymentAmount} added to this sale.` });
+    } catch (err) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      const msg = err instanceof Error ? err.message : "Failed to record payment";
+      Toast.show({ type: "error", text1: "Payment Failed", text2: msg });
     } finally {
       setIsPaying(false);
     }
@@ -109,6 +118,7 @@ export const SaleDetailPage = ({
         <View className="mb-4 flex-row items-center justify-between">
           <Pressable
             onPress={handleInvoice}
+            android_ripple={{ color: "rgba(255,255,255,0.1)", borderless: false }}
             className="flex-row items-center bg-black px-4 py-3 rounded-2xl"
           >
             <MaterialIcons name="receipt-long" size={18} color="#fff" />
@@ -118,6 +128,7 @@ export const SaleDetailPage = ({
           </Pressable>
           <Pressable
             onPress={onBack}
+            android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: false }}
             className="flex-row items-center bg-white px-4 py-3 rounded-2xl border border-slate-200"
           >
             <MaterialIcons
@@ -226,6 +237,7 @@ export const SaleDetailPage = ({
               <Pressable
                 onPress={handlePayment}
                 disabled={isPaying || !paymentAmount}
+                android_ripple={{ color: "rgba(255,255,255,0.1)", borderless: false }}
                 className={`mt-4 rounded-2xl py-4 items-center ${
                   isPaying || !paymentAmount ? "bg-slate-300" : "bg-black"
                 }`}

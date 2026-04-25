@@ -8,7 +8,12 @@ import {
   TextInput,
   View,
 } from "react-native";
+import DateTimePicker, {
+  type DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
 import { MaterialIcons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
+import Toast from "react-native-toast-message";
 import { AppLayout } from "../components/AppLayout";
 import { createSale, fetchCustomers, fetchProducts } from "../lib/api";
 import { useAuth } from "../providers/AuthProvider";
@@ -49,7 +54,21 @@ export const AddSalePage = ({
   const [discount, setDiscount] = useState("0");
   const [paidAmount, setPaidAmount] = useState("0");
   const [reminderDate, setReminderDate] = useState("");
+  const [reminderDateObj, setReminderDateObj] = useState<Date | undefined>(undefined);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const formatDateForDisplay = (d: Date) =>
+    d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+
+  const formatDateForBackend = (d: Date) => d.toISOString().split("T")[0];
+
+  const handleDateChange = (event: DateTimePickerEvent, selected?: Date) => {
+    if (Platform.OS === "android") setShowDatePicker(false);
+    if (event.type === "dismissed" || !selected) return;
+    setReminderDateObj(selected);
+    setReminderDate(formatDateForBackend(selected));
+  };
 
   useEffect(() => {
     const token = session?.tokens.accessToken;
@@ -103,20 +122,30 @@ export const AddSalePage = ({
   const handleSubmit = async () => {
     const token = session?.tokens.accessToken;
     if (!token) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setLoading(true);
-    const res = await createSale(token, {
-      customerId,
-      items: items.map((i) => ({
-        productId: i.productId,
-        quantity: Number(i.quantity),
-        unitPrice: Number(i.price),
-      })),
-      totalAmount: total,
-      paidAmount: Number(paidAmount),
-      reminderDate: reminderDate || undefined,
-    });
-    setLoading(false);
-    onCreated(res.sale.id);
+    try {
+      const res = await createSale(token, {
+        customerId,
+        items: items.map((i) => ({
+          productId: i.productId,
+          quantity: Number(i.quantity),
+          unitPrice: Number(i.price),
+        })),
+        totalAmount: total,
+        paidAmount: Number(paidAmount),
+        reminderDate: reminderDate || undefined,
+      });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Toast.show({ type: "success", text1: "Sale Created", text2: `₹${total.toLocaleString("en-IN")} sale recorded.` });
+      onCreated(res.sale.id);
+    } catch (err) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      const msg = err instanceof Error ? err.message : "Failed to create sale";
+      Toast.show({ type: "error", text1: "Sale Failed", text2: msg });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -168,7 +197,7 @@ export const AddSalePage = ({
                     </Text>
                   )}
                 </View>
-                <Pressable onPress={() => setCustomerId("")}>
+                <Pressable onPress={() => setCustomerId("")} android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: true }}>
                   <MaterialIcons name="close" size={18} color="#94a3b8" />
                 </Pressable>
               </View>
@@ -182,6 +211,7 @@ export const AddSalePage = ({
                     <Pressable
                       key={c.id}
                       onPress={() => setCustomerId(c.id)}
+                      android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: false }}
                       className="bg-slate-100 rounded-xl px-4 py-2.5 items-center"
                     >
                       <Text className="text-[13px] font-medium text-slate-700">
@@ -220,7 +250,7 @@ export const AddSalePage = ({
                     Item {index + 1}
                   </Text>
                   {items.length > 1 && (
-                    <Pressable onPress={() => removeItem(index)}>
+                    <Pressable onPress={() => removeItem(index)} android_ripple={{ color: "rgba(239,68,68,0.15)", borderless: false }}>
                       <View className="bg-red-50 rounded-lg px-2.5 py-1.5 flex-row items-center gap-1">
                         <MaterialIcons
                           name="delete-outline"
@@ -252,6 +282,7 @@ export const AddSalePage = ({
                       onPress={() =>
                         updateItem(index, { productId: "", price: "0" })
                       }
+                      android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: true }}
                     >
                       <MaterialIcons name="close" size={18} color="#94a3b8" />
                     </Pressable>
@@ -279,6 +310,7 @@ export const AddSalePage = ({
                             onPress={() =>
                               updateItem(index, { productId: p.id })
                             }
+                            android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: false }}
                             className="bg-slate-100 rounded-xl px-4 py-2.5 items-center"
                           >
                             <Text className="text-[13px] font-medium text-slate-700">
@@ -309,6 +341,7 @@ export const AddSalePage = ({
                             ),
                           })
                         }
+                        android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: false }}
                         className="px-4 py-3.5"
                       >
                         <MaterialIcons
@@ -329,6 +362,7 @@ export const AddSalePage = ({
                             quantity: String((Number(item.quantity) || 0) + 1),
                           })
                         }
+                        android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: false }}
                         className="px-4 py-3.5"
                       >
                         <MaterialIcons name="add" size={16} color="#475569" />
@@ -372,6 +406,7 @@ export const AddSalePage = ({
             onPress={() =>
               setItems([...items, { productId: "", quantity: "1", price: "0" }])
             }
+            android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: false }}
             className="border-2 border-dashed border-slate-200 rounded-2xl py-4 items-center mb-5 flex-row justify-center gap-2"
           >
             <MaterialIcons
@@ -432,16 +467,34 @@ export const AddSalePage = ({
               <Text className="text-[11px] font-medium text-slate-400 mb-1.5 ml-1">
                 REMINDER DATE (optional)
               </Text>
-              <View className="flex-row items-center bg-slate-50 border border-slate-100 rounded-xl px-4 py-3.5">
+              <Pressable
+                onPress={() => setShowDatePicker(true)}
+                android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: false }}
+                className="flex-row items-center bg-slate-50 border border-slate-100 rounded-xl px-4 py-3.5"
+              >
                 <MaterialIcons name="event" size={16} color="#94a3b8" />
-                <TextInput
-                  value={reminderDate}
-                  onChangeText={setReminderDate}
-                  placeholder="DD/MM/YYYY"
-                  placeholderTextColor="#94a3b8"
-                  className="flex-1 ml-2 text-[15px] text-slate-800"
+                <Text className={`flex-1 ml-2 text-[15px] ${reminderDateObj ? "text-slate-800" : "text-slate-400"}`}>
+                  {reminderDateObj ? formatDateForDisplay(reminderDateObj) : "Set reminder date"}
+                </Text>
+                {reminderDateObj && (
+                  <Pressable
+                    onPress={() => { setReminderDateObj(undefined); setReminderDate(""); }}
+                    android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: true }}
+                    hitSlop={8}
+                  >
+                    <MaterialIcons name="close" size={16} color="#94a3b8" />
+                  </Pressable>
+                )}
+              </Pressable>
+              {showDatePicker && (
+                <DateTimePicker
+                  value={reminderDateObj ?? new Date()}
+                  mode="date"
+                  display={Platform.OS === "ios" ? "compact" : "default"}
+                  minimumDate={new Date()}
+                  onChange={handleDateChange}
                 />
-              </View>
+              )}
             </View>
           </View>
 
@@ -489,6 +542,7 @@ export const AddSalePage = ({
           <Pressable
             onPress={handleSubmit}
             disabled={loading || !customerId}
+            android_ripple={{ color: "rgba(255,255,255,0.1)", borderless: false }}
             className={`rounded-2xl py-4 items-center flex-row justify-center gap-2 ${
               loading || !customerId ? "bg-slate-300" : "bg-slate-900"
             }`}

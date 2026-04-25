@@ -1,8 +1,10 @@
 import "./global.css";
 import { useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 
 import { AuthProvider, useAuth } from "./src/providers/AuthProvider";
+import { ScreenTransition } from "./src/components/ScreenTransition";
 
 import { AuthPage } from "./src/pages/AuthPage";
 import { AddCustomerPage } from "./src/pages/AddCustomerPage";
@@ -20,6 +22,14 @@ import { SalesPage } from "./src/pages/SalesPage";
 
 import type { AppRoute, AppScreen } from "./src/types/navigation";
 
+const screenKey = (s: AppScreen): string => {
+  const params =
+    "productId" in s ? s.productId :
+    "saleId" in s ? s.saleId :
+    "customerId" in s ? (s.customerId ?? "") : "";
+  return s.route + params;
+};
+
 const AppContent = () => {
   const { session, isReady, logout } = useAuth();
 
@@ -33,162 +43,184 @@ const AppContent = () => {
 
   if (session) {
     if (session.needsOnboarding) {
-      return <OnboardingPage session={session} onLogout={logout} />;
+      return (
+        <ScreenTransition screenKey="onboarding">
+          <OnboardingPage session={session} onLogout={logout} />
+        </ScreenTransition>
+      );
     }
 
     if (screen.route === "inventory") {
       return (
-        <InventoryPage
-          onAddInventory={() => setScreen({ route: "addInventory" })}
-          onBack={() => setScreen({ route: "dashboard" })}
-          onNavigate={navigate}
-          onOpenProduct={(productId) =>
-            setScreen({ route: "productDetail", productId })
-          }
-        />
+        <ScreenTransition screenKey={screenKey(screen)}>
+          <InventoryPage
+            onAddInventory={() => setScreen({ route: "addInventory" })}
+            onBack={() => setScreen({ route: "dashboard" })}
+            onNavigate={navigate}
+            onOpenProduct={(productId) =>
+              setScreen({ route: "productDetail", productId })
+            }
+          />
+        </ScreenTransition>
       );
     }
 
     if (screen.route === "addInventory") {
       return (
-        <AddInventoryPage
-          productId={screen.productId}
-          onBackToInventory={() => setScreen({ route: "inventory" })}
-          onCreated={(productId) =>
-            setScreen(
-              productId
-                ? { route: "productDetail", productId }
-                : { route: "inventory" }
-            )
-          }
-          onNavigate={navigate}
-        />
+        <ScreenTransition screenKey={screenKey(screen)}>
+          <AddInventoryPage
+            productId={screen.productId}
+            onBackToInventory={() => setScreen({ route: "inventory" })}
+            onCreated={(productId) =>
+              setScreen(
+                productId
+                  ? { route: "productDetail", productId }
+                  : { route: "inventory" }
+              )
+            }
+            onNavigate={navigate}
+          />
+        </ScreenTransition>
       );
     }
 
     if (screen.route === "productDetail") {
       return (
-        <ProductDetailPage
-          productId={screen.productId}
-          onBack={() => setScreen({ route: "inventory" })}
-          onEdit={() =>
-            setScreen({
-              route: "addInventory",
-              productId: screen.productId,
-            })
-          }
-          onNavigate={navigate}
-        />
+        <ScreenTransition screenKey={screenKey(screen)}>
+          <ProductDetailPage
+            productId={screen.productId}
+            onBack={() => setScreen({ route: "inventory" })}
+            onEdit={() =>
+              setScreen({
+                route: "addInventory",
+                productId: screen.productId,
+              })
+            }
+            onNavigate={navigate}
+          />
+        </ScreenTransition>
       );
     }
 
     if (screen.route === "sales") {
       return (
-        <SalesPage
-          onNavigate={navigate}
-          onOpenAddSale={() => setScreen({ route: "addSale" })}
-          onOpenSale={(saleId) =>
-            setScreen({ route: "saleDetail", saleId })
-          }
-        />
+        <ScreenTransition screenKey={screenKey(screen)}>
+          <SalesPage
+            onNavigate={navigate}
+            onOpenAddSale={() => setScreen({ route: "addSale" })}
+            onOpenSale={(saleId) =>
+              setScreen({ route: "saleDetail", saleId })
+            }
+          />
+        </ScreenTransition>
       );
     }
 
     if (screen.route === "addSale") {
       return (
-        <AddSalePage
-          onBack={() => setScreen({ route: "sales" })}
-          onCreated={(saleId) =>
-            setScreen({ route: "saleDetail", saleId })
-          }
-          onNavigate={navigate}
-        />
+        <ScreenTransition screenKey={screenKey(screen)}>
+          <AddSalePage
+            onBack={() => setScreen({ route: "sales" })}
+            onCreated={(saleId) =>
+              setScreen({ route: "saleDetail", saleId })
+            }
+            onNavigate={navigate}
+          />
+        </ScreenTransition>
       );
     }
 
     if (screen.route === "saleDetail") {
       return (
-        <SaleDetailPage
-          saleId={screen.saleId}
-          onBack={() => setScreen({ route: "sales" })}
-          onNavigate={navigate}
-        />
+        <ScreenTransition screenKey={screenKey(screen)}>
+          <SaleDetailPage
+            saleId={screen.saleId}
+            onBack={() => setScreen({ route: "sales" })}
+            onNavigate={navigate}
+          />
+        </ScreenTransition>
       );
     }
 
     if (screen.route === "customers") {
       return (
-        <CustomersPage
-          onNavigate={navigate}
-          onOpenAddCustomer={() =>
-            setScreen({ route: "addCustomer" })
-          }
-          onOpenCustomer={(customerId) =>
-            setScreen({
-              route: "customerDetail",
-              customerId,
-            })
-          }
-        />
+        <ScreenTransition screenKey={screenKey(screen)}>
+          <CustomersPage
+            onNavigate={navigate}
+            onOpenAddCustomer={() =>
+              setScreen({ route: "addCustomer" })
+            }
+            onOpenCustomer={(customerId) =>
+              setScreen({
+                route: "customerDetail",
+                customerId,
+              })
+            }
+          />
+        </ScreenTransition>
       );
     }
 
     if (screen.route === "addCustomer") {
       return (
-        <AddCustomerPage
-          customerId={screen.customerId}
-          onBack={() => setScreen({ route: "customers" })}
-          onCreated={(customerId) =>
-            setScreen(
-              customerId
-                ? { route: "customerDetail", customerId }
-                : { route: "customers" }
-            )
-          }
-          onNavigate={navigate}
-        />
+        <ScreenTransition screenKey={screenKey(screen)}>
+          <AddCustomerPage
+            customerId={screen.customerId}
+            onBack={() => setScreen({ route: "customers" })}
+            onCreated={(customerId) =>
+              setScreen(
+                customerId
+                  ? { route: "customerDetail", customerId }
+                  : { route: "customers" }
+              )
+            }
+            onNavigate={navigate}
+          />
+        </ScreenTransition>
       );
     }
 
     if (screen.route === "customerDetail") {
       return (
-        <CustomerDetailPage
-          customerId={screen.customerId}
-          onBack={() => setScreen({ route: "customers" })}
-          onEdit={() =>
-            setScreen({
-              route: "addCustomer",
-              customerId: screen.customerId,
-            })
-          }
-          onNavigate={navigate}
-          onOpenSale={(saleId) =>
-            setScreen({ route: "saleDetail", saleId })
-          }
-        />
+        <ScreenTransition screenKey={screenKey(screen)}>
+          <CustomerDetailPage
+            customerId={screen.customerId}
+            onBack={() => setScreen({ route: "customers" })}
+            onEdit={() =>
+              setScreen({
+                route: "addCustomer",
+                customerId: screen.customerId,
+              })
+            }
+            onNavigate={navigate}
+            onOpenSale={(saleId) =>
+              setScreen({ route: "saleDetail", saleId })
+            }
+          />
+        </ScreenTransition>
       );
     }
 
-    
-
     return (
-      <DashboardPage
-        session={session}
-        onLogout={logout}
-        onOpenAddInventory={() =>
-          setScreen({ route: "addInventory" })
-        }
-        onOpenCustomers={() =>
-          setScreen({ route: "addCustomer" })
-        }
-        onOpenInventory={() =>
-          setScreen({ route: "inventory" })
-        }
-        onOpenSales={() =>
-          setScreen({ route: "addSale" })
-        }
-        onNavigate={navigate}
-      />
+      <ScreenTransition screenKey="dashboard">
+        <DashboardPage
+          session={session}
+          onLogout={logout}
+          onOpenAddInventory={() =>
+            setScreen({ route: "addInventory" })
+          }
+          onOpenCustomers={() =>
+            setScreen({ route: "addCustomer" })
+          }
+          onOpenInventory={() =>
+            setScreen({ route: "inventory" })
+          }
+          onOpenSales={() =>
+            setScreen({ route: "addSale" })
+          }
+          onNavigate={navigate}
+        />
+      </ScreenTransition>
     );
   }
 
@@ -201,6 +233,7 @@ export default function App() {
       <AuthProvider>
         <AppContent />
       </AuthProvider>
+      <Toast />
     </SafeAreaProvider>
   );
 }

@@ -11,6 +11,8 @@ import {
   View,
   ActivityIndicator,
 } from "react-native";
+import * as Haptics from "expo-haptics";
+import Toast from "react-native-toast-message";
 import { AppLayout } from "../components/AppLayout";
 import { fetchProduct, updateProduct } from "../lib/api";
 import { useAuth } from "../providers/AuthProvider";
@@ -33,6 +35,9 @@ type FormState = {
   quantity: string;
   minimumQuantity: string;
 };
+
+type FormErrors = Partial<Record<keyof FormState, string>>;
+type FormTouched = Partial<Record<keyof FormState, boolean>>;
 
 const initialForm: FormState = {
   name: "",
@@ -59,6 +64,41 @@ const generateSku = (name: string) => {
   return `${prefix}-${random}`;
 };
 
+const validateField = (name: keyof FormState, value: string): string | undefined => {
+  switch (name) {
+    case "name":
+      return value.trim() ? undefined : "Product name is required";
+    case "category":
+      return value.trim() ? undefined : "Category is required";
+    case "costPrice": {
+      if (!value.trim()) return "Cost price is required";
+      const n = Number(value);
+      if (Number.isNaN(n) || n < 0) return "Enter a valid positive number";
+      return undefined;
+    }
+    case "price": {
+      if (!value.trim()) return "Selling price is required";
+      const n = Number(value);
+      if (Number.isNaN(n) || n < 0) return "Enter a valid positive number";
+      return undefined;
+    }
+    case "quantity": {
+      if (!value.trim()) return "Stock quantity is required";
+      const n = Number(value);
+      if (Number.isNaN(n) || !Number.isInteger(n) || n < 0) return "Enter a valid non-negative integer";
+      return undefined;
+    }
+    case "minimumQuantity": {
+      if (!value.trim()) return "Low alert quantity is required";
+      const n = Number(value);
+      if (Number.isNaN(n) || !Number.isInteger(n) || n < 0) return "Enter a valid non-negative integer";
+      return undefined;
+    }
+    default:
+      return undefined;
+  }
+};
+
 export const AddInventoryPage = ({
   productId,
   onBackToInventory,
@@ -66,10 +106,11 @@ export const AddInventoryPage = ({
   onNavigate,
 }: AddInventoryPageProps) => {
   const { session } = useAuth();
-  const { createProduct, error, isLoading } = useCreateProduct();
+  const { createProduct, error: createError, isLoading } = useCreateProduct();
 
   const [form, setForm] = useState<FormState>(initialForm);
-  const [validationError, setValidationError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [touched, setTouched] = useState<FormTouched>({});
   const [isBootstrapping, setIsBootstrapping] = useState(Boolean(productId));
 
   useEffect(() => {
@@ -93,47 +134,56 @@ export const AddInventoryPage = ({
         });
       })
       .catch((err) => {
-        setValidationError(
-          err instanceof Error ? err.message : "Failed to load product",
-        );
+        setErrors({ name: err instanceof Error ? err.message : "Failed to load product" });
       })
       .finally(() => setIsBootstrapping(false));
   }, [productId, session?.tokens.accessToken]);
 
+  const handleChange = (name: keyof FormState, value: string) => {
+    setForm((prev) => ({ ...prev, [name]: value }));
+    if (touched[name]) {
+      const err = validateField(name, value);
+      setErrors((prev) => ({ ...prev, [name]: err }));
+    }
+  };
+
+  const handleBlur = (name: keyof FormState, value: string) => {
+    setTouched((prev) => ({ ...prev, [name]: true }));
+    const err = validateField(name, value);
+    setErrors((prev) => ({ ...prev, [name]: err }));
+  };
+
   const handleSubmit = async () => {
+    const requiredFields: (keyof FormState)[] = [
+      "name", "category", "costPrice", "price", "quantity", "minimumQuantity",
+    ];
+
+    const newErrors: FormErrors = {};
+    const newTouched: FormTouched = {};
+
+    for (const field of requiredFields) {
+      newTouched[field] = true;
+      const err = validateField(field, form[field]);
+      if (err) newErrors[field] = err;
+    }
+
+    setTouched((prev) => ({ ...prev, ...newTouched }));
+    setErrors((prev) => ({ ...prev, ...newErrors }));
+
+    if (Object.keys(newErrors).length > 0) return;
+
     const name = form.name.trim();
     const category = form.category.trim();
     const sku = form.sku.trim();
-
     const costPrice = Number(form.costPrice);
     const price = Number(form.price);
     const quantity = Number(form.quantity);
     const minimumQuantity = Number(form.minimumQuantity);
-
     const token = session?.tokens.accessToken;
 
-    if (
-      !name ||
-      !category ||
-      !form.costPrice ||
-      !form.price ||
-      !form.quantity ||
-      !form.minimumQuantity
-    ) {
-      setValidationError("All required fields must be filled");
-      return;
-    }
-
-    if (
-      [costPrice, price, quantity, minimumQuantity].some((v) => Number.isNaN(v))
-    ) {
-      setValidationError("Enter valid numeric values");
-      return;
-    }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     try {
-      setValidationError(null);
-
       const payload = {
         name,
         category,
@@ -146,19 +196,26 @@ export const AddInventoryPage = ({
 
       if (productId) {
         if (!token) {
-          setValidationError("Session expired");
+          setErrors((prev) => ({ ...prev, name: "Session expired" }));
           return;
         }
 
         await updateProduct(token, productId, payload);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        Toast.show({ type: "success", text1: "Product Updated", text2: `${name} has been saved.` });
         onCreated(productId);
         return;
       }
 
       const product = await createProduct(payload);
       setForm(initialForm);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Toast.show({ type: "success", text1: "Product Added", text2: `${name} is now in your inventory.` });
       onCreated(product.id);
-    } catch {}
+    } catch {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      Toast.show({ type: "error", text1: "Save Failed", text2: "Could not save the product. Try again." });
+    }
   };
 
   return (
@@ -181,6 +238,7 @@ export const AddInventoryPage = ({
           {/* Back */}
           <Pressable
             onPress={onBackToInventory}
+            android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: true }}
             className="mb-5 flex-row items-center"
           >
             <MaterialIcons name="arrow-back-ios" size={15} color="#666" />
@@ -189,11 +247,9 @@ export const AddInventoryPage = ({
 
           {/* Form */}
           <View className="rounded-[28px] border border-zinc-200 bg-white px-5 py-6">
-            {(validationError || error) && (
+            {createError && (
               <View className="mb-5 rounded-2xl bg-zinc-100 px-4 py-4">
-                <Text className="text-[13px] text-black">
-                  {validationError || error}
-                </Text>
+                <Text className="text-[13px] text-black">{createError}</Text>
               </View>
             )}
 
@@ -213,7 +269,9 @@ export const AddInventoryPage = ({
                   icon="inventory-2"
                   placeholder="Wireless Mouse"
                   value={form.name}
-                  onChangeText={(name) => setForm((c) => ({ ...c, name }))}
+                  error={errors.name}
+                  onChangeText={(name) => handleChange("name", name)}
+                  onBlur={() => handleBlur("name", form.name)}
                 />
 
                 <Field
@@ -221,9 +279,9 @@ export const AddInventoryPage = ({
                   icon="category"
                   placeholder="Electronics"
                   value={form.category}
-                  onChangeText={(category) =>
-                    setForm((c) => ({ ...c, category }))
-                  }
+                  error={errors.category}
+                  onChangeText={(category) => handleChange("category", category)}
+                  onBlur={() => handleBlur("category", form.category)}
                 />
 
                 <Field
@@ -231,7 +289,8 @@ export const AddInventoryPage = ({
                   icon="qr-code"
                   placeholder="Auto Generated"
                   value={form.sku}
-                  onChangeText={(sku) => setForm((c) => ({ ...c, sku }))}
+                  onChangeText={(sku) => handleChange("sku", sku)}
+                  onBlur={() => handleBlur("sku", form.sku)}
                 />
 
                 <Pressable
@@ -241,6 +300,7 @@ export const AddInventoryPage = ({
                       sku: generateSku(c.name),
                     }))
                   }
+                  android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: true }}
                   className="mb-7 self-start rounded-full border border-zinc-300 px-5 py-3"
                 >
                   <Text className="text-[13px] font-semibold text-black">
@@ -261,9 +321,9 @@ export const AddInventoryPage = ({
                       keyboardType="decimal-pad"
                       placeholder="0"
                       value={form.costPrice}
-                      onChangeText={(costPrice) =>
-                        setForm((c) => ({ ...c, costPrice }))
-                      }
+                      error={errors.costPrice}
+                      onChangeText={(costPrice) => handleChange("costPrice", costPrice)}
+                      onBlur={() => handleBlur("costPrice", form.costPrice)}
                     />
                   </View>
 
@@ -274,9 +334,9 @@ export const AddInventoryPage = ({
                       keyboardType="decimal-pad"
                       placeholder="0"
                       value={form.price}
-                      onChangeText={(price) =>
-                        setForm((c) => ({ ...c, price }))
-                      }
+                      error={errors.price}
+                      onChangeText={(price) => handleChange("price", price)}
+                      onBlur={() => handleBlur("price", form.price)}
                     />
                   </View>
                 </View>
@@ -289,9 +349,9 @@ export const AddInventoryPage = ({
                       keyboardType="number-pad"
                       placeholder="0"
                       value={form.quantity}
-                      onChangeText={(quantity) =>
-                        setForm((c) => ({ ...c, quantity }))
-                      }
+                      error={errors.quantity}
+                      onChangeText={(quantity) => handleChange("quantity", quantity)}
+                      onBlur={() => handleBlur("quantity", form.quantity)}
                     />
                   </View>
 
@@ -302,12 +362,9 @@ export const AddInventoryPage = ({
                       keyboardType="number-pad"
                       placeholder="0"
                       value={form.minimumQuantity}
-                      onChangeText={(minimumQuantity) =>
-                        setForm((c) => ({
-                          ...c,
-                          minimumQuantity,
-                        }))
-                      }
+                      error={errors.minimumQuantity}
+                      onChangeText={(minimumQuantity) => handleChange("minimumQuantity", minimumQuantity)}
+                      onBlur={() => handleBlur("minimumQuantity", form.minimumQuantity)}
                     />
                   </View>
                 </View>
@@ -340,6 +397,7 @@ export const AddInventoryPage = ({
                 <Pressable
                   onPress={handleSubmit}
                   disabled={isLoading}
+                  android_ripple={{ color: "rgba(255,255,255,0.1)", borderless: false }}
                   className="mt-6 rounded-2xl bg-black py-4 items-center justify-center"
                 >
                   {isLoading ? (
@@ -365,20 +423,28 @@ const Field = ({
   keyboardType = "default",
   placeholder,
   value,
+  error,
   onChangeText,
+  onBlur,
 }: {
   label: string;
   icon: ComponentProps<typeof MaterialIcons>["name"];
   keyboardType?: "default" | "decimal-pad" | "number-pad";
   placeholder: string;
   value: string;
+  error?: string;
   onChangeText: (value: string) => void;
+  onBlur?: () => void;
 }) => (
   <View className="mb-4">
     <Text className="mb-2 text-[14px] font-medium text-zinc-700">{label}</Text>
 
-    <View className="h-16 flex-row items-center rounded-2xl border border-zinc-200 bg-zinc-50 px-4">
-      <MaterialIcons name={icon} size={20} color="#777" />
+    <View
+      className={`h-16 flex-row items-center rounded-2xl border bg-zinc-50 px-4 ${
+        error ? "border-red-300" : "border-zinc-200"
+      }`}
+    >
+      <MaterialIcons name={icon} size={20} color={error ? "#EF4444" : "#777"} />
 
       <TextInput
         className="flex-1 pl-3 text-[16px] text-black"
@@ -387,8 +453,13 @@ const Field = ({
         keyboardType={keyboardType}
         value={value}
         onChangeText={onChangeText}
+        onBlur={onBlur}
       />
     </View>
+
+    {error && (
+      <Text className="text-red-500 text-[11px] mt-1 ml-1">{error}</Text>
+    )}
   </View>
 );
 

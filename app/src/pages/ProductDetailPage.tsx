@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import {
+  Alert,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -8,6 +9,8 @@ import {
   View,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
+import Toast from "react-native-toast-message";
 import { AppLayout } from "../components/AppLayout";
 import {
   adjustProductStock,
@@ -80,6 +83,7 @@ export const ProductDetailPage = ({
   const handleAdjustStock = async () => {
     const token = session?.tokens.accessToken;
     if (!token || !product) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     try {
       await adjustProductStock(token, product.id, {
@@ -90,22 +94,45 @@ export const ProductDetailPage = ({
 
       setQuantity("");
       setReason("");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Toast.show({ type: "success", text1: "Stock Updated", text2: "Inventory level has been adjusted." });
       load(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update stock");
+    } catch (adjustError) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      const msg = adjustError instanceof Error ? adjustError.message : "Failed to adjust stock";
+      setError(msg);
+      Toast.show({ type: "error", text1: "Update Failed", text2: msg });
     }
   };
 
-  const handleDelete = async () => {
-    const token = session?.tokens.accessToken;
-    if (!token || !product) return;
-
-    try {
-      await deleteProduct(token, product.id);
-      onBack();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete");
-    }
+  const handleDelete = () => {
+    Alert.alert(
+      "Delete Product",
+      "This will permanently remove the product and its history. This cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            const accessToken = session?.tokens.accessToken;
+            if (!accessToken || !product) return;
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+            try {
+              await deleteProduct(accessToken, product.id);
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              Toast.show({ type: "success", text1: "Product Deleted" });
+              onBack();
+            } catch (deleteError) {
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+              const msg = deleteError instanceof Error ? deleteError.message : "Failed to delete product";
+              setError(msg);
+              Toast.show({ type: "error", text1: "Delete Failed", text2: msg });
+            }
+          },
+        },
+      ],
+    );
   };
 
   const isLowStock =
@@ -255,6 +282,7 @@ export const ProductDetailPage = ({
 
               <Pressable
                 onPress={handleAdjustStock}
+                android_ripple={{ color: "rgba(255,255,255,0.1)", borderless: false }}
                 className="mt-4 items-center rounded-2xl bg-blue-600 py-4"
               >
                 <Text className="font-semibold text-white">

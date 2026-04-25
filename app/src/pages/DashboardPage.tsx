@@ -207,7 +207,7 @@ export const DashboardPage = ({
             <Text className="text-[11px] font-bold tracking-wider text-slate-400 uppercase">
               Recent Transactions
             </Text>
-            <Pressable onPress={onOpenSales}>
+            <Pressable onPress={onOpenSales} android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: true }}>
               <Text className="text-[11px] font-medium text-indigo-600">
                 View all
               </Text>
@@ -386,6 +386,7 @@ const QuickActions = ({
         <Pressable
           key={action.name}
           onPress={handlers[action.action]}
+          android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: false }}
           className={`flex-row items-center gap-4 px-4 py-3.5 active:bg-slate-50 ${
             index < QUICK_ACTIONS.length - 1 ? "border-b border-slate-50" : ""
           }`}
@@ -455,6 +456,7 @@ const RecentSales = ({ error, isLoading, sales }: RecentSalesProps) => (
           <Pressable
             key={sale.id}
             onPress={() => {}}
+            android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: false }}
             className={`flex-row items-center gap-3 px-4 py-3 active:bg-slate-50 ${
               index < Math.min(sales.length, 5) - 1
                 ? "border-b border-slate-50"
@@ -535,6 +537,7 @@ const RecentSales = ({ error, isLoading, sales }: RecentSalesProps) => (
     {!isLoading && !error && sales.length > 5 && (
       <Pressable
         onPress={() => {}}
+        android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: false }}
         className="py-3 items-center border-t border-slate-50 bg-slate-50/50"
       >
         <Text className="text-[11px] font-medium text-indigo-600">

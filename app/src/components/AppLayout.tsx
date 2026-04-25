@@ -89,6 +89,7 @@ export const AppLayout = ({
 
             {/* PROFILE */}
             <Pressable
+              android_ripple={{ color: "rgba(255,255,255,0.1)", borderless: false }}
               style={{
                 height: 48,
                 width: 48,
@@ -141,6 +142,7 @@ export const AppLayout = ({
               <Pressable
                 key={item.route}
                 onPress={() => onNavigate(item.route)}
+                android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: false }}
                 style={{
                   flex: 1,
                   alignItems: "center",

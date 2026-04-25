@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import {
+  Alert,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -7,6 +8,8 @@ import {
   View,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
+import Toast from "react-native-toast-message";
 import { AppLayout } from "../components/AppLayout";
 import { archiveCustomer, fetchCustomer } from "../lib/api";
 import { useAuth } from "../providers/AuthProvider";
@@ -80,17 +83,36 @@ export const CustomerDetailPage = ({
     load();
   }, [customerId]);
 
-  const handleArchive = async () => {
-    const token = session?.tokens.accessToken;
-    if (!token) return;
-
-    try {
-      setIsArchiving(true);
-      await archiveCustomer(token, customerId);
-      onBack();
-    } finally {
-      setIsArchiving(false);
-    }
+  const handleArchive = () => {
+    Alert.alert(
+      "Archive Customer",
+      "This customer will be archived and hidden from your active list.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Archive",
+          style: "destructive",
+          onPress: async () => {
+            const token = session?.tokens.accessToken;
+            if (!token) return;
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            try {
+              setIsArchiving(true);
+              await archiveCustomer(token, customerId);
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              Toast.show({ type: "success", text1: "Customer Archived" });
+              onBack();
+            } catch (err) {
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+              const msg = err instanceof Error ? err.message : "Failed to archive customer";
+              Toast.show({ type: "error", text1: "Archive Failed", text2: msg });
+            } finally {
+              setIsArchiving(false);
+            }
+          },
+        },
+      ],
+    );
   };
 
   return (
@@ -236,6 +258,7 @@ export const CustomerDetailPage = ({
                   <Pressable
                     key={sale.id}
                     onPress={() => onOpenSale(sale.id)}
+                    android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: false }}
                     className={`px-5 py-4 ${
                       index < customer.sales.length - 1
                         ? "border-b border-black/5"
@@ -279,6 +302,7 @@ export const CustomerDetailPage = ({
 const TopBtn = ({ label, icon, dark, warn, onPress }: any) => (
   <Pressable
     onPress={onPress}
+    android_ripple={{ color: dark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)", borderless: false }}
     className={`flex-row items-center gap-2 rounded-2xl px-4 py-3 ${
       dark
         ? "bg-black"
