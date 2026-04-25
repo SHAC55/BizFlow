@@ -1336,6 +1336,10 @@ export const SaleScalarFieldEnum = {
   id: 'id',
   businessId: 'businessId',
   customerId: 'customerId',
+  subtotalAmount: 'subtotalAmount',
+  discountAmount: 'discountAmount',
+  gstRate: 'gstRate',
+  gstAmount: 'gstAmount',
   totalAmount: 'totalAmount',
   reminderDate: 'reminderDate',
   createdAt: 'createdAt'

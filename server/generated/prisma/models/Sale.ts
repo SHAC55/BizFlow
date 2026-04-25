@@ -28,10 +28,18 @@ export type AggregateSale = {
 }
 
 export type SaleAvgAggregateOutputType = {
+  subtotalAmount: number | null
+  discountAmount: number | null
+  gstRate: number | null
+  gstAmount: number | null
   totalAmount: number | null
 }
 
 export type SaleSumAggregateOutputType = {
+  subtotalAmount: number | null
+  discountAmount: number | null
+  gstRate: number | null
+  gstAmount: number | null
   totalAmount: number | null
 }
 
@@ -39,6 +47,10 @@ export type SaleMinAggregateOutputType = {
   id: string | null
   businessId: string | null
   customerId: string | null
+  subtotalAmount: number | null
+  discountAmount: number | null
+  gstRate: number | null
+  gstAmount: number | null
   totalAmount: number | null
   reminderDate: Date | null
   createdAt: Date | null
@@ -48,6 +60,10 @@ export type SaleMaxAggregateOutputType = {
   id: string | null
   businessId: string | null
   customerId: string | null
+  subtotalAmount: number | null
+  discountAmount: number | null
+  gstRate: number | null
+  gstAmount: number | null
   totalAmount: number | null
   reminderDate: Date | null
   createdAt: Date | null
@@ -57,6 +73,10 @@ export type SaleCountAggregateOutputType = {
   id: number
   businessId: number
   customerId: number
+  subtotalAmount: number
+  discountAmount: number
+  gstRate: number
+  gstAmount: number
   totalAmount: number
   reminderDate: number
   createdAt: number
@@ -65,10 +85,18 @@ export type SaleCountAggregateOutputType = {
 
 
 export type SaleAvgAggregateInputType = {
+  subtotalAmount?: true
+  discountAmount?: true
+  gstRate?: true
+  gstAmount?: true
   totalAmount?: true
 }
 
 export type SaleSumAggregateInputType = {
+  subtotalAmount?: true
+  discountAmount?: true
+  gstRate?: true
+  gstAmount?: true
   totalAmount?: true
 }
 
@@ -76,6 +104,10 @@ export type SaleMinAggregateInputType = {
   id?: true
   businessId?: true
   customerId?: true
+  subtotalAmount?: true
+  discountAmount?: true
+  gstRate?: true
+  gstAmount?: true
   totalAmount?: true
   reminderDate?: true
   createdAt?: true
@@ -85,6 +117,10 @@ export type SaleMaxAggregateInputType = {
   id?: true
   businessId?: true
   customerId?: true
+  subtotalAmount?: true
+  discountAmount?: true
+  gstRate?: true
+  gstAmount?: true
   totalAmount?: true
   reminderDate?: true
   createdAt?: true
@@ -94,6 +130,10 @@ export type SaleCountAggregateInputType = {
   id?: true
   businessId?: true
   customerId?: true
+  subtotalAmount?: true
+  discountAmount?: true
+  gstRate?: true
+  gstAmount?: true
   totalAmount?: true
   reminderDate?: true
   createdAt?: true
@@ -190,6 +230,10 @@ export type SaleGroupByOutputType = {
   id: string
   businessId: string
   customerId: string
+  subtotalAmount: number
+  discountAmount: number
+  gstRate: number
+  gstAmount: number
   totalAmount: number
   reminderDate: Date | null
   createdAt: Date
@@ -222,6 +266,10 @@ export type SaleWhereInput = {
   id?: Prisma.StringFilter<"Sale"> | string
   businessId?: Prisma.StringFilter<"Sale"> | string
   customerId?: Prisma.StringFilter<"Sale"> | string
+  subtotalAmount?: Prisma.FloatFilter<"Sale"> | number
+  discountAmount?: Prisma.FloatFilter<"Sale"> | number
+  gstRate?: Prisma.FloatFilter<"Sale"> | number
+  gstAmount?: Prisma.FloatFilter<"Sale"> | number
   totalAmount?: Prisma.FloatFilter<"Sale"> | number
   reminderDate?: Prisma.DateTimeNullableFilter<"Sale"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Sale"> | Date | string
@@ -236,6 +284,10 @@ export type SaleOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   businessId?: Prisma.SortOrder
   customerId?: Prisma.SortOrder
+  subtotalAmount?: Prisma.SortOrder
+  discountAmount?: Prisma.SortOrder
+  gstRate?: Prisma.SortOrder
+  gstAmount?: Prisma.SortOrder
   totalAmount?: Prisma.SortOrder
   reminderDate?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -253,6 +305,10 @@ export type SaleWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.SaleWhereInput | Prisma.SaleWhereInput[]
   businessId?: Prisma.StringFilter<"Sale"> | string
   customerId?: Prisma.StringFilter<"Sale"> | string
+  subtotalAmount?: Prisma.FloatFilter<"Sale"> | number
+  discountAmount?: Prisma.FloatFilter<"Sale"> | number
+  gstRate?: Prisma.FloatFilter<"Sale"> | number
+  gstAmount?: Prisma.FloatFilter<"Sale"> | number
   totalAmount?: Prisma.FloatFilter<"Sale"> | number
   reminderDate?: Prisma.DateTimeNullableFilter<"Sale"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Sale"> | Date | string
@@ -267,6 +323,10 @@ export type SaleOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   businessId?: Prisma.SortOrder
   customerId?: Prisma.SortOrder
+  subtotalAmount?: Prisma.SortOrder
+  discountAmount?: Prisma.SortOrder
+  gstRate?: Prisma.SortOrder
+  gstAmount?: Prisma.SortOrder
   totalAmount?: Prisma.SortOrder
   reminderDate?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -284,6 +344,10 @@ export type SaleScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Sale"> | string
   businessId?: Prisma.StringWithAggregatesFilter<"Sale"> | string
   customerId?: Prisma.StringWithAggregatesFilter<"Sale"> | string
+  subtotalAmount?: Prisma.FloatWithAggregatesFilter<"Sale"> | number
+  discountAmount?: Prisma.FloatWithAggregatesFilter<"Sale"> | number
+  gstRate?: Prisma.FloatWithAggregatesFilter<"Sale"> | number
+  gstAmount?: Prisma.FloatWithAggregatesFilter<"Sale"> | number
   totalAmount?: Prisma.FloatWithAggregatesFilter<"Sale"> | number
   reminderDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Sale"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Sale"> | Date | string
@@ -291,6 +355,10 @@ export type SaleScalarWhereWithAggregatesInput = {
 
 export type SaleCreateInput = {
   id?: string
+  subtotalAmount: number
+  discountAmount?: number
+  gstRate?: number
+  gstAmount?: number
   totalAmount: number
   reminderDate?: Date | string | null
   createdAt?: Date | string
@@ -305,6 +373,10 @@ export type SaleUncheckedCreateInput = {
   id?: string
   businessId: string
   customerId: string
+  subtotalAmount: number
+  discountAmount?: number
+  gstRate?: number
+  gstAmount?: number
   totalAmount: number
   reminderDate?: Date | string | null
   createdAt?: Date | string
@@ -315,6 +387,10 @@ export type SaleUncheckedCreateInput = {
 
 export type SaleUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  subtotalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  discountAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -329,6 +405,10 @@ export type SaleUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   businessId?: Prisma.StringFieldUpdateOperationsInput | string
   customerId?: Prisma.StringFieldUpdateOperationsInput | string
+  subtotalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  discountAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -341,6 +421,10 @@ export type SaleCreateManyInput = {
   id?: string
   businessId: string
   customerId: string
+  subtotalAmount: number
+  discountAmount?: number
+  gstRate?: number
+  gstAmount?: number
   totalAmount: number
   reminderDate?: Date | string | null
   createdAt?: Date | string
@@ -348,6 +432,10 @@ export type SaleCreateManyInput = {
 
 export type SaleUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  subtotalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  discountAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -357,6 +445,10 @@ export type SaleUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   businessId?: Prisma.StringFieldUpdateOperationsInput | string
   customerId?: Prisma.StringFieldUpdateOperationsInput | string
+  subtotalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  discountAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -376,12 +468,20 @@ export type SaleCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   businessId?: Prisma.SortOrder
   customerId?: Prisma.SortOrder
+  subtotalAmount?: Prisma.SortOrder
+  discountAmount?: Prisma.SortOrder
+  gstRate?: Prisma.SortOrder
+  gstAmount?: Prisma.SortOrder
   totalAmount?: Prisma.SortOrder
   reminderDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type SaleAvgOrderByAggregateInput = {
+  subtotalAmount?: Prisma.SortOrder
+  discountAmount?: Prisma.SortOrder
+  gstRate?: Prisma.SortOrder
+  gstAmount?: Prisma.SortOrder
   totalAmount?: Prisma.SortOrder
 }
 
@@ -389,6 +489,10 @@ export type SaleMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   businessId?: Prisma.SortOrder
   customerId?: Prisma.SortOrder
+  subtotalAmount?: Prisma.SortOrder
+  discountAmount?: Prisma.SortOrder
+  gstRate?: Prisma.SortOrder
+  gstAmount?: Prisma.SortOrder
   totalAmount?: Prisma.SortOrder
   reminderDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -398,12 +502,20 @@ export type SaleMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   businessId?: Prisma.SortOrder
   customerId?: Prisma.SortOrder
+  subtotalAmount?: Prisma.SortOrder
+  discountAmount?: Prisma.SortOrder
+  gstRate?: Prisma.SortOrder
+  gstAmount?: Prisma.SortOrder
   totalAmount?: Prisma.SortOrder
   reminderDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type SaleSumOrderByAggregateInput = {
+  subtotalAmount?: Prisma.SortOrder
+  discountAmount?: Prisma.SortOrder
+  gstRate?: Prisma.SortOrder
+  gstAmount?: Prisma.SortOrder
   totalAmount?: Prisma.SortOrder
 }
 
@@ -540,6 +652,10 @@ export type SaleUpdateOneRequiredWithoutPaymentsNestedInput = {
 
 export type SaleCreateWithoutBusinessInput = {
   id?: string
+  subtotalAmount: number
+  discountAmount?: number
+  gstRate?: number
+  gstAmount?: number
   totalAmount: number
   reminderDate?: Date | string | null
   createdAt?: Date | string
@@ -552,6 +668,10 @@ export type SaleCreateWithoutBusinessInput = {
 export type SaleUncheckedCreateWithoutBusinessInput = {
   id?: string
   customerId: string
+  subtotalAmount: number
+  discountAmount?: number
+  gstRate?: number
+  gstAmount?: number
   totalAmount: number
   reminderDate?: Date | string | null
   createdAt?: Date | string
@@ -593,6 +713,10 @@ export type SaleScalarWhereInput = {
   id?: Prisma.StringFilter<"Sale"> | string
   businessId?: Prisma.StringFilter<"Sale"> | string
   customerId?: Prisma.StringFilter<"Sale"> | string
+  subtotalAmount?: Prisma.FloatFilter<"Sale"> | number
+  discountAmount?: Prisma.FloatFilter<"Sale"> | number
+  gstRate?: Prisma.FloatFilter<"Sale"> | number
+  gstAmount?: Prisma.FloatFilter<"Sale"> | number
   totalAmount?: Prisma.FloatFilter<"Sale"> | number
   reminderDate?: Prisma.DateTimeNullableFilter<"Sale"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Sale"> | Date | string
@@ -600,6 +724,10 @@ export type SaleScalarWhereInput = {
 
 export type SaleCreateWithoutCustomerInput = {
   id?: string
+  subtotalAmount: number
+  discountAmount?: number
+  gstRate?: number
+  gstAmount?: number
   totalAmount: number
   reminderDate?: Date | string | null
   createdAt?: Date | string
@@ -612,6 +740,10 @@ export type SaleCreateWithoutCustomerInput = {
 export type SaleUncheckedCreateWithoutCustomerInput = {
   id?: string
   businessId: string
+  subtotalAmount: number
+  discountAmount?: number
+  gstRate?: number
+  gstAmount?: number
   totalAmount: number
   reminderDate?: Date | string | null
   createdAt?: Date | string
@@ -648,6 +780,10 @@ export type SaleUpdateManyWithWhereWithoutCustomerInput = {
 
 export type SaleCreateWithoutItemsInput = {
   id?: string
+  subtotalAmount: number
+  discountAmount?: number
+  gstRate?: number
+  gstAmount?: number
   totalAmount: number
   reminderDate?: Date | string | null
   createdAt?: Date | string
@@ -661,6 +797,10 @@ export type SaleUncheckedCreateWithoutItemsInput = {
   id?: string
   businessId: string
   customerId: string
+  subtotalAmount: number
+  discountAmount?: number
+  gstRate?: number
+  gstAmount?: number
   totalAmount: number
   reminderDate?: Date | string | null
   createdAt?: Date | string
@@ -686,6 +826,10 @@ export type SaleUpdateToOneWithWhereWithoutItemsInput = {
 
 export type SaleUpdateWithoutItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  subtotalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  discountAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -699,6 +843,10 @@ export type SaleUncheckedUpdateWithoutItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   businessId?: Prisma.StringFieldUpdateOperationsInput | string
   customerId?: Prisma.StringFieldUpdateOperationsInput | string
+  subtotalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  discountAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -708,6 +856,10 @@ export type SaleUncheckedUpdateWithoutItemsInput = {
 
 export type SaleCreateWithoutInvoiceInput = {
   id?: string
+  subtotalAmount: number
+  discountAmount?: number
+  gstRate?: number
+  gstAmount?: number
   totalAmount: number
   reminderDate?: Date | string | null
   createdAt?: Date | string
@@ -721,6 +873,10 @@ export type SaleUncheckedCreateWithoutInvoiceInput = {
   id?: string
   businessId: string
   customerId: string
+  subtotalAmount: number
+  discountAmount?: number
+  gstRate?: number
+  gstAmount?: number
   totalAmount: number
   reminderDate?: Date | string | null
   createdAt?: Date | string
@@ -746,6 +902,10 @@ export type SaleUpdateToOneWithWhereWithoutInvoiceInput = {
 
 export type SaleUpdateWithoutInvoiceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  subtotalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  discountAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -759,6 +919,10 @@ export type SaleUncheckedUpdateWithoutInvoiceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   businessId?: Prisma.StringFieldUpdateOperationsInput | string
   customerId?: Prisma.StringFieldUpdateOperationsInput | string
+  subtotalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  discountAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -768,6 +932,10 @@ export type SaleUncheckedUpdateWithoutInvoiceInput = {
 
 export type SaleCreateWithoutPaymentsInput = {
   id?: string
+  subtotalAmount: number
+  discountAmount?: number
+  gstRate?: number
+  gstAmount?: number
   totalAmount: number
   reminderDate?: Date | string | null
   createdAt?: Date | string
@@ -781,6 +949,10 @@ export type SaleUncheckedCreateWithoutPaymentsInput = {
   id?: string
   businessId: string
   customerId: string
+  subtotalAmount: number
+  discountAmount?: number
+  gstRate?: number
+  gstAmount?: number
   totalAmount: number
   reminderDate?: Date | string | null
   createdAt?: Date | string
@@ -806,6 +978,10 @@ export type SaleUpdateToOneWithWhereWithoutPaymentsInput = {
 
 export type SaleUpdateWithoutPaymentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  subtotalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  discountAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -819,6 +995,10 @@ export type SaleUncheckedUpdateWithoutPaymentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   businessId?: Prisma.StringFieldUpdateOperationsInput | string
   customerId?: Prisma.StringFieldUpdateOperationsInput | string
+  subtotalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  discountAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -829,6 +1009,10 @@ export type SaleUncheckedUpdateWithoutPaymentsInput = {
 export type SaleCreateManyBusinessInput = {
   id?: string
   customerId: string
+  subtotalAmount: number
+  discountAmount?: number
+  gstRate?: number
+  gstAmount?: number
   totalAmount: number
   reminderDate?: Date | string | null
   createdAt?: Date | string
@@ -836,6 +1020,10 @@ export type SaleCreateManyBusinessInput = {
 
 export type SaleUpdateWithoutBusinessInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  subtotalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  discountAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -848,6 +1036,10 @@ export type SaleUpdateWithoutBusinessInput = {
 export type SaleUncheckedUpdateWithoutBusinessInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   customerId?: Prisma.StringFieldUpdateOperationsInput | string
+  subtotalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  discountAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -859,6 +1051,10 @@ export type SaleUncheckedUpdateWithoutBusinessInput = {
 export type SaleUncheckedUpdateManyWithoutBusinessInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   customerId?: Prisma.StringFieldUpdateOperationsInput | string
+  subtotalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  discountAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -867,6 +1063,10 @@ export type SaleUncheckedUpdateManyWithoutBusinessInput = {
 export type SaleCreateManyCustomerInput = {
   id?: string
   businessId: string
+  subtotalAmount: number
+  discountAmount?: number
+  gstRate?: number
+  gstAmount?: number
   totalAmount: number
   reminderDate?: Date | string | null
   createdAt?: Date | string
@@ -874,6 +1074,10 @@ export type SaleCreateManyCustomerInput = {
 
 export type SaleUpdateWithoutCustomerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  subtotalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  discountAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -886,6 +1090,10 @@ export type SaleUpdateWithoutCustomerInput = {
 export type SaleUncheckedUpdateWithoutCustomerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   businessId?: Prisma.StringFieldUpdateOperationsInput | string
+  subtotalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  discountAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -897,6 +1105,10 @@ export type SaleUncheckedUpdateWithoutCustomerInput = {
 export type SaleUncheckedUpdateManyWithoutCustomerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   businessId?: Prisma.StringFieldUpdateOperationsInput | string
+  subtotalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  discountAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  gstAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   reminderDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -946,6 +1158,10 @@ export type SaleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   id?: boolean
   businessId?: boolean
   customerId?: boolean
+  subtotalAmount?: boolean
+  discountAmount?: boolean
+  gstRate?: boolean
+  gstAmount?: boolean
   totalAmount?: boolean
   reminderDate?: boolean
   createdAt?: boolean
@@ -961,6 +1177,10 @@ export type SaleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   id?: boolean
   businessId?: boolean
   customerId?: boolean
+  subtotalAmount?: boolean
+  discountAmount?: boolean
+  gstRate?: boolean
+  gstAmount?: boolean
   totalAmount?: boolean
   reminderDate?: boolean
   createdAt?: boolean
@@ -972,6 +1192,10 @@ export type SaleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   id?: boolean
   businessId?: boolean
   customerId?: boolean
+  subtotalAmount?: boolean
+  discountAmount?: boolean
+  gstRate?: boolean
+  gstAmount?: boolean
   totalAmount?: boolean
   reminderDate?: boolean
   createdAt?: boolean
@@ -983,12 +1207,16 @@ export type SaleSelectScalar = {
   id?: boolean
   businessId?: boolean
   customerId?: boolean
+  subtotalAmount?: boolean
+  discountAmount?: boolean
+  gstRate?: boolean
+  gstAmount?: boolean
   totalAmount?: boolean
   reminderDate?: boolean
   createdAt?: boolean
 }
 
-export type SaleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "businessId" | "customerId" | "totalAmount" | "reminderDate" | "createdAt", ExtArgs["result"]["sale"]>
+export type SaleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "businessId" | "customerId" | "subtotalAmount" | "discountAmount" | "gstRate" | "gstAmount" | "totalAmount" | "reminderDate" | "createdAt", ExtArgs["result"]["sale"]>
 export type SaleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   business?: boolean | Prisma.BusinessDefaultArgs<ExtArgs>
   customer?: boolean | Prisma.CustomerDefaultArgs<ExtArgs>
@@ -1019,6 +1247,10 @@ export type $SalePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     id: string
     businessId: string
     customerId: string
+    subtotalAmount: number
+    discountAmount: number
+    gstRate: number
+    gstAmount: number
     totalAmount: number
     reminderDate: Date | null
     createdAt: Date
@@ -1453,6 +1685,10 @@ export interface SaleFieldRefs {
   readonly id: Prisma.FieldRef<"Sale", 'String'>
   readonly businessId: Prisma.FieldRef<"Sale", 'String'>
   readonly customerId: Prisma.FieldRef<"Sale", 'String'>
+  readonly subtotalAmount: Prisma.FieldRef<"Sale", 'Float'>
+  readonly discountAmount: Prisma.FieldRef<"Sale", 'Float'>
+  readonly gstRate: Prisma.FieldRef<"Sale", 'Float'>
+  readonly gstAmount: Prisma.FieldRef<"Sale", 'Float'>
   readonly totalAmount: Prisma.FieldRef<"Sale", 'Float'>
   readonly reminderDate: Prisma.FieldRef<"Sale", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Sale", 'DateTime'>

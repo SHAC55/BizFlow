@@ -14,6 +14,10 @@ export const createSaleSchema = z
         }),
       )
       .min(1),
+    subtotalAmount: z.number().positive(),
+    discountAmount: z.number().nonnegative().optional().default(0),
+    gstRate: z.number().min(0).max(100).optional().default(0),
+    gstAmount: z.number().nonnegative().optional().default(0),
     totalAmount: z.number().positive(),
     paidAmount: z.number().nonnegative().optional().default(0),
     reminderDate: z.coerce.date().optional(),
@@ -38,11 +42,44 @@ export const createSaleSchema = z
       0,
     );
 
-    if (data.totalAmount > subtotal) {
+    const discountAmount = Number(data.discountAmount || 0);
+    const taxableAmount = Math.max(subtotal - discountAmount, 0);
+    const expectedGstAmount = Number(
+      ((taxableAmount * Number(data.gstRate || 0)) / 100).toFixed(2),
+    );
+    const expectedTotalAmount = Number(
+      (taxableAmount + expectedGstAmount).toFixed(2),
+    );
+
+    if (Math.abs(data.subtotalAmount - subtotal) > 0.01) {
+      context.addIssue({
+        code: "custom",
+        path: ["subtotalAmount"],
+        message: "subtotal amount does not match item subtotal",
+      });
+    }
+
+    if (discountAmount > subtotal) {
+      context.addIssue({
+        code: "custom",
+        path: ["discountAmount"],
+        message: "discount amount cannot exceed item subtotal",
+      });
+    }
+
+    if (Math.abs(data.gstAmount - expectedGstAmount) > 0.01) {
+      context.addIssue({
+        code: "custom",
+        path: ["gstAmount"],
+        message: "gst amount does not match subtotal, discount and gst rate",
+      });
+    }
+
+    if (Math.abs(data.totalAmount - expectedTotalAmount) > 0.01) {
       context.addIssue({
         code: "custom",
         path: ["totalAmount"],
-        message: "total amount cannot exceed item subtotal",
+        message: "total amount does not match subtotal, discount and gst",
       });
     }
 

@@ -13,6 +13,10 @@ export type CreateSaleParams = {
     quantity: number;
     unitPrice: number;
   }>;
+  subtotalAmount: number;
+  discountAmount?: number;
+  gstRate?: number;
+  gstAmount?: number;
   totalAmount: number;
   paidAmount?: number;
   reminderDate?: Date;
@@ -91,17 +95,17 @@ const mapSaleMetrics = (sale: SaleListItem | SaleDetailItem) => {
     (sum, payment) => sum + payment.amount,
     0,
   );
-  const subtotalAmount = sale.items.reduce(
-    (sum, item) => sum + item.totalAmount,
-    0,
-  );
+  const subtotalAmount = sale.subtotalAmount;
   const dueAmount = sale.totalAmount - paidAmount;
-  const discountAmount = subtotalAmount - sale.totalAmount;
+  const discountAmount = sale.discountAmount;
+  const gstRate = sale.gstRate;
+  const gstAmount = sale.gstAmount;
   const estimatedCostAmount = sale.items.reduce(
     (sum, item) => sum + item.quantity * (item.product.costPrice ?? 0),
     0,
   );
-  const estimatedProfitAmount = sale.totalAmount - estimatedCostAmount;
+  const estimatedProfitAmount =
+    subtotalAmount - discountAmount - estimatedCostAmount;
 
   return {
     id: sale.id,
@@ -112,6 +116,8 @@ const mapSaleMetrics = (sale: SaleListItem | SaleDetailItem) => {
     reminderDate: sale.reminderDate,
     subtotalAmount,
     discountAmount,
+    gstRate,
+    gstAmount,
     estimatedCostAmount,
     estimatedProfitAmount,
     paidAmount,
@@ -169,6 +175,9 @@ const buildSaleReminder = (sale: ReturnType<typeof mapSaleMetrics>) => {
 export const createSale = async (data: CreateSaleParams) => {
   const business = await getBusinessByOwnerId(data.userId);
   const paidAmount = data.paidAmount ?? 0;
+  const discountAmount = data.discountAmount ?? 0;
+  const gstRate = data.gstRate ?? 0;
+  const gstAmount = data.gstAmount ?? 0;
 
   const result = await prisma.$transaction(async (transaction) => {
     const customer = await transaction.customer.findFirst({
@@ -217,6 +226,10 @@ export const createSale = async (data: CreateSaleParams) => {
       data: {
         businessId: business.id,
         customerId: customer.id,
+        subtotalAmount: data.subtotalAmount,
+        discountAmount,
+        gstRate,
+        gstAmount,
         totalAmount: data.totalAmount,
         reminderDate: data.reminderDate,
       },
