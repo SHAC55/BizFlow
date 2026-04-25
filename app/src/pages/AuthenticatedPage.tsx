@@ -57,7 +57,8 @@ export const AuthenticatedPage = ({
             Onboarding still needed
           </Text>
           <Text className="mt-1 text-[13px] leading-[18px] text-blue-800">
-            This account is authenticated, but some profile fields are still missing.
+            This account is authenticated, but some profile fields are still
+            missing.
           </Text>
         </View>
       ) : null}

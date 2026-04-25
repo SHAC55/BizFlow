@@ -1,5 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { Pressable, Text, TextInput, View, ScrollView } from "react-native";
+import type { ComponentProps } from "react";
+import { Pressable, Text, TextInput, View } from "react-native";
 
 export type LoginForm = {
   username: string;
@@ -29,177 +30,117 @@ export const SignInPage = ({
   onToggleRememberMe,
   onTogglePasswordVisibility,
 }: SignInPageProps) => (
-  <ScrollView
-    className="flex-1 bg-white"
-    contentContainerClassName="min-h-full"
-    keyboardShouldPersistTaps="handled"
-    showsVerticalScrollIndicator={false}
-  >
-    {/* �� HERO ZONE ��������������������������������������� */}
-    <View className="px-6 pb-10 pt-16">
-      {/* Eyebrow label */}
-      <View className="mb-5 self-start flex-row items-center gap-1.5">
-        <View className="h-[6px] w-[6px] rounded-full bg-gray-800" />
-        <Text className="text-[11px] font-semibold uppercase tracking-[2.5px] text-gray-400">
-          Business Dashboard
-        </Text>
-      </View>
-
-      {/* Primary headline - giant, heavy, tight */}
-      <Text
-        className="text-[44px] font-extrabold leading-[48px] tracking-tight text-gray-900"
-        numberOfLines={2}
-      >
-        {"Welcome\nBack."}
-      </Text>
-
-      {/* Separator rule */}
-      <View className="my-5 h-px w-10 bg-gray-300" />
-
-      {/* Subtext */}
-      <Text
-        className="text-[15px] leading-[22px] text-gray-500"
-        style={{ maxWidth: 260 }}
-      >
-        Sign in to take control of your operations.
+  <View>
+    <View className="mb-5">
+      <Text className="text-[28px] font-bold text-[#1f2937]">Welcome Back!</Text>
+      <Text className="mt-2 text-[14px] leading-[20px] text-[#6b7280]">
+        Ready to take control of your business? Sign in to continue.
       </Text>
     </View>
 
-    {/* �� FORM CARD ��������������������������������������� */}
-    <View
-      className="mx-4 rounded-3xl border border-gray-100 bg-gray-50 px-5 py-6"
-      style={{
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.06,
-        shadowRadius: 16,
-        elevation: 3,
-      }}
+    <Field
+      icon="person"
+      label="Username"
+      placeholder="Enter your username"
+      value={form.username}
+      onChangeText={(value) =>
+        onChangeForm((current) => ({ ...current, username: value }))
+      }
+    />
+
+    <Field
+      icon="lock"
+      label="Password"
+      placeholder="Enter your password"
+      secureTextEntry={!showPassword}
+      trailing={
+        <Pressable onPress={onTogglePasswordVisibility} hitSlop={10}>
+          <MaterialIcons
+            name={showPassword ? "visibility" : "visibility-off"}
+            size={20}
+            color="#9ca3af"
+          />
+        </Pressable>
+      }
+      value={form.password}
+      onChangeText={(value) =>
+        onChangeForm((current) => ({ ...current, password: value }))
+      }
+    />
+
+    <Pressable
+      onPress={onToggleRememberMe}
+      className="mb-6 mt-1 flex-row items-center gap-3"
     >
-      {/* �� USERNAME FIELD �� */}
-      <View className="mb-4">
-        <Text className="mb-2 text-[11px] font-bold uppercase tracking-[1.8px] text-gray-400">
-          Username
-        </Text>
-        <View
-          className="flex-row items-center gap-3 rounded-2xl border border-gray-200 bg-white px-4"
-          style={{ minHeight: 54 }}
-        >
-          <MaterialIcons name="person" size={18} color="#9ca3af" />
-          <TextInput
-            className="flex-1 py-3 text-[15px] text-gray-900"
-            onChangeText={(value) =>
-              onChangeForm((current) => ({ ...current, username: value }))
-            }
-            placeholder="Enter your username"
-            placeholderTextColor="#d1d5db"
-            value={form.username}
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-        </View>
-      </View>
-
-      {/* �� PASSWORD FIELD �� */}
-      <View className="mb-5">
-        <View className="mb-2 flex-row items-center justify-between">
-          <Text className="text-[11px] font-bold uppercase tracking-[1.8px] text-gray-400">
-            Password
-          </Text>
-          <Pressable hitSlop={10}>
-            <Text className="text-[12px] font-semibold text-gray-500">
-              Forgot?
-            </Text>
-          </Pressable>
-        </View>
-        <View
-          className="flex-row items-center gap-3 rounded-2xl border border-gray-200 bg-white px-4"
-          style={{ minHeight: 54 }}
-        >
-          <MaterialIcons name="lock" size={18} color="#9ca3af" />
-          <TextInput
-            className="flex-1 py-3 text-[15px] text-gray-900"
-            onChangeText={(value) =>
-              onChangeForm((current) => ({ ...current, password: value }))
-            }
-            placeholder="Enter your password"
-            placeholderTextColor="#d1d5db"
-            secureTextEntry={!showPassword}
-            value={form.password}
-          />
-          <Pressable
-            onPress={onTogglePasswordVisibility}
-            hitSlop={10}
-            className="py-1 pl-1"
-          >
-            <MaterialIcons
-              name={showPassword ? "visibility" : "visibility-off"}
-              size={18}
-              color="#9ca3af"
-            />
-          </Pressable>
-        </View>
-      </View>
-
-      {/* �� REMEMBER ME �� */}
-      <Pressable
-        onPress={onToggleRememberMe}
-        className="mb-6 flex-row items-center gap-3"
-        hitSlop={6}
-      >
-        <View
-          className={`h-5 w-5 items-center justify-center rounded-md border ${
-            rememberMe
-              ? "border-blue-600 bg-blue-600"
-              : "border-gray-300 bg-white"
-          }`}
-        >
-          {rememberMe ? (
-            <MaterialIcons name="check" size={13} color="#ffffff" />
-          ) : null}
-        </View>
-        <Text className="text-[13px] text-gray-600">Keep me signed in</Text>
-      </Pressable>
-
-      {/* �� CTA BUTTON �� */}
-      <Pressable
-        onPress={onSubmit}
-        disabled={isBusy || isDisabled}
-        className={`items-center justify-center rounded-2xl bg-gray-900 ${
-          isBusy || isDisabled ? "opacity-50" : ""
+      <View
+        className={`h-5 w-5 items-center justify-center rounded-md border ${
+          rememberMe ? "border-black bg-black" : "border-black/15 bg-white"
         }`}
-        style={[
-          { minHeight: 56 },
-          !(isBusy || isDisabled) && {
-            shadowColor: "#000000",
-            shadowOffset: { width: 0, height: 8 },
-            shadowOpacity: 0.18,
-            shadowRadius: 16,
-            elevation: 6,
-          },
-        ]}
       >
-        <View className="flex-row items-center gap-2">
-          {isBusy ? (
-            <Text className="text-[15px] font-bold tracking-wide text-white">
-              Signing in.
-            </Text>
-          ) : (
-            <>
-              <Text className="text-[15px] font-bold tracking-wide text-white">
-                Sign In
-              </Text>
-              <MaterialIcons name="arrow-forward" size={16} color="#ffffff" />
-            </>
-          )}
-        </View>
-      </Pressable>
-    </View>
+        {rememberMe ? (
+          <MaterialIcons name="check" size={13} color="#ffffff" />
+        ) : null}
+      </View>
+      <Text className="text-[13px] text-[#374151]">Remember me</Text>
+    </Pressable>
 
-    {/* �� FOOTER ������������������������������������������ */}
-    <View className="flex-row items-center justify-center gap-1 pb-10 pt-8">
-      <Text className="text-[13px] text-gray-400">Don't have an account?</Text>
-      <Text className="text-[13px] font-bold text-gray-800">Contact Admin</Text>
+    <Pressable
+      onPress={onSubmit}
+      disabled={isBusy || isDisabled}
+      className={`items-center justify-center rounded-[16px] bg-black py-4 ${
+        isBusy || isDisabled ? "opacity-50" : ""
+      }`}
+      style={
+        isBusy || isDisabled
+          ? undefined
+          : {
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 10 },
+              shadowOpacity: 0.18,
+              shadowRadius: 20,
+              elevation: 8,
+            }
+      }
+    >
+      <Text className="text-[15px] font-bold text-white">
+        {isBusy ? "Signing in..." : "Sign In"}
+      </Text>
+    </Pressable>
+  </View>
+);
+
+const Field = ({
+  icon,
+  label,
+  onChangeText,
+  placeholder,
+  secureTextEntry,
+  trailing,
+  value,
+}: {
+  icon: ComponentProps<typeof MaterialIcons>["name"];
+  label: string;
+  onChangeText: (value: string) => void;
+  placeholder: string;
+  secureTextEntry?: boolean;
+  trailing?: React.ReactNode;
+  value: string;
+}) => (
+  <View className="mb-4">
+    <Text className="mb-2 text-[13px] font-medium text-[#374151]">{label}</Text>
+    <View className="flex-row items-center gap-3 rounded-[16px] border border-[#d1d5db] bg-white px-4 py-1">
+      <MaterialIcons name={icon} size={20} color="#9ca3af" />
+      <TextInput
+        autoCapitalize="none"
+        autoCorrect={false}
+        className="flex-1 py-4 text-[15px] text-[#0f172a]"
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        placeholderTextColor="#94a3b8"
+        secureTextEntry={secureTextEntry}
+        value={value}
+      />
+      {trailing ? trailing : null}
     </View>
-  </ScrollView>
+  </View>
 );
