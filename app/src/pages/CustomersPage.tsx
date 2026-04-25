@@ -162,58 +162,57 @@ export const CustomersPage = ({
                 <Pressable
                   key={customer.id}
                   onPress={() => onOpenCustomer(customer.id)}
-                  className={`px-5 py-4 ${
+                  className={`px-4 py-3 ${
                     index < customers.length - 1
                       ? "border-b border-black/5"
                       : ""
                   }`}
                 >
-                  <View className="flex-row gap-3">
+                  <View className="flex-row items-center gap-3">
                     {/* Avatar */}
-                    <View className="h-12 w-12 rounded-full bg-black items-center justify-center">
-                      <Text className="text-white font-semibold text-[12px]">
+                    <View className="h-10 w-10 rounded-xl bg-black items-center justify-center">
+                      <Text className="text-white text-[11px] font-semibold">
                         {initialsFor(customer.name)}
                       </Text>
                     </View>
 
-                    {/* Info */}
+                    {/* Content */}
                     <View className="flex-1">
-                      <View className="flex-row justify-between items-center">
-                        <Text className="text-[15px] font-semibold text-black">
+                      {/* Top */}
+                      <View className="flex-row items-center justify-between">
+                        <Text
+                          numberOfLines={1}
+                          className="flex-1 text-[14px] font-semibold text-black"
+                        >
                           {customer.name}
                         </Text>
 
-                        <MaterialIcons
-                          name="chevron-right"
-                          size={18}
-                          color="#aaa"
-                        />
-                      </View>
-
-                      <Text className="mt-1 text-[12px] text-black/40">
-                        {customer.mobile}
-                      </Text>
-
-                      <View className="mt-3 flex-row items-center justify-between">
-                        <Text className="text-[11px] text-black/30">
-                          Since {formatDate(customer.createdAt)}
-                        </Text>
-
-                        <View
-                          className={`rounded-full px-3 py-1 ${
-                            cleared ? "bg-green-50" : "bg-red-50"
+                        <Text
+                          className={`ml-2 text-[12px] font-bold ${
+                            cleared ? "text-green-600" : "text-red-500"
                           }`}
                         >
-                          <Text
-                            className={`text-[10px] font-semibold ${
-                              cleared ? "text-green-600" : "text-red-600"
-                            }`}
-                          >
-                            {cleared ? "Cleared" : formatCurrency(customer.due)}
-                          </Text>
-                        </View>
+                          {cleared ? "Paid" : formatCurrency(customer.due)}
+                        </Text>
+                      </View>
+
+                      {/* Bottom */}
+                      <View className="mt-1 flex-row items-center justify-between">
+                        <Text className="text-[11px] text-black/45">
+                          {customer.mobile}
+                        </Text>
+
+                        <Text className="text-[10px] text-black/30">
+                          {formatDate(customer.createdAt)}
+                        </Text>
                       </View>
                     </View>
+
+                    <MaterialIcons
+                      name="chevron-right"
+                      size={18}
+                      color="#b0b0b0"
+                    />
                   </View>
                 </Pressable>
               );
@@ -238,7 +237,7 @@ export const CustomersPage = ({
 
 /* Components */
 
-/* REPLACE MetricCard COMPONENT */
+/*  MetricCard COMPONENT */
 
 const MetricCard = ({ label, value, red, white }: any) => (
   <View

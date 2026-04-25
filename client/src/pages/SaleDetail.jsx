@@ -78,9 +78,7 @@ const SaleDetail = () => {
   });
 
   if (isLoading) {
-    return (
-    <PageLoader/>
-    );
+    return <PageLoader />;
   }
 
   const handleAddPayment = async (event) => {

@@ -83,11 +83,16 @@ export const SaleDetailPage = ({
     }
   };
 
+  const handleInvoice = () => {
+    // Add invoice logic here
+    console.log("Generate Invoice");
+  };
+
   return (
     <AppLayout
       currentRoute="sales"
       title="Sale Details"
-      subtitle="Track payment and products"
+      subtitle="Track payment and invoice"
       onNavigate={onNavigate}
     >
       <ScrollView
@@ -100,11 +105,29 @@ export const SaleDetailPage = ({
           />
         }
       >
-        {/* Back */}
-        <Pressable onPress={onBack} className="mb-4 flex-row items-center">
-          <MaterialIcons name="arrow-back-ios" size={14} color="#64748B" />
-          <Text className="text-slate-500 text-[14px]">Back to sales</Text>
-        </Pressable>
+        {/* Header */}
+        <View className="mb-4 flex-row items-center justify-between">
+          <Pressable
+            onPress={handleInvoice}
+            className="flex-row items-center bg-black px-4 py-3 rounded-2xl"
+          >
+            <MaterialIcons name="receipt-long" size={18} color="#fff" />
+            <Text className="text-white font-semibold ml-2">
+              Generate Invoice
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={onBack}
+            className="flex-row items-center bg-white px-4 py-3 rounded-2xl border border-slate-200"
+          >
+            <MaterialIcons
+              name="arrow-back-ios-new"
+              size={16}
+              color="#0F172A"
+            />
+            <Text className="text-slate-900 font-semibold ml-1">Back</Text>
+          </Pressable>
+        </View>
 
         {loading ? (
           <View className="py-20 items-center">
@@ -118,7 +141,7 @@ export const SaleDetailPage = ({
             <View className="bg-white rounded-3xl border border-slate-100 p-5 mb-4">
               <View className="flex-row items-center">
                 <View className="h-14 w-14 rounded-2xl bg-slate-100 items-center justify-center">
-                  <MaterialIcons name="receipt-long" size={26} color="#000" />
+                  <MaterialIcons name="shopping-bag" size={24} color="#000" />
                 </View>
 
                 <View className="ml-4 flex-1">
@@ -146,14 +169,18 @@ export const SaleDetailPage = ({
               </View>
             </View>
 
-            {/* Customer */}
+            {/* Customer Summary Row */}
             <Section title="Customer Summary">
-              <InfoRow label="Customer" value={sale.customer.name} />
-              <InfoRow
-                label="Paid Amount"
-                value={formatCurrency(sale.paidAmount)}
-              />
-              <InfoRow label="Status" value={sale.status} />
+              <View className="flex-row justify-between gap-3">
+                <MiniCard label="Customer" value={sale.customer.name} />
+
+                <MiniCard
+                  label="Paid"
+                  value={formatCurrency(sale.paidAmount)}
+                />
+
+                <MiniCard label="Status" value={sale.status} />
+              </View>
             </Section>
 
             {/* Products */}
@@ -161,7 +188,7 @@ export const SaleDetailPage = ({
               {sale.items.map((item) => (
                 <View key={item.id} className="py-4 border-b border-slate-100">
                   <View className="flex-row justify-between">
-                    <View>
+                    <View className="flex-1 pr-3">
                       <Text className="font-semibold text-slate-900">
                         {item.product.name}
                       </Text>
@@ -191,8 +218,8 @@ export const SaleDetailPage = ({
               />
 
               {sale.dueAmount > 0 && (
-                <Text className="text-[12px] text-slate-500 mt-3">
-                  Pending Due: ₹{sale.dueAmount}
+                <Text className="text-[12px] text-red-500 mt-3">
+                  Pending Due: {formatCurrency(sale.dueAmount)}
                 </Text>
               )}
 
@@ -236,10 +263,14 @@ const StatCard = ({ label, value, red }: any) => (
   </View>
 );
 
-const InfoRow = ({ label, value }: any) => (
-  <View className="mb-3">
-    <Text className="text-[11px] uppercase text-slate-400 mb-1">{label}</Text>
-
-    <Text className="text-[15px] font-medium text-slate-900">{value}</Text>
+const MiniCard = ({ label, value }: any) => (
+  <View className="flex-1 bg-slate-50 rounded-2xl p-3">
+    <Text className="text-[11px] text-slate-400 mb-1">{label}</Text>
+    <Text
+      numberOfLines={1}
+      className="text-[14px] font-semibold text-slate-900"
+    >
+      {value}
+    </Text>
   </View>
 );

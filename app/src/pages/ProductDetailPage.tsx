@@ -7,6 +7,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 import { AppLayout } from "../components/AppLayout";
 import {
   adjustProductStock,
@@ -26,7 +27,9 @@ type ProductDetailPageProps = {
 };
 
 const formatCurrency = (value: number) =>
-  `₹${Number(value || 0).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
+  `₹${Number(value || 0).toLocaleString("en-IN", {
+    maximumFractionDigits: 2,
+  })}`;
 
 export const ProductDetailPage = ({
   onBack,
@@ -35,28 +38,35 @@ export const ProductDetailPage = ({
   productId,
 }: ProductDetailPageProps) => {
   const { session } = useAuth();
+
   const [product, setProduct] = useState<Product | null>(null);
   const [movements, setMovements] = useState<InventoryMovement[]>([]);
   const [error, setError] = useState<string | null>(null);
+
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
   const [quantity, setQuantity] = useState("");
   const [reason, setReason] = useState("");
 
   const load = async (refresh = false) => {
-    const accessToken = session?.tokens.accessToken;
-    if (!accessToken) return;
+    const token = session?.tokens.accessToken;
+    if (!token) return;
+
     refresh ? setIsRefreshing(true) : setIsLoading(true);
+
     try {
       setError(null);
+
       const [nextProduct, nextMovements] = await Promise.all([
-        fetchProduct(accessToken, productId),
-        fetchProductMovements(accessToken, productId),
+        fetchProduct(token, productId),
+        fetchProductMovements(token, productId),
       ]);
+
       setProduct(nextProduct);
       setMovements(nextMovements);
-    } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Failed to load product");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load");
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -65,116 +75,228 @@ export const ProductDetailPage = ({
 
   useEffect(() => {
     load();
-  }, [productId, session?.tokens.accessToken]);
+  }, [productId]);
 
   const handleAdjustStock = async () => {
-    const accessToken = session?.tokens.accessToken;
-    if (!accessToken || !product) return;
+    const token = session?.tokens.accessToken;
+    if (!token || !product) return;
+
     try {
-      await adjustProductStock(accessToken, product.id, {
+      await adjustProductStock(token, product.id, {
         type: "SET",
         quantity: Number(quantity),
         reason: reason || "manual stock update",
       });
+
       setQuantity("");
       setReason("");
       load(true);
-    } catch (adjustError) {
-      setError(adjustError instanceof Error ? adjustError.message : "Failed to adjust stock");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update stock");
     }
   };
 
   const handleDelete = async () => {
-    const accessToken = session?.tokens.accessToken;
-    if (!accessToken || !product) return;
+    const token = session?.tokens.accessToken;
+    if (!token || !product) return;
+
     try {
-      await deleteProduct(accessToken, product.id);
+      await deleteProduct(token, product.id);
       onBack();
-    } catch (deleteError) {
-      setError(deleteError instanceof Error ? deleteError.message : "Failed to delete product");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete");
     }
   };
+
+  const isLowStock =
+    product && product.quantity <= Number(product.minimumQuantity);
 
   return (
     <AppLayout
       currentRoute="inventory"
-      eyebrow="Product Detail"
-      headerRight={
-        <View className="flex-row gap-2">
-          <Pressable onPress={onEdit} className="rounded-[18px] border border-black/10 bg-white px-3 py-2.5">
-            <Text className="text-[12px] font-semibold text-black/70">Edit</Text>
-          </Pressable>
-          <Pressable onPress={onBack} className="rounded-[18px] border border-black/10 bg-[#f8fafc] px-3 py-2.5">
-            <Text className="text-[12px] font-semibold text-black/70">Back</Text>
-          </Pressable>
-        </View>
-      }
       onNavigate={onNavigate}
-      subtitle="Pricing, stock state, and movement history in one place."
       title={product?.name ?? "Product Detail"}
+      subtitle="Manage stock & product insights"
     >
       <ScrollView
         className="flex-1"
-        contentContainerClassName="pb-28"
-        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={() => load(true)} />}
+        contentContainerClassName="px-4 pb-32"
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={() => load(true)}
+          />
+        }
+        showsVerticalScrollIndicator={false}
       >
         {isLoading ? (
-          <Text className="py-12 text-center text-[14px] text-black/45">Loading product...</Text>
+          <Text className="py-16 text-center text-black/40">
+            Loading product...
+          </Text>
         ) : error || !product ? (
-          <Text className="py-12 text-center text-[14px] text-red-600">{error || "Product not found"}</Text>
+          <Text className="py-16 text-center text-red-500">
+            {error || "Product not found"}
+          </Text>
         ) : (
           <>
-            <View className="rounded-[28px] bg-[#0f172a] px-5 py-5">
+            {/* Top Actions */}
+            <View className="mt-4 mb-4 flex-row justify-between">
+              <ActionBtn icon="arrow-back" label="Back" onPress={onBack} />
+
+              <View className="flex-row gap-2">
+                <ActionBtn
+                  icon="edit"
+                  label="Edit"
+                  dark
+                  onPress={onEdit}
+                />
+
+                <ActionBtn
+                  icon="delete"
+                  label="Delete"
+                  red
+                  onPress={handleDelete}
+                />
+              </View>
+            </View>
+
+            {/* Hero */}
+            <View className="rounded-[30px] bg-black px-5 py-5">
+              <View className="flex-row items-center justify-between">
+                <View>
+                  <Text className="text-[11px] uppercase text-white/55">
+                    Current Stock
+                  </Text>
+
+                  <Text className="mt-1 text-[30px] font-bold text-white">
+                    {product.quantity}
+                  </Text>
+                </View>
+
+                <View
+                  className={`rounded-full px-3 py-1 ${
+                    isLowStock
+                      ? "bg-red-500/20"
+                      : "bg-green-500/20"
+                  }`}
+                >
+                  <Text
+                    className={`text-[11px] font-semibold ${
+                      isLowStock
+                        ? "text-red-300"
+                        : "text-green-300"
+                    }`}
+                  >
+                    {isLowStock ? "LOW STOCK" : "IN STOCK"}
+                  </Text>
+                </View>
+              </View>
+
+              <View className="mt-5 flex-row gap-3">
+                <MetricCard
+                  label="Selling"
+                  value={formatCurrency(product.price)}
+                  green
+                />
+
+                <MetricCard
+                  label="Cost"
+                  value={formatCurrency(product.costPrice)}
+                />
+              </View>
+            </View>
+
+            {/* Product Info One Row */}
+            <View className="mt-5 rounded-[28px] border border-black/10 bg-white p-5">
+              <Text className="mb-4 text-[16px] font-bold text-black">
+                Product Info
+              </Text>
+
               <View className="flex-row gap-3">
-                <MetricCard label="Price" value={formatCurrency(product.price)} />
-                <MetricCard label="Quantity" value={`${product.quantity}`} />
+                <InfoCard
+                  label="Category"
+                  value={product.category}
+                />
+
+                <InfoCard
+                  label="SKU"
+                  value={product.sku || "Auto"}
+                />
+
+                <InfoCard
+                  label="Min Qty"
+                  value={`${product.minimumQuantity}`}
+                />
               </View>
             </View>
 
-            <View className="mt-6 rounded-[28px] border border-black/8 bg-white px-5 py-5">
-              <InfoRow label="Category" value={product.category} />
-              <InfoRow label="SKU" value={product.sku || "Auto-generated"} />
-              <InfoRow label="Cost Price" value={formatCurrency(product.costPrice)} />
-              <InfoRow label="Minimum Quantity" value={`${product.minimumQuantity}`} />
-            </View>
+            {/* Adjust Stock */}
+            <View className="mt-5 rounded-[28px] border border-black/10 bg-white p-5">
+              <Text className="mb-4 text-[16px] font-bold text-black">
+                Adjust Stock
+              </Text>
 
-            <View className="mt-6 rounded-[28px] border border-black/8 bg-white px-5 py-5">
-              <Text className="text-[15px] font-semibold text-black">Adjust Stock</Text>
               <TextInput
-                className="mt-4 rounded-[22px] border border-black/10 bg-[#f8fafc] px-4 py-4 text-[15px] text-[#0f172a]"
-                keyboardType="number-pad"
-                onChangeText={setQuantity}
-                placeholder="Set quantity"
-                placeholderTextColor="#94a3b8"
                 value={quantity}
+                onChangeText={setQuantity}
+                keyboardType="number-pad"
+                placeholder="Enter quantity"
+                placeholderTextColor="#999"
+                className="rounded-2xl bg-zinc-50 px-4 py-4 text-black"
               />
+
               <TextInput
-                className="mt-3 rounded-[22px] border border-black/10 bg-[#f8fafc] px-4 py-4 text-[15px] text-[#0f172a]"
-                onChangeText={setReason}
-                placeholder="Reason"
-                placeholderTextColor="#94a3b8"
                 value={reason}
+                onChangeText={setReason}
+                placeholder="Reason (optional)"
+                placeholderTextColor="#999"
+                className="mt-3 rounded-2xl bg-zinc-50 px-4 py-4 text-black"
               />
-              <Pressable onPress={handleAdjustStock} className="mt-4 items-center rounded-[22px] bg-[#2563eb] py-4">
-                <Text className="text-[15px] font-bold text-white">Update Stock</Text>
-              </Pressable>
-              <Pressable onPress={handleDelete} className="mt-3 items-center rounded-[22px] bg-[#0f172a] py-4">
-                <Text className="text-[15px] font-bold text-white">Delete Product</Text>
+
+              <Pressable
+                onPress={handleAdjustStock}
+                className="mt-4 items-center rounded-2xl bg-blue-600 py-4"
+              >
+                <Text className="font-semibold text-white">
+                  Update Stock
+                </Text>
               </Pressable>
             </View>
 
-            <View className="mt-6 overflow-hidden rounded-[28px] border border-black/8 bg-white">
-              <View className="border-b border-black/5 px-5 py-4">
-                <Text className="text-[15px] font-semibold text-black">Movement History</Text>
+            {/* Movement History */}
+            <View className="mt-5 rounded-[28px] border border-black/10 bg-white overflow-hidden">
+              <View className="px-5 py-4 border-b border-black/5">
+                <Text className="text-[16px] font-bold text-black">
+                  Movement History
+                </Text>
               </View>
+
               {movements.length === 0 ? (
-                <Text className="px-5 py-10 text-center text-[14px] text-black/40">No movements yet</Text>
+                <Text className="py-10 text-center text-black/35">
+                  No movement found
+                </Text>
               ) : (
-                movements.map((movement, index) => (
-                  <View key={movement.id} className={`px-5 py-4 ${index < movements.length - 1 ? "border-b border-black/5" : ""}`}>
-                    <Text className="text-[14px] font-semibold text-black">{movement.reason}</Text>
+                movements.map((item, index) => (
+                  <View
+                    key={item.id}
+                    className={`px-5 py-4 ${
+                      index !== movements.length - 1
+                        ? "border-b border-black/5"
+                        : ""
+                    }`}
+                  >
+                    <View className="flex-row justify-between items-center">
+                      <Text className="font-semibold text-black">
+                        {item.reason}
+                      </Text>
+
+                      <Text className="text-blue-600 font-bold text-[12px]">
+                        {item.quantityBefore} → {item.quantityAfter}
+                      </Text>
+                    </View>
+
                     <Text className="mt-1 text-[12px] text-black/40">
-                      {movement.type} · {movement.quantityBefore} → {movement.quantityAfter}
+                      {item.type}
                     </Text>
                   </View>
                 ))
@@ -187,16 +309,60 @@ export const ProductDetailPage = ({
   );
 };
 
-const MetricCard = ({ label, value }: { label: string; value: string }) => (
-  <View className="flex-1 rounded-[22px] bg-white/8 px-4 py-4">
-    <Text className="text-[12px] text-white/55">{label}</Text>
-    <Text className="mt-2 text-[18px] font-bold text-white">{value}</Text>
+/* Components */
+
+const ActionBtn = ({ label, icon, dark, red, onPress }: any) => (
+  <Pressable
+    onPress={onPress}
+    className={`flex-row items-center gap-2 rounded-2xl px-4 py-3 ${
+      dark
+        ? "bg-black"
+        : red
+        ? "bg-red-500"
+        : "border border-black/10 bg-white"
+    }`}
+  >
+    <MaterialIcons
+      name={icon}
+      size={18}
+      color={dark || red ? "#fff" : "#000"}
+    />
+
+    <Text
+      className={`font-medium ${
+        dark || red ? "text-white" : "text-black"
+      }`}
+    >
+      {label}
+    </Text>
+  </Pressable>
+);
+
+const MetricCard = ({ label, value, green }: any) => (
+  <View
+    className={`flex-1 rounded-2xl px-4 py-4 ${
+      green ? "bg-green-400" : "bg-white/10"
+    }`}
+  >
+    <Text className="text-[11px] text-white/70">{label}</Text>
+
+    <Text className="mt-2 text-[17px] font-bold text-white">
+      {value}
+    </Text>
   </View>
 );
 
-const InfoRow = ({ label, value }: { label: string; value: string }) => (
-  <View className="mb-4 rounded-[20px] bg-[#f8fafc] px-4 py-4">
-    <Text className="text-[11px] font-bold uppercase tracking-[1.8px] text-black/35">{label}</Text>
-    <Text className="mt-2 text-[14px] text-black">{value}</Text>
+const InfoCard = ({ label, value }: any) => (
+  <View className="flex-1 rounded-2xl bg-zinc-50 px-3 py-4">
+    <Text className="text-[10px] uppercase text-black/35">
+      {label}
+    </Text>
+
+    <Text
+      numberOfLines={1}
+      className="mt-2 text-[13px] font-semibold text-black"
+    >
+      {value}
+    </Text>
   </View>
 );

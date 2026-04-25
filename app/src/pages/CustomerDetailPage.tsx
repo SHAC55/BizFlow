@@ -48,7 +48,6 @@ export const CustomerDetailPage = ({
   const { session } = useAuth();
 
   const [customer, setCustomer] = useState<CustomerDetail | null>(null);
-
   const [error, setError] = useState<string | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -67,9 +66,7 @@ export const CustomerDetailPage = ({
 
     try {
       setError(null);
-
       const data = await fetchCustomer(token, customerId);
-
       setCustomer(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load");
@@ -112,12 +109,24 @@ export const CustomerDetailPage = ({
             onRefresh={() => load(true)}
           />
         }
+        showsVerticalScrollIndicator={false}
       >
-        {/* Top Buttons */}
-        <View className="mt-4 mb-4 flex-row gap-3">
-          <TopBtn label="Back" icon="arrow-back" onPress={onBack} />
+        {/* Top Actions */}
+        <View className="mt-4 mb-4 flex-row justify-between items-center">
+          <TopBtn icon="arrow-back" label="Back" onPress={onBack} />
 
-          <TopBtn label="Edit" icon="edit" onPress={onEdit} dark />
+          <View className="flex-row gap-2">
+            {!customer?.archivedAt && (
+              <TopBtn
+                icon="archive"
+                label={isArchiving ? "..." : "Archive"}
+                warn
+                onPress={handleArchive}
+              />
+            )}
+
+            <TopBtn icon="edit" label="Edit" dark onPress={onEdit} />
+          </View>
         </View>
 
         {isLoading ? (
@@ -130,17 +139,17 @@ export const CustomerDetailPage = ({
           </Text>
         ) : (
           <>
-            {/* Hero Card */}
+            {/* Hero */}
             <View className="rounded-[28px] bg-black px-5 py-5">
               <View className="flex-row items-center gap-4">
-                <View className="h-14 w-14 items-center justify-center rounded-full bg-white/10">
+                <View className="h-14 w-14 items-center justify-center rounded-2xl bg-white/10">
                   <Text className="text-[16px] font-bold text-white">
                     {initialsFor(customer.name)}
                   </Text>
                 </View>
 
                 <View className="flex-1">
-                  <Text className="text-[22px] font-bold text-white">
+                  <Text className="text-[21px] font-bold text-white">
                     {customer.name}
                   </Text>
 
@@ -154,21 +163,21 @@ export const CustomerDetailPage = ({
                 <MetricCard
                   label="Revenue"
                   value={formatCurrency(customer.totalPayment)}
+                  green
                 />
 
                 <MetricCard
-                  label="Total Due"
+                  label="Due"
                   value={formatCurrency(customer.due)}
                   red
                 />
               </View>
             </View>
 
-            {/* Info Section */}
+            {/* Info */}
             <View className="mt-5 rounded-[28px] border border-black/10 bg-white p-5">
               <SectionTitle title="Customer Info" />
 
-              {/* Phone + Email */}
               <View className="flex-row gap-3 mb-3">
                 <View className="flex-1">
                   <InfoRow icon="phone" label="Phone" value={customer.mobile} />
@@ -183,7 +192,6 @@ export const CustomerDetailPage = ({
                 </View>
               </View>
 
-              {/* Address + Joined */}
               <View className="flex-row gap-3 mb-3">
                 <View className="flex-1">
                   <InfoRow
@@ -209,21 +217,10 @@ export const CustomerDetailPage = ({
                   value={customer.notes}
                 />
               ) : null}
-
-              {!customer.archivedAt && (
-                <Pressable
-                  onPress={handleArchive}
-                  className="mt-4 rounded-2xl bg-black py-4 items-center"
-                >
-                  <Text className="font-semibold text-white">
-                    {isArchiving ? "Archiving..." : "Archive Customer"}
-                  </Text>
-                </Pressable>
-              )}
             </View>
 
-            {/* Sales History */}
-            <View className="mt-5 rounded-[28px] border border-black/10 bg-white overflow-hidden">
+            {/* Sales */}
+            <View className="mt-5 rounded-[28px] overflow-hidden border border-black/10 bg-white">
               <View className="border-b border-black/5 px-5 py-4">
                 <Text className="text-[16px] font-semibold text-black">
                   Sales History
@@ -279,11 +276,15 @@ export const CustomerDetailPage = ({
 
 /* Components */
 
-const TopBtn = ({ label, icon, dark, onPress }: any) => (
+const TopBtn = ({ label, icon, dark, warn, onPress }: any) => (
   <Pressable
     onPress={onPress}
     className={`flex-row items-center gap-2 rounded-2xl px-4 py-3 ${
-      dark ? "bg-black" : "border border-black/10 bg-white"
+      dark
+        ? "bg-black"
+        : warn
+          ? "bg-yellow-400"
+          : "border border-black/10 bg-white"
     }`}
   >
     <MaterialIcons name={icon} size={18} color={dark ? "#fff" : "#000"} />
@@ -294,21 +295,15 @@ const TopBtn = ({ label, icon, dark, onPress }: any) => (
   </Pressable>
 );
 
-const MetricCard = ({ label, value, red }: any) => (
+const MetricCard = ({ label, value, red, green }: any) => (
   <View
-    className={`flex-1 rounded-2xl px-4 py-4 ${
-      red ? "bg-red-500/15" : "bg-white/10"
+    className={`flex-1 rounded-2xl px-4 py-4 text-black ${
+      red ? "bg-white" : green ? "bg-white" : "bg-white/10"
     }`}
   >
-    <Text className="text-[11px] text-white/50">{label}</Text>
+    <Text className="text-[11px] text-black">{label}</Text>
 
-    <Text
-      className={`mt-2 text-[18px] font-bold ${
-        red ? "text-red-400" : "text-white"
-      }`}
-    >
-      {value}
-    </Text>
+    <Text className="mt-2 text-[18px] font-bold text-black">{value}</Text>
   </View>
 );
 
