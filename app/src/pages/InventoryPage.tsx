@@ -1,6 +1,8 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { MaterialIcons } from "@expo/vector-icons";
 import type { ComponentProps } from "react";
 import {
+  Alert,
   FlatList,
   Pressable,
   RefreshControl,
@@ -9,10 +11,16 @@ import {
   View,
 } from "react-native";
 import { useState } from "react";
+import * as Haptics from "expo-haptics";
+import { Swipeable } from "react-native-gesture-handler";
+import Toast from "react-native-toast-message";
 import { AppLayout } from "../components/AppLayout";
 import { SkeletonProductRow } from "../components/Skeleton";
 import { useProductsData } from "../hooks/useProductsData";
 import { useDebounce } from "../hooks/useDebounce";
+import { deleteProduct } from "../lib/api";
+import { queryKeys } from "../lib/query";
+import { useAuth } from "../providers/AuthProvider";
 import type { Product } from "../types/product";
 import type { AppRoute } from "../types/navigation";
 
@@ -68,6 +76,8 @@ export const InventoryPage = ({
   onNavigate,
   onOpenProduct,
 }: InventoryPageProps) => {
+  const { session } = useAuth();
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
@@ -91,6 +101,59 @@ export const InventoryPage = ({
     search: debouncedSearch,
     lowStockOnly,
   });
+
+  const handleDeleteProduct = (product: Product, close: () => void) => {
+    Alert.alert(
+      "Delete Product",
+      `Delete ${product.name} from inventory? This cannot be undone.`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+          onPress: close,
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            const token = session?.tokens.accessToken;
+            if (!token) {
+              close();
+              return;
+            }
+
+            close();
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
+            try {
+              await deleteProduct(token, product.id);
+              await Promise.all([
+                queryClient.invalidateQueries({ queryKey: queryKeys.products.all }),
+                queryClient.invalidateQueries({ queryKey: queryKeys.products.detail(product.id) }),
+                queryClient.invalidateQueries({ queryKey: queryKeys.products.movements(product.id) }),
+                queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all }),
+              ]);
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              Toast.show({
+                type: "success",
+                text1: "Product Deleted",
+                text2: `${product.name} removed from inventory.`,
+              });
+            } catch (err) {
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+              const msg =
+                err instanceof Error ? err.message : "Failed to delete product";
+              Toast.show({
+                type: "error",
+                text1: "Delete Failed",
+                text2: msg,
+              });
+            }
+          },
+        },
+      ],
+    );
+  };
 
   const stats = [
     {
@@ -297,42 +360,68 @@ export const InventoryPage = ({
   const renderItem = ({ item: product, index }: { item: Product; index: number }) => {
     const stock = getStockConfig(product.quantity, product.minimumQuantity);
     return (
-      <Pressable
-        onPress={() => onOpenProduct(product.id)}
-        android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: false }}
-        className={`px-4 py-4 bg-white border-l border-r border-slate-100 active:bg-slate-50 ${
-          index !== products.length - 1 ? "border-b border-slate-100" : ""
-        }`}
-      >
-        <View className="flex-row gap-3">
-          <View className="h-11 w-11 items-center justify-center rounded-lg bg-slate-900">
-            <Text className="text-[12px] font-semibold text-white">
-              {initialsFor(product.name)}
-            </Text>
-          </View>
-          <View className="flex-1">
-            <View className="flex-row flex-wrap items-center gap-2 mb-1">
-              <Text className="text-[14px] font-semibold text-slate-800">
-                {product.name}
+      <Swipeable
+        overshootRight={false}
+        friction={2}
+        rightThreshold={36}
+        renderRightActions={(_, __, swipeable) => (
+          <View
+            className={`overflow-hidden bg-red-500 ${
+              index === products.length - 1
+                ? "rounded-br-xl"
+                : ""
+            }`}
+          >
+            <Pressable
+              onPress={() => handleDeleteProduct(product, () => swipeable.close())}
+              android_ripple={{ color: "rgba(255,255,255,0.1)", borderless: false }}
+              className="h-full w-[88px] items-center justify-center"
+            >
+              <MaterialIcons name="delete" size={20} color="#fff" />
+              <Text className="mt-1 text-[11px] font-semibold text-white">
+                Delete
               </Text>
-              <View className={`rounded-full px-2 py-0.5 ${stock.badge}`}>
-                <Text className={`text-[9px] font-semibold ${stock.text}`}>
-                  {stock.label}
+            </Pressable>
+          </View>
+        )}
+      >
+        <Pressable
+          onPress={() => onOpenProduct(product.id)}
+          android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: false }}
+          className={`px-4 py-4 bg-white border-l border-r border-slate-100 active:bg-slate-50 ${
+            index !== products.length - 1 ? "border-b border-slate-100" : ""
+          }`}
+        >
+          <View className="flex-row gap-3">
+            <View className="h-11 w-11 items-center justify-center rounded-lg bg-slate-900">
+              <Text className="text-[12px] font-semibold text-white">
+                {initialsFor(product.name)}
+              </Text>
+            </View>
+            <View className="flex-1">
+              <View className="flex-row flex-wrap items-center gap-2 mb-1">
+                <Text className="text-[14px] font-semibold text-slate-800">
+                  {product.name}
+                </Text>
+                <View className={`rounded-full px-2 py-0.5 ${stock.badge}`}>
+                  <Text className={`text-[9px] font-semibold ${stock.text}`}>
+                    {stock.label}
+                  </Text>
+                </View>
+              </View>
+              <Text className="text-[11px] text-slate-500">{product.category}</Text>
+              <View className="flex-row justify-between items-center mt-2">
+                <Text className="text-[13px] font-bold text-slate-800">
+                  {formatCurrency(product.price)}
+                </Text>
+                <Text className={`text-[11px] font-medium ${stock.qty}`}>
+                  Stock: {product.quantity} units
                 </Text>
               </View>
             </View>
-            <Text className="text-[11px] text-slate-500">{product.category}</Text>
-            <View className="flex-row justify-between items-center mt-2">
-              <Text className="text-[13px] font-bold text-slate-800">
-                {formatCurrency(product.price)}
-              </Text>
-              <Text className={`text-[11px] font-medium ${stock.qty}`}>
-                Stock: {product.quantity} units
-              </Text>
-            </View>
           </View>
-        </View>
-      </Pressable>
+        </Pressable>
+      </Swipeable>
     );
   };
 

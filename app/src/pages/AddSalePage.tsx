@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -16,6 +17,7 @@ import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
 import { AppLayout } from "../components/AppLayout";
 import { createSale, fetchCustomers, fetchProducts } from "../lib/api";
+import { queryKeys } from "../lib/query";
 import { useAuth } from "../providers/AuthProvider";
 import type { Customer } from "../types/customer";
 import type { Product } from "../types/product";
@@ -42,6 +44,7 @@ export const AddSalePage = ({
   onNavigate,
 }: AddSalePageProps) => {
   const { session } = useAuth();
+  const queryClient = useQueryClient();
 
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -52,6 +55,7 @@ export const AddSalePage = ({
     { productId: "", quantity: "1", price: "0" },
   ]);
   const [discount, setDiscount] = useState("0");
+  const [gstRate, setGstRate] = useState("18");
   const [paidAmount, setPaidAmount] = useState("0");
   const [reminderDate, setReminderDate] = useState("");
   const [reminderDateObj, setReminderDateObj] = useState<Date | undefined>(undefined);
@@ -90,7 +94,12 @@ export const AddSalePage = ({
       ),
     [items],
   );
-  const total = Math.max(subTotal - (Number(discount) || 0), 0);
+  const discountAmount = Math.min(Number(discount) || 0, subTotal);
+  const taxableAmount = Math.max(subTotal - discountAmount, 0);
+  const gstAmount = Number(
+    ((taxableAmount * (Number(gstRate) || 0)) / 100).toFixed(2),
+  );
+  const total = Number((taxableAmount + gstAmount).toFixed(2));
   const due = Math.max(total - (Number(paidAmount) || 0), 0);
 
   const filteredCustomers = customers.filter((c) =>
@@ -132,10 +141,20 @@ export const AddSalePage = ({
           quantity: Number(i.quantity),
           unitPrice: Number(i.price),
         })),
+        subtotalAmount: subTotal,
+        discountAmount,
+        gstRate: Number(gstRate) || 0,
+        gstAmount,
         totalAmount: total,
         paidAmount: Number(paidAmount),
         reminderDate: reminderDate || undefined,
       });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.sales.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.customers.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.products.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all }),
+      ]);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Toast.show({ type: "success", text1: "Sale Created", text2: `₹${total.toLocaleString("en-IN")} sale recorded.` });
       onCreated(res.sale.id);
@@ -156,10 +175,11 @@ export const AddSalePage = ({
       onNavigate={onNavigate}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
         <ScrollView
+          automaticallyAdjustKeyboardInsets
           className="flex-1"
           showsVerticalScrollIndicator={false}
           contentContainerClassName="px-4 pb-36 pt-3 mt-3"
@@ -440,6 +460,26 @@ export const AddSalePage = ({
               </View>
             </View>
 
+            <View className="mb-3">
+              <Text className="text-[11px] font-medium text-slate-400 mb-1.5 ml-1">
+                GST RATE (%)
+              </Text>
+              <View className="flex-row items-center bg-slate-50 border border-slate-100 rounded-xl px-4 py-3.5">
+                <MaterialIcons name="receipt" size={16} color="#94a3b8" />
+                <TextInput
+                  value={gstRate}
+                  onChangeText={setGstRate}
+                  keyboardType="decimal-pad"
+                  placeholder="0"
+                  placeholderTextColor="#94a3b8"
+                  className="flex-1 ml-2 text-[15px] text-slate-800"
+                />
+              </View>
+              <Text className="mt-1.5 ml-1 text-[11px] text-slate-400">
+                GST amount: {formatCurrency(gstAmount)}
+              </Text>
+            </View>
+
             {/* Paid amount */}
             <View className="mb-3">
               <Text className="text-[11px] font-medium text-slate-400 mb-1.5 ml-1">
@@ -509,10 +549,17 @@ export const AddSalePage = ({
               value={formatCurrency(subTotal)}
               light
             />
-            {Number(discount) > 0 && (
+            {discountAmount > 0 && (
               <SummaryRow
                 label="Discount"
-                value={`- ${formatCurrency(discount)}`}
+                value={`- ${formatCurrency(discountAmount)}`}
+                light
+              />
+            )}
+            {gstAmount > 0 && (
+              <SummaryRow
+                label={`GST (${Number(gstRate) || 0}%)`}
+                value={formatCurrency(gstAmount)}
                 light
               />
             )}

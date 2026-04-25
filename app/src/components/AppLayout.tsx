@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
+import { ProfileMenu } from "./ProfileMenu";
 import type { AppRoute } from "../types/navigation";
 
 type AppLayoutProps = {
@@ -37,7 +38,6 @@ export const AppLayout = ({
   title,
 }: AppLayoutProps) => {
   const insets = useSafeAreaInsets();
-  const initials = title?.charAt(0)?.toUpperCase() || "U";
 
   return (
     <View style={{ flex: 1, backgroundColor: "#F8FAFC" }}>
@@ -87,30 +87,7 @@ export const AppLayout = ({
               </Text>
             </View>
 
-            {/* PROFILE */}
-            <Pressable
-              android_ripple={{ color: "rgba(255,255,255,0.1)", borderless: false }}
-              style={{
-                height: 48,
-                width: 48,
-                borderRadius: 16,
-                backgroundColor: "#111111",
-                alignItems: "center",
-                justifyContent: "center",
-                borderWidth: 1,
-                borderColor: "#222222",
-              }}
-            >
-              {/* <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: "800",
-                  color: "#FFFFFF",
-                }}
-              >
-                {initials}
-              </Text> */}
-            </Pressable>
+            <ProfileMenu />
           </View>
         </View>
       </SafeAreaView>

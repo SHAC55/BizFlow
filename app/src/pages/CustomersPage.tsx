@@ -1,4 +1,6 @@
+import { useQueryClient } from "@tanstack/react-query";
 import {
+  Alert,
   FlatList,
   Pressable,
   RefreshControl,
@@ -8,10 +10,16 @@ import {
 } from "react-native";
 import { useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
+import { Swipeable } from "react-native-gesture-handler";
+import Toast from "react-native-toast-message";
 import { AppLayout } from "../components/AppLayout";
 import { SkeletonCustomerRow } from "../components/Skeleton";
+import { archiveCustomer } from "../lib/api";
+import { queryKeys } from "../lib/query";
 import { useCustomersData } from "../hooks/useCustomersData";
 import { useDebounce } from "../hooks/useDebounce";
+import { useAuth } from "../providers/AuthProvider";
 import type { Customer } from "../types/customer";
 import type { AppRoute } from "../types/navigation";
 
@@ -42,6 +50,8 @@ export const CustomersPage = ({
   onOpenAddCustomer,
   onOpenCustomer,
 }: CustomersPageProps) => {
+  const { session } = useAuth();
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [dueStatus, setDueStatus] = useState<
@@ -64,6 +74,59 @@ export const CustomersPage = ({
     search: debouncedSearch,
     dueStatus,
   });
+
+  const handleArchiveCustomer = (customer: Customer, close: () => void) => {
+    Alert.alert(
+      "Archive Customer",
+      `Archive ${customer.name} and hide them from the active list?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+          onPress: close,
+        },
+        {
+          text: "Archive",
+          style: "destructive",
+          onPress: async () => {
+            const token = session?.tokens.accessToken;
+            if (!token) {
+              close();
+              return;
+            }
+
+            close();
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+            try {
+              await archiveCustomer(token, customer.id);
+              await Promise.all([
+                queryClient.invalidateQueries({ queryKey: queryKeys.customers.all }),
+                queryClient.invalidateQueries({ queryKey: queryKeys.customers.detail(customer.id) }),
+                queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all }),
+                queryClient.invalidateQueries({ queryKey: queryKeys.sales.all }),
+              ]);
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              Toast.show({
+                type: "success",
+                text1: "Customer Archived",
+                text2: `${customer.name} moved out of the active list.`,
+              });
+            } catch (err) {
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+              const msg =
+                err instanceof Error ? err.message : "Failed to archive customer";
+              Toast.show({
+                type: "error",
+                text1: "Archive Failed",
+                text2: msg,
+              });
+            }
+          },
+        },
+      ],
+    );
+  };
 
   const ListHeader = () => (
     <>
@@ -202,39 +265,65 @@ export const CustomersPage = ({
     const cleared = customer.due <= 0;
     const isLast = index === customers.length - 1;
     return (
-      <Pressable
-        onPress={() => onOpenCustomer(customer.id)}
-        android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: false }}
-        className="px-5 py-4 bg-white border-l border-r border-black/10 active:bg-slate-50"
-      >
-        <View className="flex-row gap-3">
-          <View className="h-12 w-12 rounded-full bg-black items-center justify-center">
-            <Text className="text-white font-semibold text-[12px]">
-              {initialsFor(customer.name)}
-            </Text>
+      <Swipeable
+        overshootRight={false}
+        friction={2}
+        rightThreshold={36}
+        renderRightActions={(_, __, swipeable) => (
+          <View
+            className={`overflow-hidden bg-amber-400 ${
+              isLast
+                ? "rounded-br-[28px]"
+                : ""
+            }`}
+          >
+            <Pressable
+              onPress={() => handleArchiveCustomer(customer, () => swipeable.close())}
+              android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: false }}
+              className="h-full w-[88px] items-center justify-center"
+            >
+              <MaterialIcons name="archive" size={20} color="#111827" />
+              <Text className="mt-1 text-[11px] font-semibold text-slate-900">
+                Archive
+              </Text>
+            </Pressable>
           </View>
-          <View className="flex-1">
-            <View className="flex-row justify-between items-center">
-              <Text className="text-[15px] font-semibold text-black">
-                {customer.name}
+        )}
+      >
+        <Pressable
+          onPress={() => onOpenCustomer(customer.id)}
+          android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: false }}
+          className="px-5 py-4 bg-white border-l border-r border-black/10 active:bg-slate-50"
+        >
+          <View className="flex-row gap-3">
+            <View className="h-12 w-12 rounded-full bg-black items-center justify-center">
+              <Text className="text-white font-semibold text-[12px]">
+                {initialsFor(customer.name)}
               </Text>
-              <MaterialIcons name="chevron-right" size={18} color="#aaa" />
             </View>
-            <Text className="mt-1 text-[12px] text-black/40">{customer.mobile}</Text>
-            <View className="mt-3 flex-row items-center justify-between">
-              <Text className="text-[11px] text-black/30">
-                Since {formatDate(customer.createdAt)}
-              </Text>
-              <View className={`rounded-full px-3 py-1 ${cleared ? "bg-green-50" : "bg-red-50"}`}>
-                <Text className={`text-[10px] font-semibold ${cleared ? "text-green-600" : "text-red-600"}`}>
-                  {cleared ? "Cleared" : formatCurrency(customer.due)}
+            <View className="flex-1">
+              <View className="flex-row justify-between items-center">
+                <Text className="text-[15px] font-semibold text-black">
+                  {customer.name}
                 </Text>
+                <MaterialIcons name="chevron-right" size={18} color="#aaa" />
+              </View>
+              <Text className="mt-1 text-[12px] text-black/40">{customer.mobile}</Text>
+              <View className="mt-3 flex-row items-center justify-between">
+                <Text className="text-[11px] text-black/30">
+                  Since {formatDate(customer.createdAt)}
+                </Text>
+                <View className={`rounded-full px-3 py-1 ${cleared ? "bg-green-50" : "bg-red-50"}`}>
+                  <Text className={`text-[10px] font-semibold ${cleared ? "text-green-600" : "text-red-600"}`}>
+                    {cleared ? "Cleared" : formatCurrency(customer.due)}
+                  </Text>
+                </View>
               </View>
             </View>
           </View>
-        </View>
-        {!isLast && <View className="h-[0.5px] bg-black/5 mt-3" />}
-      </Pressable>
+          {!isLast && <View className="h-[0.5px] bg-black/5 mt-3" />}
+        </Pressable>
+      </Swipeable>
     );
   };
 

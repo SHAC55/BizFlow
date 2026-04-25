@@ -9,6 +9,7 @@ import {
 import * as Linking from "expo-linking";
 import { makeRedirectUri } from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
+import { queryClient } from "../lib/query";
 import {
   buildGoogleAuthUrl,
   completeOnboarding as completeOnboardingRequest,
@@ -41,6 +42,7 @@ type AuthContextValue = {
   register: (payload: RegisterPayload) => Promise<void>;
   completeOnboarding: (payload: OnboardingPayload) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
+  refreshUser: () => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -92,6 +94,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   }, []);
 
   const persistSession = async (nextSession: AuthSession) => {
+    queryClient.clear();
     setSession(nextSession);
     await writeStoredSession(nextSession);
   };
@@ -184,9 +187,23 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     }
   };
 
+  const refreshUser = async () => {
+    const accessToken = session?.tokens.accessToken;
+    const refreshToken = session?.tokens.refreshToken;
+
+    if (!accessToken || !refreshToken) {
+      throw new Error("Session expired. Please sign in again.");
+    }
+
+    const user = await fetchCurrentUser(accessToken);
+    const nextSession = buildSession(user, accessToken, refreshToken);
+    await persistSession(nextSession);
+  };
+
   const logout = async () => {
     const accessToken = session?.tokens.accessToken;
 
+    queryClient.clear();
     setSession(null);
     await clearStoredSession();
 
@@ -210,6 +227,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       register,
       completeOnboarding,
       loginWithGoogle,
+      refreshUser,
       logout,
     }),
     [isBusy, isReady, session],

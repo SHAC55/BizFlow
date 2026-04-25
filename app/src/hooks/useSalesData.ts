@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { fetchSales } from "../lib/api";
+import { queryKeys } from "../lib/query";
 import { useAuth } from "../providers/AuthProvider";
 import type { DashboardSale, DashboardSalesSummary } from "../types/dashboard";
 
@@ -27,73 +28,41 @@ export const useSalesData = ({
   status?: "all" | "paid" | "partial" | "pending";
 }) => {
   const { session } = useAuth();
-  const [sales, setSales] = useState<DashboardSale[]>([]);
-  const [summary, setSummary] = useState<DashboardSalesSummary>(emptySummary);
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit,
-    total: 0,
-    totalPages: 0,
-  });
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const accessToken = session?.tokens.accessToken;
 
-  const load = async (refresh = false) => {
-    const accessToken = session?.tokens.accessToken;
-
-    if (!accessToken) {
-      setError("Session expired. Please sign in again.");
-      setIsLoading(false);
-      setIsRefreshing(false);
-      return;
-    }
-
-    if (refresh) {
-      setIsRefreshing(true);
-    } else {
-      setIsLoading(true);
-    }
-
-    try {
-      setError(null);
-      const response = await fetchSales(accessToken, {
+  const query = useQuery({
+    queryKey: queryKeys.sales.list({
+      page,
+      limit,
+      search,
+      status,
+    }),
+    enabled: Boolean(accessToken),
+    queryFn: () =>
+      fetchSales(accessToken!, {
         page,
         limit,
         search,
         status,
-      });
-      setSales(response.sales ?? []);
-      setSummary(response.summary ?? emptySummary);
-      setPagination(
-        response.pagination ?? {
-          page,
-          limit,
-          total: 0,
-          totalPages: 0,
-        },
-      );
-    } catch (loadError) {
-      setError(
-        loadError instanceof Error ? loadError.message : "Failed to load sales",
-      );
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-    }
-  };
-
-  useEffect(() => {
-    load();
-  }, [session?.tokens.accessToken, page, limit, search, status]);
+      }),
+  });
 
   return {
-    error,
-    isLoading,
-    isRefreshing,
-    pagination,
-    refetch: () => load(true),
-    sales,
-    summary,
+    error: accessToken
+      ? query.error instanceof Error
+        ? query.error.message
+        : null
+      : "Session expired. Please sign in again.",
+    isLoading: query.isPending,
+    isRefreshing: query.isRefetching && !query.isPending,
+    pagination: query.data?.pagination ?? {
+      page,
+      limit,
+      total: 0,
+      totalPages: 0,
+    },
+    refetch: () => query.refetch(),
+    sales: (query.data?.sales ?? []) as DashboardSale[],
+    summary: (query.data?.summary ?? emptySummary) as DashboardSalesSummary,
   };
 };

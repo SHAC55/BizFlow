@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Pressable,
   RefreshControl,
@@ -13,6 +14,7 @@ import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
 import { AppLayout } from "../components/AppLayout";
 import { createSalePayment, fetchSale } from "../lib/api";
+import { queryKeys } from "../lib/query";
 import { useAuth } from "../providers/AuthProvider";
 import type { DashboardSale } from "../types/dashboard";
 import type { AppRoute } from "../types/navigation";
@@ -39,6 +41,7 @@ export const SaleDetailPage = ({
   onNavigate,
 }: SaleDetailPageProps) => {
   const { session } = useAuth();
+  const queryClient = useQueryClient();
 
   const [sale, setSale] = useState<DashboardSale | null>(null);
   const [loading, setLoading] = useState(true);
@@ -81,6 +84,12 @@ export const SaleDetailPage = ({
 
       setSale(updated);
       setPaymentAmount("");
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.sales.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.sales.detail(sale.id) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.customers.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all }),
+      ]);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Toast.show({ type: "success", text1: "Payment Recorded", text2: `₹${paymentAmount} added to this sale.` });
     } catch (err) {
@@ -194,6 +203,31 @@ export const SaleDetailPage = ({
               </View>
             </Section>
 
+            <Section title="Bill Summary">
+              <SummaryRow
+                label="Subtotal"
+                value={formatCurrency(sale.subtotalAmount)}
+              />
+              {sale.discountAmount > 0 && (
+                <SummaryRow
+                  label="Discount"
+                  value={`- ${formatCurrency(sale.discountAmount)}`}
+                />
+              )}
+              {sale.gstAmount > 0 && (
+                <SummaryRow
+                  label={`GST (${sale.gstRate}%)`}
+                  value={formatCurrency(sale.gstAmount)}
+                />
+              )}
+              <View className="my-3 h-px bg-slate-100" />
+              <SummaryRow
+                label="Final Amount"
+                value={formatCurrency(sale.totalAmount)}
+                bold
+              />
+            </Section>
+
             {/* Products */}
             <Section title="Products">
               {sale.items.map((item) => (
@@ -282,6 +316,25 @@ const MiniCard = ({ label, value }: any) => (
       numberOfLines={1}
       className="text-[14px] font-semibold text-slate-900"
     >
+      {value}
+    </Text>
+  </View>
+);
+
+const SummaryRow = ({
+  label,
+  value,
+  bold,
+}: {
+  label: string;
+  value: string;
+  bold?: boolean;
+}) => (
+  <View className="flex-row items-center justify-between py-1.5">
+    <Text className={`text-[13px] ${bold ? "font-semibold text-slate-900" : "text-slate-500"}`}>
+      {label}
+    </Text>
+    <Text className={`${bold ? "text-[16px] font-bold text-slate-900" : "text-[14px] font-semibold text-slate-800"}`}>
       {value}
     </Text>
   </View>

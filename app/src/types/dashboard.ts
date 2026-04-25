@@ -34,12 +34,14 @@ export type DashboardSale = {
   id: string;
   businessId?: string;
   status: DashboardSaleStatus;
+  subtotalAmount: number;
+  discountAmount: number;
+  gstRate: number;
+  gstAmount: number;
   totalAmount: number;
   paidAmount: number;
   dueAmount: number;
   reminderDate?: string | null;
-  subtotalAmount?: number;
-  discountAmount?: number;
   estimatedCostAmount?: number;
   estimatedProfitAmount?: number;
   createdAt: string;
@@ -70,6 +72,10 @@ export type CreateSalePayload = {
     quantity: number;
     unitPrice: number;
   }>;
+  subtotalAmount: number;
+  discountAmount?: number;
+  gstRate?: number;
+  gstAmount?: number;
   totalAmount: number;
   paidAmount?: number;
   reminderDate?: string;

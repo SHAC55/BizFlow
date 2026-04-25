@@ -91,10 +91,11 @@ export const OnboardingPage = ({
       <View className="absolute right-[-70px] bottom-[120px] h-[210px] w-[210px] rounded-full bg-[#c7d2fe]" />
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
         <ScrollView
+          automaticallyAdjustKeyboardInsets
           contentContainerClassName="flex-grow py-4"
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}

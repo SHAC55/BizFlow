@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createProduct, fetchProducts } from "../lib/api";
+import { queryClient, queryKeys } from "../lib/query";
 import { useAuth } from "../providers/AuthProvider";
 import type {
   CreateProductPayload,
@@ -31,109 +32,69 @@ export const useProductsData = ({
   lowStockOnly?: boolean;
 }) => {
   const { session } = useAuth();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [summary, setSummary] = useState<ProductsSummary>(emptySummary);
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit,
-    total: 0,
-    totalPages: 0,
-  });
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const accessToken = session?.tokens.accessToken;
 
-  const load = async (refresh = false) => {
-    const accessToken = session?.tokens.accessToken;
-
-    if (!accessToken) {
-      setError("Session expired. Please sign in again.");
-      setIsLoading(false);
-      setIsRefreshing(false);
-      return;
-    }
-
-    if (refresh) {
-      setIsRefreshing(true);
-    } else {
-      setIsLoading(true);
-    }
-
-    try {
-      setError(null);
-      const response = await fetchProducts(accessToken, {
+  const query = useQuery({
+    queryKey: queryKeys.products.list({
+      page,
+      limit,
+      category,
+      search,
+      lowStockOnly,
+    }),
+    enabled: Boolean(accessToken),
+    queryFn: () =>
+      fetchProducts(accessToken!, {
         page,
         limit,
         category,
         search,
         lowStockOnly,
-      });
-
-      setProducts(response.products ?? []);
-      setSummary(response.summary ?? emptySummary);
-      setPagination(
-        response.pagination ?? {
-          page,
-          limit,
-          total: 0,
-          totalPages: 0,
-        },
-      );
-    } catch (loadError) {
-      setError(
-        loadError instanceof Error ? loadError.message : "Failed to load inventory",
-      );
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-    }
-  };
-
-  useEffect(() => {
-    load();
-  }, [session?.tokens.accessToken, page, limit, category, search, lowStockOnly]);
+      }),
+  });
 
   return {
-    error,
-    isLoading,
-    isRefreshing,
-    pagination,
-    products,
-    refetch: () => load(true),
-    summary,
+    error: accessToken
+      ? query.error instanceof Error
+        ? query.error.message
+        : null
+      : "Session expired. Please sign in again.",
+    isLoading: query.isPending,
+    isRefreshing: query.isRefetching && !query.isPending,
+    pagination: query.data?.pagination ?? {
+      page,
+      limit,
+      total: 0,
+      totalPages: 0,
+    },
+    products: (query.data?.products ?? []) as Product[],
+    refetch: () => query.refetch(),
+    summary: (query.data?.summary ?? emptySummary) as ProductsSummary,
   };
 };
 
 export const useCreateProduct = () => {
   const { session } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const mutation = useMutation({
+    mutationFn: async (payload: CreateProductPayload) => {
+      const accessToken = session?.tokens.accessToken;
+      if (!accessToken) {
+        throw new Error("Session expired. Please sign in again.");
+      }
 
-  const submit = async (payload: CreateProductPayload) => {
-    const accessToken = session?.tokens.accessToken;
-
-    if (!accessToken) {
-      throw new Error("Session expired. Please sign in again.");
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      return await createProduct(accessToken, payload);
-    } catch (submitError) {
-      const nextError =
-        submitError instanceof Error ? submitError.message : "Failed to create product";
-      setError(nextError);
-      throw submitError;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      return createProduct(accessToken, payload);
+    },
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.products.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all }),
+      ]);
+    },
+  });
 
   return {
-    createProduct: submit,
-    error,
-    isLoading,
+    createProduct: mutation.mutateAsync,
+    error: mutation.error instanceof Error ? mutation.error.message : null,
+    isLoading: mutation.isPending,
   };
 };

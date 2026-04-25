@@ -18,7 +18,6 @@ import type {
 import type { AppRoute } from "../types/navigation";
 
 type DashboardPageProps = {
-  onLogout: () => Promise<void>;
   onOpenAddInventory: () => void;
   onOpenCustomers: () => void;
   onOpenInventory: () => void;
@@ -116,7 +115,6 @@ const QUICK_ACTIONS = [
 ] as const;
 
 export const DashboardPage = ({
-  onLogout,
   onNavigate,
   onOpenAddInventory,
   onOpenCustomers,

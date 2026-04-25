@@ -5,14 +5,15 @@ export type AppRoute =
   | "sales"
   | "customers";
 
-export type AppScreen =
-  | { route: "dashboard" }
-  | { route: "inventory" }
-  | { route: "addInventory"; productId?: string }
-  | { route: "sales" }
-  | { route: "saleDetail"; saleId: string }
-  | { route: "addSale" }
-  | { route: "customers" }
-  | { route: "customerDetail"; customerId: string }
-  | { route: "addCustomer"; customerId?: string }
-  | { route: "productDetail"; productId: string };
+export type RootStackParamList = {
+  Dashboard: undefined;
+  Inventory: undefined;
+  AddInventory: { productId?: string } | undefined;
+  ProductDetail: { productId: string };
+  Sales: undefined;
+  AddSale: undefined;
+  SaleDetail: { saleId: string };
+  Customers: undefined;
+  AddCustomer: { customerId?: string } | undefined;
+  CustomerDetail: { customerId: string };
+};

@@ -52,10 +52,11 @@ export const AuthPage = () => {
       <View className="absolute right-[-90px] bottom-[160px] h-[240px] w-[240px] rounded-full bg-[#e5e7eb]" />
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
         <ScrollView
+          automaticallyAdjustKeyboardInsets
           contentContainerClassName="px-4 pb-10 pt-5"
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}

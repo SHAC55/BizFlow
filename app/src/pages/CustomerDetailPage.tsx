@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Alert,
   Pressable,
@@ -12,6 +13,7 @@ import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
 import { AppLayout } from "../components/AppLayout";
 import { archiveCustomer, fetchCustomer } from "../lib/api";
+import { queryKeys } from "../lib/query";
 import { useAuth } from "../providers/AuthProvider";
 import type { CustomerDetail } from "../types/customer";
 import type { AppRoute } from "../types/navigation";
@@ -49,6 +51,7 @@ export const CustomerDetailPage = ({
   onOpenSale,
 }: CustomerDetailPageProps) => {
   const { session } = useAuth();
+  const queryClient = useQueryClient();
 
   const [customer, setCustomer] = useState<CustomerDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -99,6 +102,12 @@ export const CustomerDetailPage = ({
             try {
               setIsArchiving(true);
               await archiveCustomer(token, customerId);
+              await Promise.all([
+                queryClient.invalidateQueries({ queryKey: queryKeys.customers.all }),
+                queryClient.invalidateQueries({ queryKey: queryKeys.customers.detail(customerId) }),
+                queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all }),
+                queryClient.invalidateQueries({ queryKey: queryKeys.sales.all }),
+              ]);
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
               Toast.show({ type: "success", text1: "Customer Archived" });
               onBack();

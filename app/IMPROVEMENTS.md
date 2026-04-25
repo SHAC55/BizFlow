@@ -45,16 +45,49 @@ All 14 improvements scoped and tracked here. Constraint: logo, images, and font 
 
 ---
 
-## Items 11–14: Not yet started
+## Items 11–14: In progress / pending
 
 | # | Item | Effort | Impact | Status | Notes |
 |---|------|--------|--------|--------|-------|
-| 11 | React Navigation adoption | High | High | ⬜ | Replace custom `useState` state machine in App.tsx with React Navigation stack. Enables deep linking, back-gesture on iOS, Android hardware back button. |
-| 12 | React Query for data fetching | High | High | ⬜ | Replace custom `useEffect`-based hooks (`useSalesData`, `useProductsData`, `useCustomersData`) with `@tanstack/react-query`. Gains background refetch, cache invalidation, stale-while-revalidate, optimistic updates. |
-| 13 | Swipe gestures on list items | High | Medium | ⬜ | Swipe-left to delete/archive on customer and product rows. Requires `react-native-gesture-handler` + `react-native-reanimated` (already installed). |
-| 14 | Bottom sheet for add forms | High | Medium | ⬜ | Replace full-screen Add Customer / Add Inventory pages with `@gorhom/bottom-sheet` modals. Keeps context visible behind the form. |
+| 11 | React Navigation adoption | High | High | ✅ | Replaced custom `useState` router in `App.tsx` with a native stack. Added deep-link paths plus native iOS back gesture and Android hardware back support. |
+| 12 | React Query for data fetching | High | High | ✅ | Replaced manual list/dashboard hooks with `@tanstack/react-query`, added shared query keys, QueryClient provider, and cache invalidation after product/customer/sale mutations. |
+| 13 | Swipe gestures on list items | High | Medium | ✅ | Added swipe-left actions on customer and product rows. Customers can be archived from the list and products can be deleted from the list with confirmation + invalidation. |
+| 14 | Bottom sheet for add forms | High | Medium | ✅ | Replaced full-screen Add Customer / Add Inventory flows with `@gorhom/bottom-sheet` modal sheets layered over the current screen. Add Sale remains full-screen. |
+
+### Files changed by item 11
+- `App.tsx` — NavigationContainer + native stack screens, deep-link config, route reset helpers
+- `package.json` / `package-lock.json` — added React Navigation stack dependencies
+- `src/types/navigation.ts` — replaced local screen-state union with `RootStackParamList`
+
+### Files changed by item 12
+- `App.tsx` — `QueryClientProvider` wiring
+- `package.json` / `package-lock.json` — added `@tanstack/react-query`
+- `src/lib/query.ts` — NEW: QueryClient + query key definitions
+- `src/hooks/useDashboardData.ts` — migrated to `useQuery`
+- `src/hooks/useSalesData.ts` — migrated to `useQuery`
+- `src/hooks/useProductsData.ts` — migrated to `useQuery` and `useMutation`
+- `src/hooks/useCustomersData.ts` — migrated to `useQuery`
+- `src/providers/AuthProvider.tsx` — clears React Query cache on session changes
+- `src/pages/AddInventoryPage.tsx` — invalidates product/dashboard caches after create/update
+- `src/pages/AddCustomerPage.tsx` — invalidates customer/dashboard/sales caches after create/update
+- `src/pages/AddSalePage.tsx` — invalidates sales/customer/product/dashboard caches after create
+- `src/pages/ProductDetailPage.tsx` — invalidates product/dashboard caches after stock update/delete
+- `src/pages/CustomerDetailPage.tsx` — invalidates customer/dashboard/sales caches after archive
+- `src/pages/SaleDetailPage.tsx` — invalidates sales/customer/dashboard caches after payment
+
+### Files changed by item 13
+- `App.tsx` — wraps the app in `GestureHandlerRootView`
+- `src/pages/CustomersPage.tsx` — swipe-left archive action for customer rows
+- `src/pages/InventoryPage.tsx` — swipe-left delete action for product rows
+
+### Files changed by item 14
+- `App.tsx` — `BottomSheetModalProvider` + transparent modal presentation for add/edit customer and inventory routes
+- `package.json` / `package-lock.json` — added `@gorhom/bottom-sheet`
+- `src/components/FormBottomSheet.tsx` — NEW: reusable sheet wrapper with backdrop, close button and pan-down dismiss
+- `src/pages/AddCustomerPage.tsx` — supports sheet presentation for create/edit customer
+- `src/pages/AddInventoryPage.tsx` — supports sheet presentation for create/edit inventory
 
 ---
 
 ## Known Issues (pre-existing, not from this work)
-- `ProductDetailPage.tsx:130` — passes `headerRight` prop to `AppLayout` which doesn't accept it. Dead prop, causes TS error.
+- None currently tracked from items 1–14.

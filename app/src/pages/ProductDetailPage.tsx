@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Alert,
   Pressable,
@@ -18,6 +19,7 @@ import {
   fetchProduct,
   fetchProductMovements,
 } from "../lib/api";
+import { queryKeys } from "../lib/query";
 import { useAuth } from "../providers/AuthProvider";
 import type { InventoryMovement, Product } from "../types/product";
 import type { AppRoute } from "../types/navigation";
@@ -41,6 +43,7 @@ export const ProductDetailPage = ({
   productId,
 }: ProductDetailPageProps) => {
   const { session } = useAuth();
+  const queryClient = useQueryClient();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [movements, setMovements] = useState<InventoryMovement[]>([]);
@@ -94,6 +97,12 @@ export const ProductDetailPage = ({
 
       setQuantity("");
       setReason("");
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.products.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.products.detail(product.id) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.products.movements(product.id) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all }),
+      ]);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Toast.show({ type: "success", text1: "Stock Updated", text2: "Inventory level has been adjusted." });
       load(true);
@@ -120,6 +129,12 @@ export const ProductDetailPage = ({
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
             try {
               await deleteProduct(accessToken, product.id);
+              await Promise.all([
+                queryClient.invalidateQueries({ queryKey: queryKeys.products.all }),
+                queryClient.invalidateQueries({ queryKey: queryKeys.products.detail(product.id) }),
+                queryClient.invalidateQueries({ queryKey: queryKeys.products.movements(product.id) }),
+                queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all }),
+              ]);
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
               Toast.show({ type: "success", text1: "Product Deleted" });
               onBack();
