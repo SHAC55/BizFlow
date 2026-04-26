@@ -48,10 +48,8 @@ export const ProductDetailPage = ({
   const [product, setProduct] = useState<Product | null>(null);
   const [movements, setMovements] = useState<InventoryMovement[]>([]);
   const [error, setError] = useState<string | null>(null);
-
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-
   const [quantity, setQuantity] = useState("");
   const [reason, setReason] = useState("");
 
@@ -63,12 +61,10 @@ export const ProductDetailPage = ({
 
     try {
       setError(null);
-
       const [nextProduct, nextMovements] = await Promise.all([
         fetchProduct(token, productId),
         fetchProductMovements(token, productId),
       ]);
-
       setProduct(nextProduct);
       setMovements(nextMovements);
     } catch (err) {
@@ -150,8 +146,7 @@ export const ProductDetailPage = ({
     );
   };
 
-  const isLowStock =
-    product && product.quantity <= Number(product.minimumQuantity);
+  const isLowStock = product && product.quantity <= Number(product.minimumQuantity);
 
   return (
     <AppLayout
@@ -162,12 +157,9 @@ export const ProductDetailPage = ({
     >
       <ScrollView
         className="flex-1"
-        contentContainerClassName="px-4 pb-32"
+        contentContainerClassName="pb-32"
         refreshControl={
-          <RefreshControl
-            refreshing={isRefreshing}
-            onRefresh={() => load(true)}
-          />
+          <RefreshControl refreshing={isRefreshing} onRefresh={() => load(true)} />
         }
         showsVerticalScrollIndicator={false}
       >
@@ -181,52 +173,46 @@ export const ProductDetailPage = ({
           </Text>
         ) : (
           <>
-            {/* Top Actions */}
-            <View className="mt-4 mb-4 flex-row justify-between">
-              <ActionBtn icon="arrow-back" label="Back" onPress={onBack} />
+            {/* Top Bar */}
+            <View className="flex-row items-center justify-between px-4 pt-4 pb-3">
+              <Pressable
+                onPress={onBack}
+                className="h-[36px] w-[36px] items-center justify-center rounded-full bg-black/5"
+              >
+                <MaterialIcons name="arrow-back" size={18} color="#000" />
+              </Pressable>
 
               <View className="flex-row gap-2">
-                <ActionBtn
-                  icon="edit"
-                  label="Edit"
-                  dark
-                  onPress={onEdit}
-                />
-
-                <ActionBtn
-                  icon="delete"
-                  label="Delete"
-                  red
-                  onPress={handleDelete}
-                />
+                <TopBtn icon="edit" label="Edit" onPress={onEdit} />
+                <TopBtn icon="delete" label="Delete" danger onPress={handleDelete} />
               </View>
             </View>
 
-            {/* Hero */}
-            <View className="rounded-[30px] bg-black px-5 py-5">
-              <View className="flex-row items-center justify-between">
-                <View>
-                  <Text className="text-[11px] uppercase text-white/55">
-                    Current Stock
+            {/* Hero Card */}
+            <View className="mx-4 rounded-[22px] bg-[#141414] px-5 pt-5 pb-5">
+              {/* Name + Status */}
+              <View className="flex-row items-start justify-between">
+                <View className="flex-1 pr-3">
+                  <Text className="text-[18px] font-semibold text-white leading-snug" numberOfLines={2}>
+                    {product.name}
                   </Text>
-
-                  <Text className="mt-1 text-[30px] font-bold text-white">
-                    {product.quantity}
-                  </Text>
+                  <View className="mt-2 flex-row gap-2">
+                    <View className="rounded-full bg-white/10 px-3 py-[3px]">
+                      <Text className="text-[10px] text-white/50">{product.category}</Text>
+                    </View>
+                    <View className="rounded-full bg-white/10 px-3 py-[3px]">
+                      <Text className="text-[10px] text-white/50">{product.sku || "Auto SKU"}</Text>
+                    </View>
+                  </View>
                 </View>
-
                 <View
-                  className={`rounded-full px-3 py-1 ${
-                    isLowStock
-                      ? "bg-red-500/20"
-                      : "bg-green-500/20"
+                  className={`rounded-full px-3 py-[5px] ${
+                    isLowStock ? "bg-red-500/20" : "bg-green-500/20"
                   }`}
                 >
                   <Text
-                    className={`text-[11px] font-semibold ${
-                      isLowStock
-                        ? "text-red-300"
-                        : "text-green-300"
+                    className={`text-[10px] font-semibold ${
+                      isLowStock ? "text-red-300" : "text-green-400"
                     }`}
                   >
                     {isLowStock ? "LOW STOCK" : "IN STOCK"}
@@ -234,114 +220,113 @@ export const ProductDetailPage = ({
                 </View>
               </View>
 
-              <View className="mt-5 flex-row gap-3">
-                <MetricCard
-                  label="Selling"
-                  value={formatCurrency(product.price)}
-                  green
-                />
+              {/* Stock Number */}
+              <View className="mt-5">
+                <Text className="text-[10px] uppercase tracking-widest text-white/40">
+                  Current Stock
+                </Text>
+                <View className="flex-row items-baseline gap-1 mt-1">
+                  <Text className="text-[44px] font-semibold text-white leading-none tracking-tight">
+                    {product.quantity}
+                  </Text>
+                  <Text className="text-[14px] text-white/40 mb-1">units</Text>
+                </View>
+              </View>
 
-                <MetricCard
-                  label="Cost"
-                  value={formatCurrency(product.costPrice)}
-                />
+              {/* Price Tiles */}
+              <View className="mt-4 flex-row gap-2">
+                <View className="flex-1 rounded-[14px] bg-white/8 border border-white/8 px-4 py-3">
+                  <Text className="text-[10px] uppercase tracking-wider text-white/40">Selling</Text>
+                  <Text className="mt-2 text-[16px] font-semibold text-green-400">
+                    {formatCurrency(product.price)}
+                  </Text>
+                </View>
+                <View className="flex-1 rounded-[14px] bg-white/8 border border-white/8 px-4 py-3">
+                  <Text className="text-[10px] uppercase tracking-wider text-white/40">Cost</Text>
+                  <Text className="mt-2 text-[16px] font-semibold text-white">
+                    {formatCurrency(product.costPrice)}
+                  </Text>
+                </View>
               </View>
             </View>
 
-            {/* Product Info One Row */}
-            <View className="mt-5 rounded-[28px] border border-black/10 bg-white p-5">
-              <Text className="mb-4 text-[16px] font-bold text-black">
-                Product Info
-              </Text>
-
-              <View className="flex-row gap-3">
-                <InfoCard
-                  label="Category"
-                  value={product.category}
-                />
-
-                <InfoCard
-                  label="SKU"
-                  value={product.sku || "Auto"}
-                />
-
-                <InfoCard
-                  label="Min Qty"
-                  value={`${product.minimumQuantity}`}
-                />
+            {/* Product Info */}
+            <View className="mx-4 mt-3 rounded-[18px] border border-black/[0.07] bg-white overflow-hidden">
+              <View className="px-4 pt-4 pb-3">
+                <Text className="text-[11px] font-medium uppercase tracking-wider text-black/35">
+                  Product Info
+                </Text>
+              </View>
+              <View className="flex-row border-t border-black/[0.06]">
+                <InfoCell label="Category" value={product.category} />
+                <View className="w-[0.5px] bg-black/[0.06]" />
+                <InfoCell label="SKU" value={product.sku || "Auto"} />
+                <View className="w-[0.5px] bg-black/[0.06]" />
+                <InfoCell label="Min Qty" value={`${product.minimumQuantity}`} />
               </View>
             </View>
 
             {/* Adjust Stock */}
-            <View className="mt-5 rounded-[28px] border border-black/10 bg-white p-5">
-              <Text className="mb-4 text-[16px] font-bold text-black">
+            <View className="mx-4 mt-3 rounded-[18px] border border-black/[0.07] bg-white px-4 py-4">
+              <Text className="mb-3 text-[11px] font-medium uppercase tracking-wider text-black/35">
                 Adjust Stock
               </Text>
 
-              <TextInput
-                value={quantity}
-                onChangeText={setQuantity}
-                keyboardType="number-pad"
-                placeholder="Enter quantity"
-                placeholderTextColor="#999"
-                className="rounded-2xl bg-zinc-50 px-4 py-4 text-black"
-              />
+              <View className="flex-row gap-2 items-center">
+                {/* Live preview display */}
+                <View className="h-[48px] w-[56px] items-center justify-center rounded-[12px] bg-zinc-100 border border-black/[0.06]">
+                  <Text className="text-[18px] font-semibold text-black">
+                    {quantity || "—"}
+                  </Text>
+                </View>
+                <TextInput
+                  value={quantity}
+                  onChangeText={setQuantity}
+                  keyboardType="number-pad"
+                  placeholder="New quantity"
+                  placeholderTextColor="#aaa"
+                  className="flex-1 h-[48px] rounded-[12px] bg-zinc-50 border border-black/[0.06] px-4 text-[15px] text-black"
+                />
+              </View>
 
               <TextInput
                 value={reason}
                 onChangeText={setReason}
                 placeholder="Reason (optional)"
-                placeholderTextColor="#999"
-                className="mt-3 rounded-2xl bg-zinc-50 px-4 py-4 text-black"
+                placeholderTextColor="#aaa"
+                className="mt-2 h-[42px] rounded-[12px] bg-zinc-50 border border-black/[0.06] px-4 text-[13px] text-black"
               />
 
               <Pressable
                 onPress={handleAdjustStock}
                 android_ripple={{ color: "rgba(255,255,255,0.1)", borderless: false }}
-                className="mt-4 items-center rounded-2xl bg-blue-600 py-4"
+                className="mt-3 h-[48px] items-center justify-center rounded-[12px] bg-[#141414]"
               >
-                <Text className="font-semibold text-white">
+                <Text className="text-[14px] font-semibold text-white">
                   Update Stock
                 </Text>
               </Pressable>
             </View>
 
             {/* Movement History */}
-            <View className="mt-5 rounded-[28px] border border-black/10 bg-white overflow-hidden">
-              <View className="px-5 py-4 border-b border-black/5">
-                <Text className="text-[16px] font-bold text-black">
+            <View className="mx-4 mt-3 rounded-[18px] border border-black/[0.07] bg-white overflow-hidden">
+              <View className="px-4 pt-4 pb-3 border-b border-black/[0.06]">
+                <Text className="text-[11px] font-medium uppercase tracking-wider text-black/35">
                   Movement History
                 </Text>
               </View>
 
               {movements.length === 0 ? (
-                <Text className="py-10 text-center text-black/35">
-                  No movement found
+                <Text className="py-10 text-center text-[13px] text-black/30">
+                  No movements yet
                 </Text>
               ) : (
                 movements.map((item, index) => (
-                  <View
+                  <MovementRow
                     key={item.id}
-                    className={`px-5 py-4 ${
-                      index !== movements.length - 1
-                        ? "border-b border-black/5"
-                        : ""
-                    }`}
-                  >
-                    <View className="flex-row justify-between items-center">
-                      <Text className="font-semibold text-black">
-                        {item.reason}
-                      </Text>
-
-                      <Text className="text-blue-600 font-bold text-[12px]">
-                        {item.quantityBefore} → {item.quantityAfter}
-                      </Text>
-                    </View>
-
-                    <Text className="mt-1 text-[12px] text-black/40">
-                      {item.type}
-                    </Text>
-                  </View>
+                    item={item}
+                    isLast={index === movements.length - 1}
+                  />
                 ))
               )}
             </View>
@@ -352,28 +337,35 @@ export const ProductDetailPage = ({
   );
 };
 
-/* Components */
+/* ─── Sub-components ─────────────────────────────────────── */
 
-const ActionBtn = ({ label, icon, dark, red, onPress }: any) => (
+const TopBtn = ({
+  label,
+  icon,
+  danger,
+  onPress,
+}: {
+  label: string;
+  icon: string;
+  danger?: boolean;
+  onPress: () => void;
+}) => (
   <Pressable
     onPress={onPress}
-    className={`flex-row items-center gap-2 rounded-2xl px-4 py-3 ${
-      dark
-        ? "bg-black"
-        : red
-        ? "bg-red-500"
-        : "border border-black/10 bg-white"
+    className={`flex-row items-center gap-1.5 rounded-[10px] px-3 h-[36px] border ${
+      danger
+        ? "bg-red-50 border-red-200"
+        : "bg-black border-black"
     }`}
   >
     <MaterialIcons
-      name={icon}
-      size={18}
-      color={dark || red ? "#fff" : "#000"}
+      name={icon as any}
+      size={15}
+      color={danger ? "#b91c1c" : "#fff"}
     />
-
     <Text
-      className={`font-medium ${
-        dark || red ? "text-white" : "text-black"
+      className={`text-[13px] font-medium ${
+        danger ? "text-red-700" : "text-white"
       }`}
     >
       {label}
@@ -381,31 +373,57 @@ const ActionBtn = ({ label, icon, dark, red, onPress }: any) => (
   </Pressable>
 );
 
-const MetricCard = ({ label, value, green }: any) => (
-  <View
-    className={`flex-1 rounded-2xl px-4 py-4 ${
-      green ? "bg-green-400" : "bg-white/10"
-    }`}
-  >
-    <Text className="text-[11px] text-white/70">{label}</Text>
-
-    <Text className="mt-2 text-[17px] font-bold text-white">
-      {value}
-    </Text>
-  </View>
-);
-
-const InfoCard = ({ label, value }: any) => (
-  <View className="flex-1 rounded-2xl bg-zinc-50 px-3 py-4">
-    <Text className="text-[10px] uppercase text-black/35">
+const InfoCell = ({ label, value }: { label: string; value: string }) => (
+  <View className="flex-1 px-4 py-3">
+    <Text className="text-[10px] uppercase tracking-wider text-black/35">
       {label}
     </Text>
-
-    <Text
-      numberOfLines={1}
-      className="mt-2 text-[13px] font-semibold text-black"
-    >
+    <Text numberOfLines={1} className="mt-1.5 text-[13px] font-semibold text-black">
       {value}
     </Text>
   </View>
 );
+
+const MovementRow = ({
+  item,
+  isLast,
+}: {
+  item: InventoryMovement;
+  isLast: boolean;
+}) => {
+  const dotColor =
+    item.type === "INCREASE"
+      ? "#86efac"   // green-300
+      : item.type === "DECREASE"
+      ? "#fca5a5"   // red-300
+      : "#93c5fd";  // blue-300
+
+  return (
+    <View
+      className={`flex-row items-center gap-3 px-4 py-3.5 ${
+        !isLast ? "border-b border-black/[0.05]" : ""
+      }`}
+    >
+      {/* Type dot */}
+      <View
+        style={{ backgroundColor: dotColor }}
+        className="w-2 h-2 rounded-full flex-shrink-0"
+      />
+
+      {/* Info */}
+      <View className="flex-1 min-w-0">
+        <Text className="text-[13px] font-semibold text-black" numberOfLines={1}>
+          {item.reason}
+        </Text>
+        <Text className="mt-0.5 text-[11px] text-black/40">{item.type}</Text>
+      </View>
+
+      {/* Delta */}
+      <Text className="text-[12px] font-medium text-black/50 flex-shrink-0">
+        <Text className="text-black font-semibold">{item.quantityBefore}</Text>
+        {" → "}
+        <Text className="text-black font-semibold">{item.quantityAfter}</Text>
+      </Text>
+    </View>
+  );
+};

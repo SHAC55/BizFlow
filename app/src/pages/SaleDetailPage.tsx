@@ -18,6 +18,7 @@ import { queryKeys } from "../lib/query";
 import { useAuth } from "../providers/AuthProvider";
 import type { DashboardSale } from "../types/dashboard";
 import type { AppRoute } from "../types/navigation";
+import { handleGenerateInvoice } from "../lib/InvoiceGenerator";
 
 type SaleDetailPageProps = {
   saleId: string;
@@ -86,15 +87,22 @@ export const SaleDetailPage = ({
       setPaymentAmount("");
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.sales.all }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.sales.detail(sale.id) }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.sales.detail(sale.id),
+        }),
         queryClient.invalidateQueries({ queryKey: queryKeys.customers.all }),
         queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all }),
       ]);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Toast.show({ type: "success", text1: "Payment Recorded", text2: `₹${paymentAmount} added to this sale.` });
+      Toast.show({
+        type: "success",
+        text1: "Payment Recorded",
+        text2: `₹${paymentAmount} added to this sale.`,
+      });
     } catch (err) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      const msg = err instanceof Error ? err.message : "Failed to record payment";
+      const msg =
+        err instanceof Error ? err.message : "Failed to record payment";
       Toast.show({ type: "error", text1: "Payment Failed", text2: msg });
     } finally {
       setIsPaying(false);
@@ -102,10 +110,10 @@ export const SaleDetailPage = ({
   };
 
   const handleInvoice = () => {
-    // Add invoice logic here
-    console.log("Generate Invoice");
+    if (!sale || !session?.user) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    handleGenerateInvoice(sale, session.user);
   };
-
   return (
     <AppLayout
       currentRoute="sales"
@@ -127,7 +135,10 @@ export const SaleDetailPage = ({
         <View className="mb-4 flex-row items-center justify-between">
           <Pressable
             onPress={handleInvoice}
-            android_ripple={{ color: "rgba(255,255,255,0.1)", borderless: false }}
+            android_ripple={{
+              color: "rgba(255,255,255,0.1)",
+              borderless: false,
+            }}
             className="flex-row items-center bg-black px-4 py-3 rounded-2xl"
           >
             <MaterialIcons name="receipt-long" size={18} color="#fff" />
@@ -271,7 +282,10 @@ export const SaleDetailPage = ({
               <Pressable
                 onPress={handlePayment}
                 disabled={isPaying || !paymentAmount}
-                android_ripple={{ color: "rgba(255,255,255,0.1)", borderless: false }}
+                android_ripple={{
+                  color: "rgba(255,255,255,0.1)",
+                  borderless: false,
+                }}
                 className={`mt-4 rounded-2xl py-4 items-center ${
                   isPaying || !paymentAmount ? "bg-slate-300" : "bg-black"
                 }`}
@@ -331,10 +345,14 @@ const SummaryRow = ({
   bold?: boolean;
 }) => (
   <View className="flex-row items-center justify-between py-1.5">
-    <Text className={`text-[13px] ${bold ? "font-semibold text-slate-900" : "text-slate-500"}`}>
+    <Text
+      className={`text-[13px] ${bold ? "font-semibold text-slate-900" : "text-slate-500"}`}
+    >
       {label}
     </Text>
-    <Text className={`${bold ? "text-[16px] font-bold text-slate-900" : "text-[14px] font-semibold text-slate-800"}`}>
+    <Text
+      className={`${bold ? "text-[16px] font-bold text-slate-900" : "text-[14px] font-semibold text-slate-800"}`}
+    >
       {value}
     </Text>
   </View>

@@ -4,6 +4,8 @@ import HeroSection from '../components/HeroSection'
 import Features from '../components/Features'
 import FeedbackForm from '../components/FeedbackForm'
 import Footer from '../components/Footer'
+import Pricing from '../components/Pricing'
+import CTA from '../components/CTA'
 
 const LandingPage = () => {
   return (
@@ -11,7 +13,9 @@ const LandingPage = () => {
       <LandingHeader />
       <HeroSection/>
       <Features/>
-      <FeedbackForm/>
+      {/* <FeedbackForm/> */}
+      <CTA/>
+      <Pricing/>
       <Footer/>
     </div>
   )
