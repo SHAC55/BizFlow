@@ -1,6 +1,7 @@
 import { useEffect, useState, type ComponentProps } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
+  BackHandler,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -15,6 +16,7 @@ import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
 import { AppLayout } from "../components/AppLayout";
 import { FormBottomSheet } from "../components/FormBottomSheet";
+import { SubmitOverlay } from "../components/SubmitOverlay";
 import { createCustomer, fetchCustomer, updateCustomer } from "../lib/api";
 import { queryKeys } from "../lib/query";
 import { useAuth } from "../providers/AuthProvider";
@@ -82,6 +84,12 @@ export const AddCustomerPage = ({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isBootstrapping, setIsBootstrapping] = useState(Boolean(customerId));
+
+  useEffect(() => {
+    if (!isLoading) return;
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => true);
+    return () => sub.remove();
+  }, [isLoading]);
 
   useEffect(() => {
     const accessToken = session?.tokens.accessToken;
@@ -331,18 +339,16 @@ export const AddCustomerPage = ({
     </View>
   );
 
-  const formBody = (
+  const formBody = presentation === "sheet" ? (
+    <View className="px-5 pb-16 pt-2">
+      {hero}
+      {cardContent}
+    </View>
+  ) : (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       className="flex-1"
     >
-      {presentation === "sheet" ? (
-        <View className="px-5 pb-16 pt-2">
-          {hero}
-          {cardContent}
-        </View>
-      ) : null}
-
       <ScrollView
         automaticallyAdjustKeyboardInsets
         className="flex-1"
@@ -350,7 +356,6 @@ export const AddCustomerPage = ({
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         contentContainerClassName="px-4 pb-32 pt-3"
-        style={presentation === "sheet" ? { display: "none" } : undefined}
       >
         {hero}
         {cardContent}
@@ -365,6 +370,7 @@ export const AddCustomerPage = ({
         subtitle="Keep context visible while updating customer details."
         onClose={closeHandler}
       >
+        <SubmitOverlay visible={isLoading} />
         {formBody}
       </FormBottomSheet>
     );
@@ -377,6 +383,7 @@ export const AddCustomerPage = ({
       subtitle="Manage customer profile professionally"
       onNavigate={onNavigate}
     >
+      <SubmitOverlay visible={isLoading} />
       {formBody}
     </AppLayout>
   );

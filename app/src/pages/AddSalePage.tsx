@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
+  BackHandler,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -16,6 +17,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
 import { AppLayout } from "../components/AppLayout";
+import { SubmitOverlay } from "../components/SubmitOverlay";
 import { createSale, fetchCustomers, fetchProducts } from "../lib/api";
 import { queryKeys } from "../lib/query";
 import { useAuth } from "../providers/AuthProvider";
@@ -73,6 +75,12 @@ export const AddSalePage = ({
     setReminderDateObj(selected);
     setReminderDate(formatDateForBackend(selected));
   };
+
+  useEffect(() => {
+    if (!loading) return;
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => true);
+    return () => sub.remove();
+  }, [loading]);
 
   useEffect(() => {
     const token = session?.tokens.accessToken;
@@ -150,10 +158,10 @@ export const AddSalePage = ({
         reminderDate: reminderDate || undefined,
       });
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.sales.all }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.customers.all }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.products.all }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.sales.all, refetchType: "all" }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.customers.all, refetchType: "all" }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.products.all, refetchType: "all" }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all, refetchType: "all" }),
       ]);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Toast.show({ type: "success", text1: "Sale Created", text2: `₹${total.toLocaleString("en-IN")} sale recorded.` });
@@ -174,6 +182,7 @@ export const AddSalePage = ({
       subtitle="Easy billing & due tracking"
       onNavigate={onNavigate}
     >
+      <SubmitOverlay visible={loading} />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"

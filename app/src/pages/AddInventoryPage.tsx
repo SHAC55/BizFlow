@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import type { ComponentProps } from "react";
 import { useEffect, useState } from "react";
 import {
+  BackHandler,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -16,6 +17,7 @@ import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
 import { AppLayout } from "../components/AppLayout";
 import { FormBottomSheet } from "../components/FormBottomSheet";
+import { SubmitOverlay } from "../components/SubmitOverlay";
 import { fetchProduct, updateProduct } from "../lib/api";
 import { queryKeys } from "../lib/query";
 import { useAuth } from "../providers/AuthProvider";
@@ -154,6 +156,12 @@ export const AddInventoryPage = ({
       setErrors((prev) => ({ ...prev, [name]: err }));
     }
   };
+
+  useEffect(() => {
+    if (!isLoading) return;
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => true);
+    return () => sub.remove();
+  }, [isLoading]);
 
   const handleBlur = (name: keyof FormState, value: string) => {
     setTouched((prev) => ({ ...prev, [name]: true }));
@@ -430,25 +438,22 @@ export const AddInventoryPage = ({
     </View>
   );
 
-  const formBody = (
+  const formBody = presentation === "sheet" ? (
+    <View className="px-5 pb-16 pt-2">
+      {header}
+      {cardContent}
+    </View>
+  ) : (
     <KeyboardAvoidingView
       className="flex-1"
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      {presentation === "sheet" ? (
-        <View className="px-5 pb-16 pt-2">
-          {header}
-          {cardContent}
-        </View>
-      ) : null}
-
       <ScrollView
         automaticallyAdjustKeyboardInsets
         showsVerticalScrollIndicator={false}
         nestedScrollEnabled
         keyboardShouldPersistTaps="handled"
         contentContainerClassName="px-5 pt-3 pb-36"
-        style={presentation === "sheet" ? { display: "none" } : undefined}
       >
         {header}
         {cardContent}
@@ -463,6 +468,7 @@ export const AddInventoryPage = ({
         subtitle="Update stock data without leaving the current screen."
         onClose={closeHandler}
       >
+        <SubmitOverlay visible={isLoading} />
         {formBody}
       </FormBottomSheet>
     );
@@ -476,6 +482,7 @@ export const AddInventoryPage = ({
       subtitle="Manage products professionally."
       eyebrow={productId ? "Edit" : "Create"}
     >
+      <SubmitOverlay visible={isLoading} />
       {formBody}
     </AppLayout>
   );

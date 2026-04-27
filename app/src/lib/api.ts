@@ -376,6 +376,21 @@ export const createSalePayment = (
     },
   });
 
+export type SaleReminder = {
+  customerMobile: string;
+  scheduledFor: string | null;
+  reminderLabel: string;
+  message: string;
+  whatsappUrl: string;
+};
+
+export const fetchSaleReminder = (accessToken: string, saleId: string) =>
+  request<SaleReminder>(`/sales/${saleId}/reminder`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
 export const buildGoogleAuthUrl = (redirectUri: string) =>
   `${assertApiUrl()}/auth/google?mobile_redirect_uri=${encodeURIComponent(
     redirectUri,

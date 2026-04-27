@@ -1,6 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
-import type { ComponentProps, ReactNode } from "react";
+import { createContext, useContext, type ComponentProps, type ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
 import {
   SafeAreaView,
@@ -8,6 +8,11 @@ import {
 } from "react-native-safe-area-context";
 import { ProfileMenu } from "./ProfileMenu";
 import type { AppRoute } from "../types/navigation";
+
+const PagerModeContext = createContext(false);
+export const PagerModeProvider = ({ children }: { children: ReactNode }) => (
+  <PagerModeContext.Provider value={true}>{children}</PagerModeContext.Provider>
+);
 
 type AppLayoutProps = {
   children: ReactNode;
@@ -37,6 +42,9 @@ export const AppLayout = ({
   subtitle,
   title,
 }: AppLayoutProps) => {
+  const isInPagerMode = useContext(PagerModeContext);
+  if (isInPagerMode) return <View style={{ flex: 1 }}>{children}</View>;
+
   const insets = useSafeAreaInsets();
 
   return (

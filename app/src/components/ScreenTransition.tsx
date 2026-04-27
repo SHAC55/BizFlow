@@ -34,9 +34,9 @@ export const ScreenTransition = ({ children, screenKey }: Props) => {
 
   const entering =
     direction === "left-to-right"
-      ? SlideInLeft.duration(320).easing(transitionCurve)
+      ? SlideInRight.duration(320).easing(transitionCurve)
       : direction === "right-to-left"
-        ? SlideInRight.duration(320).easing(transitionCurve)
+        ? SlideInLeft.duration(320).easing(transitionCurve)
         : FadeIn.duration(180).easing(Easing.out(Easing.quad));
 
   return (

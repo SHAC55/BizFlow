@@ -7,8 +7,11 @@ import {
   Text,
   View,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../providers/AuthProvider";
+import type { RootStackParamList } from "../types/navigation";
 
 const formatMemberSince = (value: string) =>
   new Date(value).toLocaleDateString("en-IN", {
@@ -20,6 +23,7 @@ const formatMemberSince = (value: string) =>
 export const ProfileMenu = () => {
   const { logout, refreshUser, session } = useAuth();
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [isOpen, setIsOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -193,7 +197,11 @@ export const ProfileMenu = () => {
             </View>
 
             <View style={{ marginTop: 16, gap: 10 }}>
-              <ActionRow icon="settings" label="Settings" muted />
+              <ActionRow
+                icon="manage-accounts"
+                label="View Profile"
+                onPress={() => { setIsOpen(false); navigation.navigate("UserDetail"); }}
+              />
               <ActionRow
                 icon="logout"
                 label={isLoggingOut ? "Logging out..." : "Logout"}

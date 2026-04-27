@@ -1,16 +1,17 @@
 # BizFlow App — UI/UX Improvement Tracker
 
-All 14 improvements scoped and tracked here. Constraint: logo, images, and font colors unchanged.
+All improvements scoped and tracked here. Constraint: logo, images, and font colors unchanged.
 
 ---
 
 ## Status Legend
 - ✅ Done
 - ⬜ Not started
+- 🔄 In progress
 
 ---
 
-## Items 1–10: Implemented
+## Items 1–14: Implemented (Phase 1)
 
 | # | Item | Effort | Impact | Status |
 |---|------|--------|--------|--------|
@@ -24,70 +25,51 @@ All 14 improvements scoped and tracked here. Constraint: logo, images, and font 
 | 8 | Native date picker for reminder date in Add Sale | Medium | High | ✅ |
 | 9 | Per-field real-time form validation (Add Customer, Add Inventory) | Medium | Medium | ✅ |
 | 10 | Page transition animations (FadeInDown via Reanimated) | Medium | High | ✅ |
-
-### Files changed by items 1–10
-- `App.tsx` — Toast mount + ScreenTransition wrapping
-- `babel.config.js` — Reanimated plugin
-- `src/components/AppLayout.tsx` — ripple on nav items
-- `src/components/Skeleton.tsx` — NEW: SkeletonBox, SkeletonProductRow, SkeletonSaleRow, SkeletonCustomerRow
-- `src/components/ScreenTransition.tsx` — NEW: FadeInDown wrapper
-- `src/hooks/useDebounce.ts` — NEW: 350ms debounce hook
-- `src/pages/DashboardPage.tsx` — ripple, haptics, toasts
-- `src/pages/InventoryPage.tsx` — FlatList, skeleton, ripple
-- `src/pages/SalesPage.tsx` — FlatList, skeleton, ripple
-- `src/pages/CustomersPage.tsx` — FlatList, skeleton, ripple, debounce
-- `src/pages/AddSalePage.tsx` — native date picker, ripple, haptics, toasts
-- `src/pages/AddCustomerPage.tsx` — per-field validation, haptics, toasts
-- `src/pages/AddInventoryPage.tsx` — per-field validation, haptics, toasts
-- `src/pages/ProductDetailPage.tsx` — confirmation dialog, ripple, haptics, toasts
-- `src/pages/CustomerDetailPage.tsx` — confirmation dialog, ripple, haptics, toasts
-- `src/pages/SaleDetailPage.tsx` — ripple, haptics, toasts
+| 11 | React Navigation adoption | High | High | ✅ |
+| 12 | React Query for data fetching | High | High | ✅ |
+| 13 | Swipe gestures on list items | High | Medium | ✅ |
+| 14 | Bottom sheet for add forms | High | Medium | ✅ |
 
 ---
 
-## Items 11–14: In progress / pending
+## Items 15–20: Phase 2 Improvements
 
 | # | Item | Effort | Impact | Status | Notes |
 |---|------|--------|--------|--------|-------|
-| 11 | React Navigation adoption | High | High | ✅ | Replaced custom `useState` router in `App.tsx` with a native stack. Added deep-link paths plus native iOS back gesture and Android hardware back support. |
-| 12 | React Query for data fetching | High | High | ✅ | Replaced manual list/dashboard hooks with `@tanstack/react-query`, added shared query keys, QueryClient provider, and cache invalidation after product/customer/sale mutations. |
-| 13 | Swipe gestures on list items | High | Medium | ✅ | Added swipe-left actions on customer and product rows. Customers can be archived from the list and products can be deleted from the list with confirmation + invalidation. |
-| 14 | Bottom sheet for add forms | High | Medium | ✅ | Replaced full-screen Add Customer / Add Inventory flows with `@gorhom/bottom-sheet` modal sheets layered over the current screen. Add Sale remains full-screen. |
+| 15 | Toast at better position (bottom, above tab bar) | Low | Medium | ✅ | Moved to bottom with correct offset |
+| 16 | Freeze/lock screen during form submission | Medium | High | ✅ | Full-screen overlay + disabled inputs/buttons + back-nav blocked |
+| 17 | Smooth native screen transitions (iOS + Android) | Medium | High | ✅ | Re-enabled native stack slide animations; ScreenTransition unchanged |
+| 18 | User detail / profile page | Medium | Medium | ✅ | Dedicated UserDetailPage with business info + edit link; accessible from profile avatar |
+| 19 | Automated payment reminder (WhatsApp + in-app) | High | High | ✅ | SaleDetailPage "Send Reminder" opens WhatsApp deep-link; backend getSaleReminder endpoint surfaces the URL |
+| 20 | Stock update optimistic refresh + smooth screen switch | Medium | High | ✅ | Immediate cache update after sale creation; React Navigation native animations enabled |
 
-### Files changed by item 11
-- `App.tsx` — NavigationContainer + native stack screens, deep-link config, route reset helpers
-- `package.json` / `package-lock.json` — added React Navigation stack dependencies
-- `src/types/navigation.ts` — replaced local screen-state union with `RootStackParamList`
+### Files changed by item 15
+- `app/App.tsx` — added `position`, `bottomOffset`, `topOffset` props to `<Toast />`
 
-### Files changed by item 12
-- `App.tsx` — `QueryClientProvider` wiring
-- `package.json` / `package-lock.json` — added `@tanstack/react-query`
-- `src/lib/query.ts` — NEW: QueryClient + query key definitions
-- `src/hooks/useDashboardData.ts` — migrated to `useQuery`
-- `src/hooks/useSalesData.ts` — migrated to `useQuery`
-- `src/hooks/useProductsData.ts` — migrated to `useQuery` and `useMutation`
-- `src/hooks/useCustomersData.ts` — migrated to `useQuery`
-- `src/providers/AuthProvider.tsx` — clears React Query cache on session changes
-- `src/pages/AddInventoryPage.tsx` — invalidates product/dashboard caches after create/update
-- `src/pages/AddCustomerPage.tsx` — invalidates customer/dashboard/sales caches after create/update
-- `src/pages/AddSalePage.tsx` — invalidates sales/customer/product/dashboard caches after create
-- `src/pages/ProductDetailPage.tsx` — invalidates product/dashboard caches after stock update/delete
-- `src/pages/CustomerDetailPage.tsx` — invalidates customer/dashboard/sales caches after archive
-- `src/pages/SaleDetailPage.tsx` — invalidates sales/customer/dashboard caches after payment
+### Files changed by item 16
+- `app/src/components/SubmitOverlay.tsx` — NEW: full-screen semi-transparent overlay with spinner shown while any form is submitting
+- `app/src/pages/AddSalePage.tsx` — overlay + BackHandler block during submit
+- `app/src/pages/AddCustomerPage.tsx` — overlay + BackHandler block during submit
+- `app/src/pages/AddInventoryPage.tsx` — overlay + BackHandler block during submit
 
-### Files changed by item 13
-- `App.tsx` — wraps the app in `GestureHandlerRootView`
-- `src/pages/CustomersPage.tsx` — swipe-left archive action for customer rows
-- `src/pages/InventoryPage.tsx` — swipe-left delete action for product rows
+### Files changed by item 17
+- `app/App.tsx` — `screenOptions.animation` changed from `"none"` to `"slide_from_right"`; sheet screens keep `"none"`
 
-### Files changed by item 14
-- `App.tsx` — `BottomSheetModalProvider` + transparent modal presentation for add/edit customer and inventory routes
-- `package.json` / `package-lock.json` — added `@gorhom/bottom-sheet`
-- `src/components/FormBottomSheet.tsx` — NEW: reusable sheet wrapper with backdrop, close button and pan-down dismiss
-- `src/pages/AddCustomerPage.tsx` — supports sheet presentation for create/edit customer
-- `src/pages/AddInventoryPage.tsx` — supports sheet presentation for create/edit inventory
+### Files changed by item 18
+- `app/src/pages/UserDetailPage.tsx` — NEW: full profile page (name, email, phone, business name, GST, address, member since)
+- `app/src/components/ProfileMenu.tsx` — "View Profile" action navigates to UserDetailPage
+- `app/App.tsx` — added `UserDetail` screen to stack; extended `RootStackParamList`
+- `app/src/types/navigation.ts` — added `UserDetail: undefined` to `RootStackParamList`
+
+### Files changed by item 19
+- `app/src/pages/SaleDetailPage.tsx` — "Send Reminder" button fetches `/sales/:id/reminder` and opens `whatsappUrl` with `Linking.openURL`
+- `app/src/lib/api.ts` — added `fetchSaleReminder` helper
+
+### Files changed by item 20
+- `app/src/pages/AddSalePage.tsx` — after successful sale, optimistically invalidate product/inventory queries before navigating
+- `app/App.tsx` — `animation: "slide_from_right"` (same as item 17)
 
 ---
 
 ## Known Issues (pre-existing, not from this work)
-- None currently tracked from items 1–14.
+- None currently tracked from items 1–20.

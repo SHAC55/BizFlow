@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
+  Linking,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -9,11 +10,11 @@ import {
   View,
   ActivityIndicator,
 } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
+import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
 import { AppLayout } from "../components/AppLayout";
-import { createSalePayment, fetchSale } from "../lib/api";
+import { createSalePayment, fetchSale, fetchSaleReminder } from "../lib/api";
 import { queryKeys } from "../lib/query";
 import { useAuth } from "../providers/AuthProvider";
 import type { DashboardSale } from "../types/dashboard";
@@ -49,6 +50,7 @@ export const SaleDetailPage = ({
   const [refreshing, setRefreshing] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState("");
   const [isPaying, setIsPaying] = useState(false);
+  const [isSendingReminder, setIsSendingReminder] = useState(false);
 
   const loadSale = async (refresh = false) => {
     const token = session?.tokens.accessToken;
@@ -114,6 +116,31 @@ export const SaleDetailPage = ({
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     handleGenerateInvoice(sale, session.user);
   };
+
+  const handleReminder = async () => {
+    const token = session?.tokens.accessToken;
+    if (!token || !sale) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setIsSendingReminder(true);
+    try {
+      const reminder = await fetchSaleReminder(token, sale.id);
+
+      // Ensure +91 country code — strip non-digits, prepend 91 if missing
+      const digits = reminder.customerMobile.replace(/\D/g, "");
+      const phone = digits.startsWith("91") && digits.length >= 12 ? digits : `91${digits}`;
+      const url = `https://wa.me/${phone}?text=${encodeURIComponent(reminder.message)}`;
+
+      await Linking.openURL(url);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Toast.show({ type: "success", text1: "Reminder Ready", text2: reminder.reminderLabel });
+    } catch (err) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      const msg = err instanceof Error ? err.message : "Could not open reminder";
+      Toast.show({ type: "error", text1: "Reminder Failed", text2: msg });
+    } finally {
+      setIsSendingReminder(false);
+    }
+  };
   return (
     <AppLayout
       currentRoute="sales"
@@ -132,32 +159,39 @@ export const SaleDetailPage = ({
         }
       >
         {/* Header */}
-        <View className="mb-4 flex-row items-center justify-between">
-          <Pressable
-            onPress={handleInvoice}
-            android_ripple={{
-              color: "rgba(255,255,255,0.1)",
-              borderless: false,
-            }}
-            className="flex-row items-center bg-black px-4 py-3 rounded-2xl"
-          >
-            <MaterialIcons name="receipt-long" size={18} color="#fff" />
-            <Text className="text-white font-semibold ml-2">
-              Generate Invoice
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={onBack}
-            android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: false }}
-            className="flex-row items-center bg-white px-4 py-3 rounded-2xl border border-slate-200"
-          >
-            <MaterialIcons
-              name="arrow-back-ios-new"
-              size={16}
-              color="#0F172A"
-            />
-            <Text className="text-slate-900 font-semibold ml-1">Back</Text>
-          </Pressable>
+        <View className="mb-4 gap-2">
+          <View className="flex-row items-center justify-between gap-2">
+            <Pressable
+              onPress={handleInvoice}
+              android_ripple={{ color: "rgba(255,255,255,0.1)", borderless: false }}
+              className="flex-1 flex-row items-center justify-center bg-black px-4 py-3 rounded-2xl"
+            >
+              <MaterialIcons name="receipt-long" size={18} color="#fff" />
+              <Text className="text-white font-semibold ml-2">Invoice</Text>
+            </Pressable>
+            <Pressable
+              onPress={onBack}
+              android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: false }}
+              className="flex-row items-center bg-white px-4 py-3 rounded-2xl border border-slate-200"
+            >
+              <MaterialIcons name="arrow-back-ios-new" size={16} color="#0F172A" />
+              <Text className="text-slate-900 font-semibold ml-1">Back</Text>
+            </Pressable>
+          </View>
+
+          {sale && sale.dueAmount > 0 ? (
+            <Pressable
+              onPress={handleReminder}
+              disabled={isSendingReminder}
+              android_ripple={{ color: "rgba(255,255,255,0.1)", borderless: false }}
+              className="flex-row items-center justify-center gap-2 rounded-2xl bg-green-600 px-4 py-3"
+            >
+              <FontAwesome5 name="whatsapp" size={18} color="#fff" />
+              <Text className="text-white font-semibold">
+                {isSendingReminder ? "Opening..." : "Send Payment Reminder"}
+              </Text>
+            </Pressable>
+          ) : null}
         </View>
 
         {loading ? (
