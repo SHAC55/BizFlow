@@ -8,6 +8,7 @@ import {
   Text,
   TextInput,
   View,
+  ActivityIndicator,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -36,6 +37,13 @@ const formatCurrency = (value: number) =>
     maximumFractionDigits: 2,
   })}`;
 
+const formatDate = (value: string) =>
+  new Date(value).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+
 export const ProductDetailPage = ({
   onBack,
   onEdit,
@@ -52,6 +60,7 @@ export const ProductDetailPage = ({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [quantity, setQuantity] = useState("");
   const [reason, setReason] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const load = async (refresh = false) => {
     const token = session?.tokens.accessToken;
@@ -83,6 +92,7 @@ export const ProductDetailPage = ({
     const token = session?.tokens.accessToken;
     if (!token || !product) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setIsUpdating(true);
 
     try {
       await adjustProductStock(token, product.id, {
@@ -95,18 +105,31 @@ export const ProductDetailPage = ({
       setReason("");
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.products.all }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.products.detail(product.id) }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.products.movements(product.id) }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.products.detail(product.id),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.products.movements(product.id),
+        }),
         queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all }),
       ]);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Toast.show({ type: "success", text1: "Stock Updated", text2: "Inventory level has been adjusted." });
+      Toast.show({
+        type: "success",
+        text1: "Stock Updated",
+        text2: "Inventory level has been adjusted.",
+      });
       load(true);
     } catch (adjustError) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      const msg = adjustError instanceof Error ? adjustError.message : "Failed to adjust stock";
+      const msg =
+        adjustError instanceof Error
+          ? adjustError.message
+          : "Failed to adjust stock";
       setError(msg);
       Toast.show({ type: "error", text1: "Update Failed", text2: msg });
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -126,17 +149,30 @@ export const ProductDetailPage = ({
             try {
               await deleteProduct(accessToken, product.id);
               await Promise.all([
-                queryClient.invalidateQueries({ queryKey: queryKeys.products.all }),
-                queryClient.invalidateQueries({ queryKey: queryKeys.products.detail(product.id) }),
-                queryClient.invalidateQueries({ queryKey: queryKeys.products.movements(product.id) }),
-                queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all }),
+                queryClient.invalidateQueries({
+                  queryKey: queryKeys.products.all,
+                }),
+                queryClient.invalidateQueries({
+                  queryKey: queryKeys.products.detail(product.id),
+                }),
+                queryClient.invalidateQueries({
+                  queryKey: queryKeys.products.movements(product.id),
+                }),
+                queryClient.invalidateQueries({
+                  queryKey: queryKeys.dashboard.all,
+                }),
               ]);
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success,
+              );
               Toast.show({ type: "success", text1: "Product Deleted" });
               onBack();
             } catch (deleteError) {
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-              const msg = deleteError instanceof Error ? deleteError.message : "Failed to delete product";
+              const msg =
+                deleteError instanceof Error
+                  ? deleteError.message
+                  : "Failed to delete product";
               setError(msg);
               Toast.show({ type: "error", text1: "Delete Failed", text2: msg });
             }
@@ -146,7 +182,15 @@ export const ProductDetailPage = ({
     );
   };
 
-  const isLowStock = product && product.quantity <= Number(product.minimumQuantity);
+  const isLowStock =
+    product && product.quantity <= Number(product.minimumQuantity);
+
+  const stockPct = product
+    ? Math.min(
+        100,
+        Math.round((product.quantity / (Number(product.minimumQuantity) * 3 || 1)) * 100),
+      )
+    : 0;
 
   return (
     <AppLayout
@@ -156,63 +200,102 @@ export const ProductDetailPage = ({
       subtitle="Manage stock & product insights"
     >
       <ScrollView
-        className="flex-1"
-        contentContainerClassName="pb-32"
+        className="flex-1 bg-zinc-50"
+        contentContainerClassName="px-4 pt-3 pb-32"
         refreshControl={
-          <RefreshControl refreshing={isRefreshing} onRefresh={() => load(true)} />
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={() => load(true)}
+          />
         }
         showsVerticalScrollIndicator={false}
       >
+        {/* ── Top Action Bar ── */}
+        <View className="flex-row items-center gap-2 mb-4">
+          <Pressable
+            onPress={onBack}
+            android_ripple={{ color: "rgba(0,0,0,0.06)", borderless: false }}
+            className="flex-row items-center gap-1.5 bg-white border border-zinc-200 px-4 py-3 rounded-2xl"
+          >
+            <MaterialIcons name="arrow-back-ios-new" size={14} color="#18181b" />
+            <Text className="text-zinc-900 font-semibold text-[13px]">Back</Text>
+          </Pressable>
+
+          <Pressable
+            onPress={onEdit}
+            android_ripple={{ color: "rgba(255,255,255,0.15)", borderless: false }}
+            className="flex-1 flex-row items-center justify-center gap-2 bg-zinc-900 px-4 py-3 rounded-2xl"
+          >
+            <MaterialIcons name="edit" size={16} color="#fff" />
+            <Text className="text-white font-semibold text-[13px]">Edit Product</Text>
+          </Pressable>
+
+          <Pressable
+            onPress={handleDelete}
+            android_ripple={{ color: "rgba(239,68,68,0.1)", borderless: false }}
+            className="bg-red-50 border border-red-100 px-4 py-3 rounded-2xl"
+          >
+            <MaterialIcons name="delete-outline" size={18} color="#ef4444" />
+          </Pressable>
+        </View>
+
         {isLoading ? (
-          <Text className="py-16 text-center text-black/40">
-            Loading product...
-          </Text>
+          <View className="py-24 items-center justify-center">
+            <ActivityIndicator size="large" color="#18181b" />
+            <Text className="text-zinc-400 text-[13px] mt-3">Loading product…</Text>
+          </View>
         ) : error || !product ? (
-          <Text className="py-16 text-center text-red-500">
-            {error || "Product not found"}
-          </Text>
+          <View className="py-24 items-center">
+            <MaterialIcons name="error-outline" size={40} color="#ef4444" />
+            <Text className="text-red-500 mt-3 font-medium">
+              {error || "Product not found"}
+            </Text>
+          </View>
         ) : (
           <>
-            {/* Top Bar */}
-            <View className="flex-row items-center justify-between px-4 pt-4 pb-3">
-              <Pressable
-                onPress={onBack}
-                className="h-[36px] w-[36px] items-center justify-center rounded-full bg-black/5"
-              >
-                <MaterialIcons name="arrow-back" size={18} color="#000" />
-              </Pressable>
+            {/* ── Hero Card ── */}
+            <View className="bg-zinc-900 rounded-[28px] px-5 pt-5 pb-6 mb-3 overflow-hidden">
+              {/* Decorative rings */}
+              <View
+                className="absolute -right-10 -top-10 w-48 h-48 rounded-full border border-white/5"
+                pointerEvents="none"
+              />
+              <View
+                className="absolute -right-4 -top-4 w-32 h-32 rounded-full border border-white/5"
+                pointerEvents="none"
+              />
 
-              <View className="flex-row gap-2">
-                <TopBtn icon="edit" label="Edit" onPress={onEdit} />
-                <TopBtn icon="delete" label="Delete" danger onPress={handleDelete} />
-              </View>
-            </View>
-
-            {/* Hero Card */}
-            <View className="mx-4 rounded-[22px] bg-[#141414] px-5 pt-5 pb-5">
-              {/* Name + Status */}
-              <View className="flex-row items-start justify-between">
+              {/* Header row */}
+              <View className="flex-row items-start justify-between mb-5">
                 <View className="flex-1 pr-3">
-                  <Text className="text-[18px] font-semibold text-white leading-snug" numberOfLines={2}>
+                  <Text className="text-white/40 text-[11px] font-medium tracking-widest uppercase mb-1">
+                    Product
+                  </Text>
+                  <Text
+                    className="text-white text-[22px] font-bold tracking-tight"
+                    numberOfLines={2}
+                  >
                     {product.name}
                   </Text>
-                  <View className="mt-2 flex-row gap-2">
-                    <View className="rounded-full bg-white/10 px-3 py-[3px]">
-                      <Text className="text-[10px] text-white/50">{product.category}</Text>
-                    </View>
-                    <View className="rounded-full bg-white/10 px-3 py-[3px]">
-                      <Text className="text-[10px] text-white/50">{product.sku || "Auto SKU"}</Text>
-                    </View>
-                  </View>
+                  <Text className="text-white/40 text-[12px] mt-1">
+                    {product.sku ? `SKU: ${product.sku}` : "Auto SKU"} · {product.category}
+                  </Text>
                 </View>
+
+                {/* Stock status pill */}
                 <View
-                  className={`rounded-full px-3 py-[5px] ${
-                    isLowStock ? "bg-red-500/20" : "bg-green-500/20"
+                  className={`flex-row items-center gap-1.5 px-3 py-1.5 rounded-full ${
+                    isLowStock ? "bg-red-500/20" : "bg-emerald-500/20"
                   }`}
                 >
+                  <View
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      isLowStock ? "bg-red-400" : "bg-emerald-400"
+                    }`}
+                  />
                   <Text
-                    className={`text-[10px] font-semibold ${
-                      isLowStock ? "text-red-300" : "text-green-400"
+                    className={`text-[11px] font-bold ${
+                      isLowStock ? "text-red-300" : "text-emerald-400"
                     }`}
                   >
                     {isLowStock ? "LOW STOCK" : "IN STOCK"}
@@ -220,114 +303,182 @@ export const ProductDetailPage = ({
                 </View>
               </View>
 
-              {/* Stock Number */}
-              <View className="mt-5">
-                <Text className="text-[10px] uppercase tracking-widest text-white/40">
+              {/* Stock quantity */}
+              <View className="mb-3">
+                <Text className="text-white/40 text-[10px] uppercase tracking-widest mb-1">
                   Current Stock
                 </Text>
-                <View className="flex-row items-baseline gap-1 mt-1">
-                  <Text className="text-[44px] font-semibold text-white leading-none tracking-tight">
+                <View className="flex-row items-baseline gap-1.5">
+                  <Text className="text-white text-[44px] font-bold leading-none tracking-tight">
                     {product.quantity}
                   </Text>
-                  <Text className="text-[14px] text-white/40 mb-1">units</Text>
+                  <Text className="text-white/40 text-[14px] mb-1">units</Text>
                 </View>
+
+                {/* Stock fill bar */}
+                <View className="mt-3 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                  <View
+                    className={`h-full rounded-full ${
+                      isLowStock ? "bg-red-400" : "bg-emerald-400"
+                    }`}
+                    style={{ width: `${stockPct}%` }}
+                  />
+                </View>
+                <Text className="text-white/30 text-[10px] mt-1">
+                  Min threshold: {product.minimumQuantity} units
+                </Text>
               </View>
 
-              {/* Price Tiles */}
-              <View className="mt-4 flex-row gap-2">
-                <View className="flex-1 rounded-[14px] bg-white/8 border border-white/8 px-4 py-3">
-                  <Text className="text-[10px] uppercase tracking-wider text-white/40">Selling</Text>
-                  <Text className="mt-2 text-[16px] font-semibold text-green-400">
+              {/* Price tiles */}
+              <View className="flex-row gap-2 mt-2">
+                <View className="flex-1 bg-white/8 rounded-2xl px-4 py-3">
+                  <Text className="text-white/40 text-[10px] uppercase tracking-widest mb-1">
+                    Selling Price
+                  </Text>
+                  <Text className="text-emerald-400 text-[18px] font-bold">
                     {formatCurrency(product.price)}
                   </Text>
                 </View>
-                <View className="flex-1 rounded-[14px] bg-white/8 border border-white/8 px-4 py-3">
-                  <Text className="text-[10px] uppercase tracking-wider text-white/40">Cost</Text>
-                  <Text className="mt-2 text-[16px] font-semibold text-white">
+                <View className="flex-1 bg-white/8 rounded-2xl px-4 py-3">
+                  <Text className="text-white/40 text-[10px] uppercase tracking-widest mb-1">
+                    Cost Price
+                  </Text>
+                  <Text className="text-white text-[18px] font-bold">
                     {formatCurrency(product.costPrice)}
                   </Text>
                 </View>
               </View>
             </View>
 
-            {/* Product Info */}
-            <View className="mx-4 mt-3 rounded-[18px] border border-black/[0.07] bg-white overflow-hidden">
-              <View className="px-4 pt-4 pb-3">
-                <Text className="text-[11px] font-medium uppercase tracking-wider text-black/35">
-                  Product Info
-                </Text>
-              </View>
-              <View className="flex-row border-t border-black/[0.06]">
+            {/* ── Product Info Card ── */}
+            <View className="bg-white rounded-[24px] border border-zinc-100 px-5 py-4 mb-3">
+              <Text className="text-[11px] font-semibold text-zinc-400 uppercase tracking-widest mb-4">
+                Product Info
+              </Text>
+              <View className="flex-row">
                 <InfoCell label="Category" value={product.category} />
-                <View className="w-[0.5px] bg-black/[0.06]" />
+                <View className="w-px bg-zinc-100 mx-1" />
                 <InfoCell label="SKU" value={product.sku || "Auto"} />
-                <View className="w-[0.5px] bg-black/[0.06]" />
+                <View className="w-px bg-zinc-100 mx-1" />
                 <InfoCell label="Min Qty" value={`${product.minimumQuantity}`} />
               </View>
+
+              {/* Margin insight */}
+              {product.costPrice > 0 && (
+                <View className="mt-4 pt-4 border-t border-zinc-100 flex-row items-center justify-between">
+                  <View>
+                    <Text className="text-zinc-400 text-[11px] uppercase tracking-wider">
+                      Gross Margin
+                    </Text>
+                    <Text className="text-zinc-900 text-[15px] font-bold mt-0.5">
+                      {formatCurrency(product.price - product.costPrice)} / unit
+                    </Text>
+                  </View>
+                  <View className="bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-1.5">
+                    <Text className="text-emerald-700 text-[12px] font-bold">
+                      {Math.round(
+                        ((product.price - product.costPrice) / product.price) * 100,
+                      )}
+                      % margin
+                    </Text>
+                  </View>
+                </View>
+              )}
             </View>
 
-            {/* Adjust Stock */}
-            <View className="mx-4 mt-3 rounded-[18px] border border-black/[0.07] bg-white px-4 py-4">
-              <Text className="mb-3 text-[11px] font-medium uppercase tracking-wider text-black/35">
+            {/* ── Adjust Stock Card ── */}
+            <View className="bg-white rounded-[24px] border border-zinc-100 px-5 py-4 mb-3">
+              <Text className="text-[11px] font-semibold text-zinc-400 uppercase tracking-widest mb-4">
                 Adjust Stock
               </Text>
 
-              <View className="flex-row gap-2 items-center">
-                {/* Live preview display */}
-                <View className="h-[48px] w-[56px] items-center justify-center rounded-[12px] bg-zinc-100 border border-black/[0.06]">
-                  <Text className="text-[18px] font-semibold text-black">
-                    {quantity || "—"}
+              {isLowStock && (
+                <View className="flex-row items-center gap-2 bg-red-50 border border-red-100 rounded-2xl px-4 py-3 mb-3">
+                  <MaterialIcons name="warning-amber" size={15} color="#ef4444" />
+                  <Text className="text-red-600 text-[12px] font-medium">
+                    Stock is at or below minimum ({product.minimumQuantity} units)
                   </Text>
                 </View>
+              )}
+
+              <View className="flex-row items-center bg-zinc-50 border border-zinc-200 rounded-2xl px-4 mb-3 overflow-hidden">
+                <MaterialIcons name="inventory" size={16} color="#a1a1aa" />
                 <TextInput
                   value={quantity}
                   onChangeText={setQuantity}
                   keyboardType="number-pad"
                   placeholder="New quantity"
-                  placeholderTextColor="#aaa"
-                  className="flex-1 h-[48px] rounded-[12px] bg-zinc-50 border border-black/[0.06] px-4 text-[15px] text-black"
+                  placeholderTextColor="#a1a1aa"
+                  className="flex-1 py-4 pl-3 text-zinc-900 text-[15px] font-medium"
+                />
+                {quantity.length > 0 && (
+                  <Pressable onPress={() => setQuantity("")}>
+                    <MaterialIcons name="cancel" size={18} color="#a1a1aa" />
+                  </Pressable>
+                )}
+              </View>
+
+              <View className="flex-row items-center bg-zinc-50 border border-zinc-200 rounded-2xl px-4 mb-3 overflow-hidden">
+                <MaterialIcons name="notes" size={16} color="#a1a1aa" />
+                <TextInput
+                  value={reason}
+                  onChangeText={setReason}
+                  placeholder="Reason (optional)"
+                  placeholderTextColor="#a1a1aa"
+                  className="flex-1 py-4 pl-3 text-zinc-900 text-[13px]"
                 />
               </View>
 
-              <TextInput
-                value={reason}
-                onChangeText={setReason}
-                placeholder="Reason (optional)"
-                placeholderTextColor="#aaa"
-                className="mt-2 h-[42px] rounded-[12px] bg-zinc-50 border border-black/[0.06] px-4 text-[13px] text-black"
-              />
-
               <Pressable
                 onPress={handleAdjustStock}
-                android_ripple={{ color: "rgba(255,255,255,0.1)", borderless: false }}
-                className="mt-3 h-[48px] items-center justify-center rounded-[12px] bg-[#141414]"
+                disabled={isUpdating || !quantity}
+                android_ripple={{ color: "rgba(255,255,255,0.15)", borderless: false }}
+                className={`rounded-2xl py-4 items-center flex-row justify-center gap-2 ${
+                  isUpdating || !quantity ? "bg-zinc-200" : "bg-zinc-900"
+                }`}
               >
-                <Text className="text-[14px] font-semibold text-white">
-                  Update Stock
+                {isUpdating ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <MaterialIcons
+                    name="update"
+                    size={18}
+                    color={!quantity ? "#a1a1aa" : "#fff"}
+                  />
+                )}
+                <Text
+                  className={`font-semibold text-[14px] ${
+                    isUpdating || !quantity ? "text-zinc-400" : "text-white"
+                  }`}
+                >
+                  {isUpdating ? "Updating…" : "Update Stock"}
                 </Text>
               </Pressable>
             </View>
 
-            {/* Movement History */}
-            <View className="mx-4 mt-3 rounded-[18px] border border-black/[0.07] bg-white overflow-hidden">
-              <View className="px-4 pt-4 pb-3 border-b border-black/[0.06]">
-                <Text className="text-[11px] font-medium uppercase tracking-wider text-black/35">
-                  Movement History
-                </Text>
-              </View>
+            {/* ── Movement History ── */}
+            <View className="bg-white rounded-[24px] border border-zinc-100 px-5 py-4 mb-3">
+              <Text className="text-[11px] font-semibold text-zinc-400 uppercase tracking-widest mb-4">
+                Movement History
+              </Text>
 
               {movements.length === 0 ? (
-                <Text className="py-10 text-center text-[13px] text-black/30">
-                  No movements yet
-                </Text>
+                <View className="py-10 items-center">
+                  <MaterialIcons name="swap-vert" size={32} color="#d4d4d8" />
+                  <Text className="text-zinc-400 text-[13px] mt-2">
+                    No movements yet
+                  </Text>
+                </View>
               ) : (
-                movements.map((item, index) => (
-                  <MovementRow
-                    key={item.id}
-                    item={item}
-                    isLast={index === movements.length - 1}
-                  />
-                ))
+                <View>
+                  {movements.map((item, index) => (
+                    <MovementRow
+                      key={item.id}
+                      item={item}
+                      isLast={index === movements.length - 1}
+                    />
+                  ))}
+                </View>
               )}
             </View>
           </>
@@ -339,46 +490,12 @@ export const ProductDetailPage = ({
 
 /* ─── Sub-components ─────────────────────────────────────── */
 
-const TopBtn = ({
-  label,
-  icon,
-  danger,
-  onPress,
-}: {
-  label: string;
-  icon: string;
-  danger?: boolean;
-  onPress: () => void;
-}) => (
-  <Pressable
-    onPress={onPress}
-    className={`flex-row items-center gap-1.5 rounded-[10px] px-3 h-[36px] border ${
-      danger
-        ? "bg-red-50 border-red-200"
-        : "bg-black border-black"
-    }`}
-  >
-    <MaterialIcons
-      name={icon as any}
-      size={15}
-      color={danger ? "#b91c1c" : "#fff"}
-    />
-    <Text
-      className={`text-[13px] font-medium ${
-        danger ? "text-red-700" : "text-white"
-      }`}
-    >
-      {label}
-    </Text>
-  </Pressable>
-);
-
 const InfoCell = ({ label, value }: { label: string; value: string }) => (
-  <View className="flex-1 px-4 py-3">
-    <Text className="text-[10px] uppercase tracking-wider text-black/35">
+  <View className="flex-1 px-2 py-1">
+    <Text className="text-[10px] uppercase tracking-wider text-zinc-400 mb-1">
       {label}
     </Text>
-    <Text numberOfLines={1} className="mt-1.5 text-[13px] font-semibold text-black">
+    <Text numberOfLines={1} className="text-[13px] font-bold text-zinc-900">
       {value}
     </Text>
   </View>
@@ -391,39 +508,45 @@ const MovementRow = ({
   item: InventoryMovement;
   isLast: boolean;
 }) => {
-  const dotColor =
-    item.type === "INCREASE"
-      ? "#86efac"   // green-300
-      : item.type === "DECREASE"
-      ? "#fca5a5"   // red-300
-      : "#93c5fd";  // blue-300
+  const typeConfig = {
+    INCREASE: { dot: "bg-emerald-400", bg: "bg-emerald-50", text: "text-emerald-700", label: "Increase" },
+    DECREASE: { dot: "bg-red-400",     bg: "bg-red-50",     text: "text-red-700",     label: "Decrease" },
+    SET:      { dot: "bg-zinc-400",    bg: "bg-zinc-100",   text: "text-zinc-600",    label: "Set"      },
+  };
+  const cfg = typeConfig[item.type as keyof typeof typeConfig] ?? typeConfig.SET;
 
   return (
     <View
-      className={`flex-row items-center gap-3 px-4 py-3.5 ${
-        !isLast ? "border-b border-black/[0.05]" : ""
+      className={`flex-row items-center gap-3 py-3.5 ${
+        !isLast ? "border-b border-zinc-100" : ""
       }`}
     >
-      {/* Type dot */}
-      <View
-        style={{ backgroundColor: dotColor }}
-        className="w-2 h-2 rounded-full flex-shrink-0"
-      />
+      {/* Icon */}
+      <View className={`h-9 w-9 rounded-xl ${cfg.bg} items-center justify-center flex-shrink-0`}>
+        <View className={`w-2 h-2 rounded-full ${cfg.dot}`} />
+      </View>
 
       {/* Info */}
       <View className="flex-1 min-w-0">
-        <Text className="text-[13px] font-semibold text-black" numberOfLines={1}>
+        <Text className="text-zinc-900 text-[13px] font-semibold" numberOfLines={1}>
           {item.reason}
         </Text>
-        <Text className="mt-0.5 text-[11px] text-black/40">{item.type}</Text>
+        <View className="flex-row items-center gap-1.5 mt-0.5">
+          <View className={`px-2 py-0.5 rounded-full ${cfg.bg}`}>
+            <Text className={`text-[10px] font-bold ${cfg.text}`}>{cfg.label}</Text>
+          </View>
+        </View>
       </View>
 
       {/* Delta */}
-      <Text className="text-[12px] font-medium text-black/50 flex-shrink-0">
-        <Text className="text-black font-semibold">{item.quantityBefore}</Text>
-        {" → "}
-        <Text className="text-black font-semibold">{item.quantityAfter}</Text>
-      </Text>
+      <View className="items-end">
+        <Text className="text-zinc-900 text-[13px] font-bold">
+          {item.quantityBefore}
+          <Text className="text-zinc-400 font-normal"> → </Text>
+          {item.quantityAfter}
+        </Text>
+        <Text className="text-zinc-400 text-[10px] mt-0.5">units</Text>
+      </View>
     </View>
   );
 };

@@ -8,7 +8,6 @@ import {
   View,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
 import { AppLayout } from "../components/AppLayout";
 import { useAuth } from "../providers/AuthProvider";
 import type { AppRoute } from "../types/navigation";
@@ -37,7 +36,14 @@ export const UserDetailPage = ({ onBack, onNavigate }: UserDetailPageProps) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const user = session?.user;
-  const business = user?.business;
+  const business = user?.business as
+    | {
+        name?: string;
+        gstNumber?: string;
+        address?: string;
+        type?: string;
+      }
+    | undefined;
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -128,25 +134,21 @@ export const UserDetailPage = ({ onBack, onNavigate }: UserDetailPageProps) => {
                   label="Business Name"
                   value={business.name ?? "-"}
                 />
-                {(business as any).gstNumber ? (
-                  <InfoRow
-                    icon="receipt"
-                    label="GST Number"
-                    value={(business as any).gstNumber}
-                  />
-                ) : null}
-                {(business as any).address ? (
-                  <InfoRow
-                    icon="location-on"
-                    label="Address"
-                    value={(business as any).address}
-                  />
-                ) : null}
-                {(business as any).type ? (
+                <InfoRow
+                  icon="receipt"
+                  label="GST Number"
+                  value={business.gstNumber ?? "-"}
+                />
+                <InfoRow
+                  icon="location-on"
+                  label="Address"
+                  value={business.address ?? "-"}
+                />
+                {business.type ? (
                   <InfoRow
                     icon="business"
                     label="Business Type"
-                    value={(business as any).type}
+                    value={business.type}
                   />
                 ) : null}
               </InfoCard>

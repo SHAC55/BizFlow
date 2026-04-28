@@ -7,6 +7,7 @@ import {
   Text,
   TextInput,
   View,
+  ActivityIndicator,
 } from "react-native";
 import { useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -80,24 +81,15 @@ export const CustomersPage = ({
       "Archive Customer",
       `Archive ${customer.name} and hide them from the active list?`,
       [
-        {
-          text: "Cancel",
-          style: "cancel",
-          onPress: close,
-        },
+        { text: "Cancel", style: "cancel", onPress: close },
         {
           text: "Archive",
           style: "destructive",
           onPress: async () => {
             const token = session?.tokens.accessToken;
-            if (!token) {
-              close();
-              return;
-            }
-
+            if (!token) { close(); return; }
             close();
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-
             try {
               await archiveCustomer(token, customer.id);
               await Promise.all([
@@ -114,13 +106,8 @@ export const CustomersPage = ({
               });
             } catch (err) {
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-              const msg =
-                err instanceof Error ? err.message : "Failed to archive customer";
-              Toast.show({
-                type: "error",
-                text1: "Archive Failed",
-                text2: msg,
-              });
+              const msg = err instanceof Error ? err.message : "Failed to archive customer";
+              Toast.show({ type: "error", text1: "Archive Failed", text2: msg });
             }
           },
         },
@@ -130,76 +117,88 @@ export const CustomersPage = ({
 
   const ListHeader = () => (
     <>
-      {/* Add Button */}
+      {/* ── Add Button ── */}
       <Pressable
         onPress={onOpenAddCustomer}
-        android_ripple={{ color: "rgba(255,255,255,0.1)", borderless: false }}
-        className="mt-4 mb-4 flex-row items-center justify-center rounded-2xl bg-black py-4"
+        android_ripple={{ color: "rgba(255,255,255,0.15)", borderless: false }}
+        className="mt-3 mb-4 flex-row items-center justify-center gap-2 bg-zinc-900 py-4 rounded-2xl"
       >
-        <MaterialIcons name="person-add" size={18} color="#fff" />
-        <Text className="ml-2 text-[14px] font-semibold text-white">
-          Add Customer
-        </Text>
+        <MaterialIcons name="person-add" size={16} color="#fff" />
+        <Text className="text-white font-semibold text-[14px]">Add Customer</Text>
       </Pressable>
 
-      {/* Metric Cards */}
-      <View className="rounded-[28px] p-2 mb-1">
+      {/* ── Hero Stats Card ── */}
+      <View className="bg-zinc-900 rounded-[28px] px-5 pt-5 pb-6 mb-4 overflow-hidden">
+        {/* Decorative rings */}
+        <View
+          className="absolute -right-10 -top-10 w-48 h-48 rounded-full border border-white/5"
+          pointerEvents="none"
+        />
+        <View
+          className="absolute -right-4 -top-4 w-32 h-32 rounded-full border border-white/5"
+          pointerEvents="none"
+        />
+
+        <Text className="text-white/40 text-[11px] font-medium tracking-widest uppercase mb-4">
+          Overview
+        </Text>
+
         <View className="flex-row gap-3">
-          <MetricCard
-            label="Customers"
-            value={summary.totalCustomers.toLocaleString("en-IN")}
-            white
-          />
-          <MetricCard
-            label="Total Due"
-            value={formatCurrency(summary.totalDue)}
-            red
-          />
+          {/* Total customers */}
+          <View className="flex-1 bg-white/8 rounded-2xl px-4 py-3">
+            <Text className="text-white/40 text-[10px] uppercase tracking-widest mb-1">
+              Customers
+            </Text>
+            <Text className="text-white text-[26px] font-bold leading-none">
+              {summary.totalCustomers.toLocaleString("en-IN")}
+            </Text>
+          </View>
+
+          {/* Total due */}
+          <View className="flex-1 bg-white/8 rounded-2xl px-4 py-3">
+            <Text className="text-white/40 text-[10px] uppercase tracking-widest mb-1">
+              Total Due
+            </Text>
+            <Text className="text-red-400 text-[22px] font-bold leading-none">
+              {formatCurrency(summary.totalDue)}
+            </Text>
+          </View>
         </View>
       </View>
 
-      {/* Search */}
-      <View className="mt-5 rounded-2xl border border-black/10 bg-white px-4 py-3 flex-row items-center">
-        <MaterialIcons name="search" size={18} color="#999" />
+      {/* ── Search ── */}
+      <View className="flex-row items-center bg-white border border-zinc-200 rounded-2xl px-4 mb-3 overflow-hidden">
+        <MaterialIcons name="search" size={18} color="#a1a1aa" />
         <TextInput
           value={search}
-          onChangeText={(value) => {
-            setSearch(value);
-            setPage(1);
-          }}
-          placeholder="Search customer..."
-          placeholderTextColor="#999"
-          className="ml-2 flex-1 text-[14px]"
+          onChangeText={(v) => { setSearch(v); setPage(1); }}
+          placeholder="Search customers…"
+          placeholderTextColor="#a1a1aa"
+          className="flex-1 py-4 pl-3 text-zinc-900 text-[14px]"
         />
+        {search.length > 0 && (
+          <Pressable onPress={() => setSearch("")}>
+            <MaterialIcons name="cancel" size={18} color="#a1a1aa" />
+          </Pressable>
+        )}
       </View>
 
-      {/* Filters */}
-      <View className="mt-3 flex-row flex-wrap gap-2 mb-5">
+      {/* ── Filter Chips ── */}
+      <View className="flex-row flex-wrap gap-2 mb-4">
         {(["all", "pending", "cleared", "high_due"] as const).map((item) => (
           <FilterChip
             key={item}
             active={dueStatus === item}
-            label={
-              item === "high_due"
-                ? "High Due"
-                : item.charAt(0).toUpperCase() + item.slice(1)
-            }
-            onPress={() => {
-              setDueStatus(item);
-              setPage(1);
-            }}
+            label={item === "high_due" ? "High Due" : item.charAt(0).toUpperCase() + item.slice(1)}
+            onPress={() => { setDueStatus(item); setPage(1); }}
           />
         ))}
       </View>
 
-      {/* Card top */}
-      <View className="rounded-t-[28px] border-t border-l border-r border-black/10 bg-white">
-        <View className="px-5 py-4 border-b border-black/5">
-          <Text className="text-[16px] font-semibold text-black">Customers</Text>
-          <Text className="text-[12px] text-black/35 mt-1">
-            Customer health & dues
-          </Text>
-        </View>
+      {/* ── List card top ── */}
+      <View className="bg-white rounded-t-[24px] border border-zinc-100 px-5 py-4 border-b-0">
+        <Text className="text-zinc-900 text-[15px] font-bold">Customers</Text>
+        <Text className="text-zinc-400 text-[12px] mt-0.5">Customer health & dues</Text>
       </View>
     </>
   );
@@ -207,7 +206,7 @@ export const CustomersPage = ({
   const ListEmpty = () => {
     if (isLoading) {
       return (
-        <View className="bg-white border-l border-r border-black/10">
+        <View className="bg-white border-x border-zinc-100">
           {Array.from({ length: 5 }).map((_, i) => (
             <SkeletonCustomerRow key={i} />
           ))}
@@ -216,43 +215,44 @@ export const CustomersPage = ({
     }
     if (error) {
       return (
-        <View className="bg-white border-l border-r border-black/10 items-center py-14">
-          <MaterialIcons name="error-outline" size={32} color="#EF4444" />
-          <Text className="text-center text-[12px] text-red-500 mt-2">{error}</Text>
+        <View className="bg-white border-x border-zinc-100 items-center py-16">
+          <MaterialIcons name="error-outline" size={36} color="#ef4444" />
+          <Text className="text-red-500 text-[13px] mt-2 font-medium">{error}</Text>
         </View>
       );
     }
     return (
-      <View className="bg-white border-l border-r border-black/10 items-center py-14">
-        <Text className="text-[14px] text-black/35">No customers found</Text>
+      <View className="bg-white border-x border-zinc-100 items-center py-16">
+        <MaterialIcons name="people-outline" size={36} color="#d4d4d8" />
+        <Text className="text-zinc-400 text-[13px] mt-2">No customers found</Text>
       </View>
     );
   };
 
   const ListFooter = () => (
-    <View className="rounded-b-[28px] border-b border-l border-r border-black/10 bg-white">
+    <View className="bg-white rounded-b-[24px] border border-zinc-100 border-t-0">
       {!isLoading && !error && pagination.totalPages > 1 && (
-        <View className="flex-row items-center justify-between border-t border-black/5 px-5 py-4">
+        <View className="flex-row items-center justify-between border-t border-zinc-100 px-5 py-4">
           <Pressable
             onPress={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: false }}
-            className={`rounded-xl px-4 py-2 ${page === 1 ? "bg-slate-100" : "bg-black"}`}
+            android_ripple={{ color: "rgba(0,0,0,0.06)", borderless: false }}
+            className={`rounded-xl px-4 py-2.5 ${page === 1 ? "bg-zinc-100" : "bg-zinc-900"}`}
           >
-            <Text className={`text-[12px] font-medium ${page === 1 ? "text-black/40" : "text-white"}`}>
+            <Text className={`text-[12px] font-semibold ${page === 1 ? "text-zinc-400" : "text-white"}`}>
               Previous
             </Text>
           </Pressable>
-          <Text className="text-[12px] text-black/40">
+          <Text className="text-zinc-400 text-[12px]">
             {page} / {pagination.totalPages}
           </Text>
           <Pressable
             onPress={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
             disabled={page === pagination.totalPages}
-            android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: false }}
-            className={`rounded-xl px-4 py-2 ${page === pagination.totalPages ? "bg-slate-100" : "bg-black"}`}
+            android_ripple={{ color: "rgba(0,0,0,0.06)", borderless: false }}
+            className={`rounded-xl px-4 py-2.5 ${page === pagination.totalPages ? "bg-zinc-100" : "bg-zinc-900"}`}
           >
-            <Text className={`text-[12px] font-medium ${page === pagination.totalPages ? "text-black/40" : "text-white"}`}>
+            <Text className={`text-[12px] font-semibold ${page === pagination.totalPages ? "text-zinc-400" : "text-white"}`}>
               Next
             </Text>
           </Pressable>
@@ -261,9 +261,16 @@ export const CustomersPage = ({
     </View>
   );
 
-  const renderItem = ({ item: customer, index }: { item: Customer; index: number }) => {
+  const renderItem = ({
+    item: customer,
+    index,
+  }: {
+    item: Customer;
+    index: number;
+  }) => {
     const cleared = customer.due <= 0;
     const isLast = index === customers.length - 1;
+
     return (
       <Swipeable
         overshootRight={false}
@@ -271,57 +278,70 @@ export const CustomersPage = ({
         rightThreshold={36}
         renderRightActions={(_, __, swipeable) => (
           <View
-            className={`overflow-hidden bg-amber-400 ${
-              isLast
-                ? "rounded-br-[28px]"
-                : ""
-            }`}
+            className={`bg-amber-400 overflow-hidden ${isLast ? "rounded-br-[24px]" : ""}`}
           >
             <Pressable
               onPress={() => handleArchiveCustomer(customer, () => swipeable.close())}
               android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: false }}
-              className="h-full w-[88px] items-center justify-center"
+              className="h-full w-[88px] items-center justify-center gap-1"
             >
-              <MaterialIcons name="archive" size={20} color="#111827" />
-              <Text className="mt-1 text-[11px] font-semibold text-slate-900">
-                Archive
-              </Text>
+              <MaterialIcons name="archive" size={20} color="#18181b" />
+              <Text className="text-[11px] font-bold text-zinc-900">Archive</Text>
             </Pressable>
           </View>
         )}
       >
         <Pressable
           onPress={() => onOpenCustomer(customer.id)}
-          android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: false }}
-          className="px-5 py-4 bg-white border-l border-r border-black/10 active:bg-slate-50"
+          android_ripple={{ color: "rgba(0,0,0,0.04)", borderless: false }}
+          className={`bg-white border-x border-zinc-100 px-5 py-4 active:bg-zinc-50 ${
+            !isLast ? "border-b border-zinc-100" : ""
+          }`}
         >
-          <View className="flex-row gap-3">
-            <View className="h-12 w-12 rounded-full bg-black items-center justify-center">
-              <Text className="text-white font-semibold text-[12px]">
+          <View className="flex-row items-center gap-3">
+            {/* Avatar */}
+            <View className="h-11 w-11 rounded-2xl bg-zinc-900 items-center justify-center flex-shrink-0">
+              <Text className="text-white font-bold text-[13px]">
                 {initialsFor(customer.name)}
               </Text>
             </View>
-            <View className="flex-1">
-              <View className="flex-row justify-between items-center">
-                <Text className="text-[15px] font-semibold text-black">
+
+            {/* Info */}
+            <View className="flex-1 min-w-0">
+              <View className="flex-row items-center justify-between">
+                <Text className="text-zinc-900 text-[15px] font-semibold" numberOfLines={1}>
                   {customer.name}
                 </Text>
-                <MaterialIcons name="chevron-right" size={18} color="#aaa" />
-              </View>
-              <Text className="mt-1 text-[12px] text-black/40">{customer.mobile}</Text>
-              <View className="mt-3 flex-row items-center justify-between">
-                <Text className="text-[11px] text-black/30">
-                  Since {formatDate(customer.createdAt)}
-                </Text>
-                <View className={`rounded-full px-3 py-1 ${cleared ? "bg-green-50" : "bg-red-50"}`}>
-                  <Text className={`text-[10px] font-semibold ${cleared ? "text-green-600" : "text-red-600"}`}>
+                <View
+                  className={`flex-row items-center gap-1 px-2.5 py-1 rounded-full ${
+                    cleared ? "bg-emerald-50" : "bg-red-50"
+                  }`}
+                >
+                  <View
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      cleared ? "bg-emerald-500" : "bg-red-500"
+                    }`}
+                  />
+                  <Text
+                    className={`text-[10px] font-bold ${
+                      cleared ? "text-emerald-700" : "text-red-700"
+                    }`}
+                  >
                     {cleared ? "Cleared" : formatCurrency(customer.due)}
                   </Text>
                 </View>
               </View>
+
+              <View className="flex-row items-center justify-between mt-1.5">
+                <Text className="text-zinc-400 text-[12px]">{customer.mobile}</Text>
+                <Text className="text-zinc-300 text-[11px]">
+                  Since {formatDate(customer.createdAt)}
+                </Text>
+              </View>
             </View>
+
+            <MaterialIcons name="chevron-right" size={18} color="#d4d4d8" />
           </View>
-          {!isLast && <View className="h-[0.5px] bg-black/5 mt-3" />}
         </Pressable>
       </Swipeable>
     );
@@ -341,43 +361,39 @@ export const CustomersPage = ({
         ListHeaderComponent={<ListHeader />}
         ListEmptyComponent={<ListEmpty />}
         ListFooterComponent={<ListFooter />}
-        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={refetch} />}
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={refetch} />
+        }
         contentContainerClassName="px-4 pb-28 pt-2"
         showsVerticalScrollIndicator={false}
       />
     </AppLayout>
   );
 };
-const MetricCard = ({ label, value, red, white }: any) => (
-  <View
-    className={`flex-1 rounded-2xl px-4 py-4 ${
-      red
-        ? "bg-red-500"
-        : white
-          ? "bg-white border border-black/10"
-          : "bg-zinc-100"
-    }`}
-  >
-    <Text className={`text-[11px] ${red ? "text-red-100" : "text-black/45"}`}>
-      {label}
-    </Text>
-    <Text
-      className={`mt-2 text-[18px] font-bold ${red ? "text-white" : "text-black"}`}
-    >
-      {value}
-    </Text>
-  </View>
-);
 
-const FilterChip = ({ active, label, onPress }: any) => (
+/* ─── Sub-components ─────────────────────────────────────── */
+
+const FilterChip = ({
+  active,
+  label,
+  onPress,
+}: {
+  active: boolean;
+  label: string;
+  onPress: () => void;
+}) => (
   <Pressable
     onPress={onPress}
-    android_ripple={{ color: "rgba(0,0,0,0.08)", borderless: true }}
+    android_ripple={{ color: "rgba(0,0,0,0.06)", borderless: true }}
     className={`rounded-full px-4 py-2 ${
-      active ? "bg-black" : "border border-black/10 bg-white"
+      active ? "bg-zinc-900" : "bg-white border border-zinc-200"
     }`}
   >
-    <Text className={`text-[12px] ${active ? "text-white" : "text-black/55"}`}>
+    <Text
+      className={`text-[12px] font-semibold ${
+        active ? "text-white" : "text-zinc-500"
+      }`}
+    >
       {label}
     </Text>
   </Pressable>
