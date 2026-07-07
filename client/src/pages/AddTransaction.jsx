@@ -706,7 +706,7 @@ const AddTransaction = () => {
                                       <option value="">
                                         {servicesLoading
                                           ? "Loading services..."
-                                          : services.length === 0
+                                          : services?.length === 0
                                             ? "No services yet — add one first"
                                             : "Choose a service"}
                                       </option>

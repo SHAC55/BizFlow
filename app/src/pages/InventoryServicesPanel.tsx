@@ -193,7 +193,7 @@ export const InventoryServicesPanel = ({ onOpenService }: Props) => {
       </View>
 
       {/* Category chips */}
-      {summary.categories.length > 0 && (
+      {(summary?.categories ?? []).length > 0 && (
         <View className="flex-row flex-wrap gap-2 mb-3">
           <Chip
             active={!category}
@@ -301,7 +301,7 @@ export const InventoryServicesPanel = ({ onOpenService }: Props) => {
     index: number;
   }) => {
     const isFirst = index === 0;
-    const isLast = index === services.length - 1;
+    const isLast = index === (services?.length ?? 0) - 1;
     const margin = service.price - (service.costPrice || 0);
 
     return (

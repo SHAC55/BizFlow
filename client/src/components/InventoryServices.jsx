@@ -29,20 +29,24 @@ const InventoryServices = () => {
 
   const deferredSearch = useDeferredValue(search);
 
-  const { services, pagination, summary, isLoading, error, refetch } =
-    useServices({
-      page,
-      limit: 10,
-      search: deferredSearch,
-    });
+  const {
+    services = [],
+    pagination = {},
+    summary = {},
+    isLoading,
+    error,
+    refetch,
+  } = useServices({
+    page,
+    limit: 10,
+    search: deferredSearch,
+  });
+
+  const { page: currentPage = 1, totalPages = 0 } = pagination;
 
   const { deleteService, isLoading: isDeleting } = useDeleteService();
 
-  const {
-    totalServices = 0,
-    averagePrice = 0,
-    projectedMargin = 0,
-  } = summary;
+  const { totalServices = 0, averagePrice = 0, projectedMargin = 0 } = summary;
 
   const handleDeleteService = async (serviceId) => {
     if (!window.confirm("Delete this service? This action cannot be undone."))
@@ -147,7 +151,6 @@ const InventoryServices = () => {
                 </button>
               )}
             </div>
-
           </div>
 
           {error && (
@@ -381,14 +384,15 @@ const InventoryServices = () => {
           </div>
 
           {/* Pagination */}
-          {pagination.totalPages > 1 && (
+          {/* Pagination */}
+          {totalPages > 1 && (
             <div className="flex items-center justify-between px-5 py-3 border-t border-black/5 bg-black/[0.01]">
               <p className="text-xs text-black/35">
-                Page {pagination.page} of {pagination.totalPages}
+                Page {currentPage} of {totalPages}
               </p>
               <div className="flex items-center gap-1.5">
                 <button
-                  disabled={pagination.page <= 1}
+                  disabled={currentPage <= 1}
                   onClick={() => setPage((p) => Math.max(p - 1, 1))}
                   className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-black/10 bg-white text-xs text-black/50 hover:text-black hover:border-black/20 disabled:opacity-30 disabled:cursor-not-allowed transition"
                 >
@@ -396,9 +400,9 @@ const InventoryServices = () => {
                   Prev
                 </button>
                 <button
-                  disabled={pagination.page >= pagination.totalPages}
+                  disabled={currentPage >= totalPages}
                   onClick={() =>
-                    setPage((p) => Math.min(p + 1, pagination.totalPages))
+                    setPage((p) => Math.min(p + 1, totalPages))
                   }
                   className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-black/10 bg-white text-xs text-black/50 hover:text-black hover:border-black/20 disabled:opacity-30 disabled:cursor-not-allowed transition"
                 >

@@ -256,7 +256,7 @@ export const createSale = async (data: CreateSaleParams) => {
       : [];
 
     appAssert(
-      services.length === serviceIds.length,
+      services?.length === serviceIds.length,
       NOT_FOUND,
       "service not found",
     );
